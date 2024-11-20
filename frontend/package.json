@@ -1,6 +1,8 @@
 {
   "name": "printsync3d",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "author": "Alan Burić",
+  "description": "Web application for centralized management of 3D printers via a Vue.js website",
   "private": true,
   "type": "module",
   "scripts": {
