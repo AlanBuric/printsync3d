@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+        width="10.006091mm"
+        height="13.324954mm"
+        viewBox="0 0 10.006091 13.324954"
+        version="1.1"
+        id="svg1"
+        xmlns="http://www.w3.org/2000/svg"
+>
+  <defs
+     id="defs1" />
+  <g
+     id="layer1"
+     transform="translate(-73.044237,-111.03115)">
+    <text
+       xml:space="preserve"
+       style="font-size:9.87777px;line-height:0.7;font-family:'Berlin Sans FB';-inkscape-font-specification:'Berlin Sans FB';fill:#0891b2;stroke-width:0.264583;paint-order:stroke markers fill"
+       x="77.96759"
+       y="117.28194"
+       id="text1"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8.46667px;line-height:0.7;font-family:Inter;-inkscape-font-specification:'Inter, @wght=200';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;font-variation-settings:'wght' 200;text-align:center;text-anchor:middle;fill:#06b6d4;fill-opacity:1;stroke-width:0.264583"
+         x="77.96759"
+         y="117.28194"
+         id="tspan2">PS</tspan><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8.46667px;line-height:0.7;font-family:Inter;-inkscape-font-specification:'Inter, @wght=200';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;font-variation-settings:'wght' 200;text-align:center;text-anchor:middle;fill:#06b6d4;fill-opacity:1;stroke-width:0.264583"
+         x="77.96759"
+         y="124.27192"
+         id="tspan3">3D</tspan></text>
+  </g>
+</svg>
