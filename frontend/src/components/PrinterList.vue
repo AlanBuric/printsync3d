@@ -8,7 +8,7 @@
     <div class="max-lg:w-full max-lg:px-4">
       <ul class="space-y-1 text-zinc-300 text-xl w-full">
         <li v-for="printer in usePrinterStore().printers" :key="printer.usb.productId"
-            class="bg-zinc-900 min-w-96 px-4 py-3 rounded-xl hover:dark:bg-zinc-950 duration-150">
+            class="bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-900 hover:dark:bg-zinc-950 text-zinc-600 dark:text-zinc-300 min-w-96 px-4 py-3 rounded-xl">
           <RouterLink :to="`/printer/${printer.usb.productId}`" class="flex w-full">
               <span class="text-cyan-500">▷ </span>
               <span class="flex-1 text-center">{{ printer.name }}</span>

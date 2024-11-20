@@ -7,7 +7,7 @@
 </script>
 
 <template>
-  <button @click="store.toggleTheme" class="hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-full p-1">
+  <button @click="store.toggleTheme" class="hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-full p-1" title="Toggle between light and dark mode">
     <MoonIcon
       v-if="store.isDarkTheme()"
       width="1.6em"

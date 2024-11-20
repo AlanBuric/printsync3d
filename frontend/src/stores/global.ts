@@ -34,7 +34,7 @@ const useGlobalStore = defineStore('global', () => {
   }
 
   function toggleTheme() {
-    setTheme(isDarkTheme() ? 'light' : 'dark');
+    setTheme(isDarkTheme() ? 'light' : 'dark', true);
   }
 
   function getSavedTheme() {
