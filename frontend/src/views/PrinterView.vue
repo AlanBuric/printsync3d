@@ -57,7 +57,7 @@
             </li>
             <li>
               <span>Baud rate:</span>
-              <span class="ml-1 text-zinc-700 dark:text-zinc-4000">{{ printer.usb.baudRate }}</span>
+              <span class="ml-1 text-zinc-700 dark:text-zinc-400">{{ printer.usb.baudRate }}</span>
             </li>
           </ul>
         </div>
