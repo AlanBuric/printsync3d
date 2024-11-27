@@ -1,0 +1,37 @@
+{
+  "name": "printsync3d-backend",
+  "version": "1.0.0",
+  "author": "Alan Burić",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlanBuric/printsync3d.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AlanBuric/printsync3d/issues"
+  },
+  "homepage": "https://github.com/AlanBuric/printsync3d#readme",
+  "main": "dist/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/server.ts",
+    "build": "tsc -b tsconfig.json",
+    "start": "node dist/server.js",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^5.0.1",
+    "express-validator": "^7.2.0",
+    "http-status-codes": "^2.3.0",
+    "multer": "^1.4.5-lts.1",
+    "serialport": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/multer": "^1.4.12",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.6"
+  }
+}
