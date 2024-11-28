@@ -29,7 +29,7 @@
         <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4">
           <label for="model-select"
                  class="text-xl text-zinc-800 dark:text-zinc-200 mb-2">Model</label><br>
-          <select id="model-select" name="model" v-model="selectedModel" class="text-zinc-800 dark:text-zinc-200 rounded-md p-1">
+          <select id="model-select" name="model" v-model="selectedModel" class="text-zinc-800 bg-zinc-300 dark:text-zinc-200 dark:bg-zinc-800 rounded-md p-1">
             <option value="" disabled selected>Select a model</option>
             <option v-for="model in useModelStore().models" :key="model.value" :value="model.value">
               {{ model.text }}
@@ -91,7 +91,7 @@
             </ul>
           </div>
           <button @click="toggleUsbInformation"
-                  class="text-zinc-400 hover:text-zinc-500 dark:hover:text-zinc-300 self-start text-2xl">×
+                  class="text-zinc-400 hover:text-zinc-500 dark:hover:text-zinc-300 self-start text-2xl">—
           </button>
         </div>
 

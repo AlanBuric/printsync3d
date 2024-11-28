@@ -18,10 +18,14 @@
               </RouterLink>
             </li>
             <li>
-              <InfoIcon class="fill-cyan-500 hover:fill-cyan-400" />
+              <button>
+                <InfoIcon class="fill-cyan-500 hover:fill-cyan-400" />
+              </button>
             </li>
             <li>
-              <TrashIcon class="fill-cyan-500 hover:fill-cyan-400" />
+              <button>
+                <TrashIcon class="fill-cyan-500 hover:fill-cyan-400" />
+              </button>
             </li>
           </ul>
         </li>
