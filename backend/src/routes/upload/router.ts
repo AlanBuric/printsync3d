@@ -5,7 +5,7 @@ import fileSystem from 'fs';
 import multer from 'multer';
 import getStore from '../../store/store.js';
 
-const GCODE_DIRECTORY = path.resolve(__dirname, 'gcode-files');
+const GCODE_DIRECTORY = path.resolve('gcode-files');
 
 if (!fileSystem.existsSync(GCODE_DIRECTORY)) {
   fileSystem.mkdirSync(GCODE_DIRECTORY);

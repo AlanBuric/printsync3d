@@ -129,5 +129,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# Custom filters
+# Our project
 build
+backend/static
+gcode-files
