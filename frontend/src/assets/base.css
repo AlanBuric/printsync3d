@@ -17,8 +17,8 @@ html, body, #app {
 body {
   min-height: 100vh;
   transition:
-    color 1s,
-    background-color 1s;
+    color 0.5s,
+    background-color 0.5s;
   line-height: 1.6;
   font-family:
     Inter,
