@@ -2,6 +2,8 @@ import application from './application.js';
 import getStore from './store/store.js';
 import GCodeService from './routes/gcode/service.js';
 
+const DEFAULT_SERVER_PORT = 3000
+
 function startPrinterWorker(printerId: string): void {
   const queue = (getStore().commandQueues[printerId] = []);
 
@@ -24,7 +26,7 @@ function startPrinterWorker(printerId: string): void {
   processQueue();
 }
 
-application.listen(process.env.PORT, () => {
+application.listen(process.env.PORT ?? DEFAULT_SERVER_PORT, () => {
   console.log('PrintSync3D service is listening on port ' + process.env.PORT);
 
   Object.keys(getStore().printers).forEach((printerId) => startPrinterWorker(printerId));

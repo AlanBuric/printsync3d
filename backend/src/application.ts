@@ -10,10 +10,12 @@ config();
 const application = express()
   .use('/printsync3d', express.static('static'))
   .get('/printsync3d', (request: Request, response: Response) => response.sendFile('index.html'))
-  .use(json(), urlencoded({ extended: true }))
-  .use('/api', ControlRouter)
-  .use('/api', StatusRouter)
-  .use('/api', UploadRouter)
-  .use(handleServerError);
+  .use('/api',
+    json(),
+    urlencoded({ extended: true }),
+    ControlRouter,
+    StatusRouter,
+    UploadRouter,
+    handleServerError);
 
 export default application;

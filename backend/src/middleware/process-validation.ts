@@ -1,6 +1,6 @@
-import type { NextFunction, Request, Response } from "express";
-import { validationResult } from "express-validator";
-import { StatusCodes } from "http-status-codes";
+import type { NextFunction, Request, Response } from 'express';
+import { validationResult } from 'express-validator';
+import { StatusCodes } from 'http-status-codes';
 
 export default function processValidation(
   request: Request,

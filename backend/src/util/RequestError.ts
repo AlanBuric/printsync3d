@@ -1,4 +1,4 @@
-import { getReasonPhrase, StatusCodes } from "http-status-codes";
+import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 
 export default class RequestError extends Error {
   readonly statusCode: number;

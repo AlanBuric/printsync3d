@@ -2,7 +2,7 @@ import { SerialPort } from 'serialport';
 import getStore from '../../store/store.js';
 
 export default class StatusService {
-  static  getSerialConnection(printerId: string): SerialPort {
+  static async getSerialConnection(printerId: string): Promise<SerialPort> {
     if (getStore().connections[printerId]) {
       return getStore().connections[printerId];
     }
@@ -15,12 +15,15 @@ export default class StatusService {
 
     getStore().connections[printerId] = port;
 
-    port.open((err) => {
-      if (err) {
-        console.error(`Error opening port for ${printerId}:`, err.message);
-      }
-    });
+    return new Promise((resolve, reject) => {
+      port.open((error) => {
+        if (error) {
+          console.error(`Error opening port for ${printerId}:`, error.message);
+          return reject(error);
+        }
 
-    return port;
+        return resolve(port);
+      })
+    });
   }
 }
