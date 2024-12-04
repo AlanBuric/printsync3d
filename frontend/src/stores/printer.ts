@@ -61,5 +61,9 @@ export const usePrinterStore = defineStore('printer', () => {
     })
   ]);
 
-  return { printers };
+  function deletePrinter(productId: string) {
+    printers.value = printers.value.filter(printer => printer.usb.productId != productId);
+  }
+
+  return { printers, deletePrinter };
 });

@@ -26,7 +26,8 @@
                 </button>
               </li>
               <li>
-                <button class="hover:bg-gray-200 dark:hover:bg-zinc-800 p-2 rounded-full">
+                <button class="hover:bg-gray-200 dark:hover:bg-zinc-800 p-2 rounded-full"
+                        @click="usePrinterStore().deletePrinter(printer.usb.productId)">
                   <TrashIcon class="fill-cyan-500 hover:fill-cyan-400" />
                 </button>
               </li>
