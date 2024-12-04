@@ -2,19 +2,19 @@ import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import type { Printer } from '@/types';
 
+let lastIndex = 0;
+
 type MockedPrinterArgs = {
   name: string;
-  usbVendorId: string;
-  productId: string;
   port: string
 };
 
-function createMockedPrinter({ name, usbVendorId, productId, port }: MockedPrinterArgs): Printer {
+function createMockedPrinter({ name, port }: MockedPrinterArgs): Printer {
   return {
     name,
     usb: {
-      usbVendorId,
-      productId,
+      usbVendorId: `test-${lastIndex}`,
+      productId: `test-${lastIndex++}`,
       port,
       baudRate: 115200
     },
@@ -37,21 +37,27 @@ export const usePrinterStore = defineStore('printer', () => {
   const printers = ref<Printer[]>([
     createMockedPrinter({
       name: 'Prusa i3 MK2S',
-      usbVendorId: 'test',
-      productId: 'test',
       port: '/dev/COM3'
     }),
     createMockedPrinter({
       name: 'Prusa i3 MK2',
-      usbVendorId: 'test',
-      productId: 'test',
       port: '/dev/ttyUSB0'
     }),
     createMockedPrinter({
       name: 'Prusa MK2S 1',
-      usbVendorId: 'test',
-      productId: 'test',
-      port: '/dev/serial/by-id/usb-Prusa_Research'
+      port: '/dev/serial/by-id/usb-Prusa_Research-0'
+    }),
+    createMockedPrinter({
+      name: 'Prusa MK2S 1',
+      port: '/dev/serial/by-id/usb-Prusa_Research-1'
+    }),
+    createMockedPrinter({
+      name: 'Prusa MK2S 1',
+      port: '/dev/serial/by-id/usb-Prusa_Research-2'
+    }),
+    createMockedPrinter({
+      name: 'Prusa MK2S 1',
+      port: '/dev/serial/by-id/usb-Prusa_Research-3'
     })
   ]);
 
