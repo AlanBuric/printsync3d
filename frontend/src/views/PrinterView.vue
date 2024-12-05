@@ -18,7 +18,7 @@
 
 <template>
   <main class="w-full px-4 gap-16 mt-10 flex justify-center">
-    <div class="w-full max-w-screen-xl flex max-lg:flex-col">
+    <div class="w-full max-w-screen-xl justify-center flex max-lg:flex-col">
       <template v-if="printer">
         <section class="gap-y-4 flex flex-col flex-grow">
           <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-2 rounded-lg w-fit">
@@ -97,7 +97,7 @@
       </template>
 
       <template v-else>
-        <div class="text-center mt-20">
+        <div class="text-center">
           <h3 class="text-2xl font-semibold text-zinc-400">Printer not found</h3>
           <p class="text-zinc-500 mt-2">It seems the printer you're looking for doesn't exist or isn't connected.</p>
         </div>
