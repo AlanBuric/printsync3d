@@ -14,9 +14,10 @@ export type AxesPosition = {
 export type PrinterStatus = {
   progress: number;
   currentModel: string;
-  currentTemperature: string;
+  currentTemperature: number;
   currentAxesPosition: AxesPosition;
-  paused: boolean;
+  isFilamentLoaded: boolean;
+  isPaused: boolean;
 };
 
 export type Printer = {

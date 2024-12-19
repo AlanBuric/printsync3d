@@ -21,13 +21,13 @@ function createMockedPrinter({ name, port }: MockedPrinterArgs): Printer {
     status: {
       progress: 0,
       currentModel: 'Plastic Cup',
-      currentTemperature: '200',
+      currentTemperature: 200,
       currentAxesPosition: {
         x: 0,
         y: 0,
         z: 0
       },
-      paused: true
+      isPaused: true
     }
   };
 }

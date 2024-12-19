@@ -15,8 +15,8 @@ const router = createRouter({
       component: () => import('./views/PrinterView.vue')
     },
     {
-      path: '/start-printing/:id',
-      name: 'start-printing',
+      path: '/printing/:id',
+      name: 'printing',
       component: () => import('./views/PrintingView.vue')
     }
   ]

@@ -13,7 +13,7 @@
           class="flex items-center justify-between p-4 bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-900 hover:dark:bg-zinc-950 text-zinc-600 dark:text-zinc-300 min-w-72 px-6 py-4 rounded-xl">
           <li>
             <RouterLink :to="`/printer/${printer.usb.productId}`" class="flex w-full">
-              <span class="flex-1 text-center">{{ printer.name }}</span>
+              <span class="flex-1 text-center cursor-pointer">{{ printer.name }}</span>
             </RouterLink>
           </li>
           <li>

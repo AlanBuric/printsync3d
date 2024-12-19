@@ -3,6 +3,7 @@
   import { usePrinterStore } from '@/stores/printer';
   import { ref } from 'vue';
   import UsbIcon from '@/components/icons/UsbIcon.vue';
+  import PlayIcon from '@/components/icons/PlayIcon.vue';
 
   const printerId = useRoute().params.id;
   const printer = usePrinterStore().printers.find(
@@ -18,7 +19,7 @@
 
 <template>
   <main class="w-full px-4 gap-16 mt-10 flex justify-center">
-    <div class="w-full max-w-screen-xl justify-center flex max-lg:flex-col">
+    <div class="w-full max-w-screen-xl justify-center flex max-lg:flex-col gap-y-10">
       <template v-if="printer">
         <section class="gap-y-4 flex flex-col flex-grow">
           <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-2 rounded-lg w-fit">
@@ -41,7 +42,7 @@
               </li>
               <li>
                 <span>Paused:</span>
-                <span class="ml-1 text-zinc-700 dark:text-zinc-400">{{ printer.status.paused ? 'Yes' : 'No' }}</span>
+                <span class="ml-1 text-zinc-700 dark:text-zinc-400">{{ printer.status.isPaused ? 'Yes' : 'No' }}</span>
               </li>
               <li>
                 <span>Axes position:</span>
@@ -79,7 +80,10 @@
             </button>
           </div>
 
-          <div>
+          <div class="flex gap-x-2">
+            <RouterLink class="bg-zinc-200 dark:bg-zinc-900 p-2 rounded-xl flex" :to="`/printing/${printer.usb.productId}`" title="Start printing">
+              <PlayIcon class="fill-zinc-500 hover:fill-zinc-600 dark:hover:fill-zinc-400" />
+            </RouterLink>
             <button v-if="!showUsbInformation" @click="toggleUsbInformation" title="Toggle USB information"
                     class="bg-zinc-200 dark:bg-zinc-900 p-2 rounded-xl flex">
               <UsbIcon class="fill-zinc-500 hover:fill-zinc-600 dark:hover:fill-zinc-400" />
@@ -88,7 +92,7 @@
         </section>
         <section class="flex justify-center flex-grow">
           <div
-            class="aspect-square border-zinc-950 dark:border-zinc-100 border-2 w-[80%] flex items-center justify-center">
+            class="aspect-square border-zinc-950 dark:border-zinc-100 border-2 w-[80%] flex items-center justify-center self-start">
             <h2 class="text-3xl dark:text-zinc-200 text-center">
               Printer photo
             </h2>

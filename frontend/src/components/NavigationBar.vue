@@ -41,16 +41,16 @@
         >
           Printers
         </a>
-        <RouterLink v-else to="/"
+        <RouterLink v-else to="/#printers"
                     class="text-lg font-light text-gray-700 dark:text-gray-300 hover:text-cyan-500 dark:hover:text-cyan-400">
           Printers
         </RouterLink>
         <RouterLink
           v-if="randomPrinter"
-          :to="`/start-printing/${randomPrinter.usb.productId}`"
+          :to="`/printing/${randomPrinter.usb.productId}`"
           class="text-lg font-light text-gray-700 dark:text-gray-300 hover:text-cyan-500 dark:hover:text-cyan-400"
         >
-          Start Printing
+          Start printing
         </RouterLink>
       </nav>
     </div>
