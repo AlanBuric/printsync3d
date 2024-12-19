@@ -96,10 +96,12 @@
         <span class="text-zinc-800 dark:text-zinc-200 text-lg">Control filament</span>
         <div class="gap-y-2 flex flex-col">
           <!-- :disabled="!isFilamentReadyToBeLoaded()" -->
-          <button class="w-fit bg-zinc-700 px-2 py-0.5 rounded-full" @click="sendControl('load-filament')">Load
+          <button class="w-fit bg-zinc-300 dark:bg-zinc-700 px-2 py-0.5 rounded-full"
+                  @click="sendControl('load-filament')">Load
             filament
           </button>
-          <button class="w-fit bg-zinc-700 px-2 py-0.5 rounded-full" @click="sendControl('unload-filament')">Unload
+          <button class="w-fit bg-zinc-300 dark:bg-zinc-700 px-2 py-0.5 rounded-full"
+                  @click="sendControl('unload-filament')">Unload
             filament
           </button>
         </div>
@@ -108,12 +110,15 @@
       <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-3xl flex flex-col">
         <span class="text-zinc-800 dark:text-zinc-200 text-lg">Calibrate</span>
         <div class="gap-y-2 flex flex-col">
-          <button class="w-fit bg-zinc-700 px-2 py-0.5 rounded-full" @click="sendControl('auto-home')">Auto home
+          <button class="w-fit bg-zinc-300 dark:bg-zinc-700 px-2 py-0.5 rounded-full" @click="sendControl('auto-home')">
+            Auto home
           </button>
-          <button class="w-fit bg-zinc-700 px-2 py-0.5 rounded-full" @click="sendControl('mesh-bed-leveling')">Mesh bed
+          <button class="w-fit bg-zinc-300 dark:bg-zinc-700 px-2 py-0.5 rounded-full"
+                  @click="sendControl('mesh-bed-leveling')">Mesh bed
             leveling
           </button>
-          <button class="w-fit bg-zinc-700 px-2 py-0.5 rounded-full" @click="sendControl('reset-xyz-calibration')">Reset
+          <button class="w-fit bg-zinc-300 dark:bg-zinc-700 px-2 py-0.5 rounded-full"
+                  @click="sendControl('reset-xyz-calibration')">Reset
             XYZ calibration
           </button>
         </div>
