@@ -5,7 +5,7 @@ import path from 'path';
 
 const DATABASE_FILE_LOCATION = './database/database.json';
 
-type DatabaseSchema = {};
+type DatabaseSchema = object;
 
 let database: Low<DatabaseSchema> | undefined = undefined;
 

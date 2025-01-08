@@ -7,7 +7,8 @@ export default function handleServerError(
   error: any,
   request: Request,
   response: Response<ErrorResponse>,
-  next: NextFunction,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _next: NextFunction,
 ): any {
   if (error instanceof RequestError) {
     return response.status(error.statusCode).send({ error: error.message });
