@@ -2,10 +2,11 @@ import { Request, Response, Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import processValidation from '../../middleware/process-validation.js';
 import { body, matchedData, param } from 'express-validator';
-import { PRINTER_CONTROL_TYPES } from '../../gcode/known-controls.js';
+import knownControls, { PRINTER_CONTROL_TYPES } from '../../gcode/known-controls.js';
 import PrinterService from '../printer/service.js';
 
 const ControlRouter = Router()
+  .get("/control", (_request: Request, response: Response): any => response.send(Object.keys(knownControls)))
   .post('/control/:printerId',
     param('printerId')
       .exists()

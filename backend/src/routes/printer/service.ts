@@ -8,10 +8,8 @@ let printers: Record<string, Printer> = {};
 
 export default class PrinterService {
   static startPrinting(printerId: string) {
-
     const queue = commandQueues[printerId];
     const connection = this.getConnection(printerId) ?? this.createConnection(printerId);
-    ;
 
     const processQueue = () => {
       if (queue.length === 0) {
@@ -21,15 +19,13 @@ export default class PrinterService {
 
       const gCode = queue.shift();
 
-      if (gCode) {
-        connection.write(`${gCode}\n`, (error) => {
-          if (error) {
-            console.error(`Failed to send GCode to ${printerId}: ${error.message}`);
-          } else {
-            processQueue();
-          }
-        });
-      }
+      connection.write(`${gCode}\n`, (error) => {
+        if (error) {
+          console.error(`Failed to send GCode ${gCode} to ${printerId}: ${error.message}`);
+        } else {
+          processQueue();
+        }
+      });
     };
 
     processQueue();
@@ -95,5 +91,9 @@ export default class PrinterService {
         }
       });
     });
+  }
+
+  static getPrinters(): Printer[] {
+    return Object.values(printers);
   }
 }

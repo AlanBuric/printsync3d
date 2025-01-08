@@ -30,7 +30,8 @@ const StatusRouter = Router()
         parser.removeAllListeners();
       });
 
-      serialPort.write('M105\n');
+      serialPort.write('M27\nM105\n');
+      serialPort.flush();
     });
 
 export default StatusRouter;
