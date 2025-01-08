@@ -18,23 +18,25 @@ if (!fileSystem.existsSync(GCODE_DIRECTORY)) {
 const upload = multer({ dest: GCODE_DIRECTORY }).single('file');
 
 const FileRouter = Router()
-  .get('/files',
+  .get(
+    '/files',
     (request: Request, response: Response): Promise<any> =>
-      fileSystem.promises.readdir(GCODE_DIRECTORY)
-        .then(files => response.send(files.map(file => path.basename(GCODE_DIRECTORY, file)))))
-  .post('/upload',
-    upload,
-    async (req: Request, res: Response): Promise<any> => {
-      if (!req.file) {
-        return res.status(StatusCodes.BAD_REQUEST).json({ error: 'No file uploaded' });
-      }
-
-      const filePath = path.resolve(GCODE_DIRECTORY, req.file.originalname);
-
-      await fileSystem.promises.writeFile(filePath, req.file.stream, { encoding: 'ascii' });
-
-      response.sendStatus(StatusCodes.OK);
+      fileSystem.promises
+        .readdir(GCODE_DIRECTORY)
+        .then((files) => response.send(files.map((file) => path.basename(GCODE_DIRECTORY, file)))),
+  )
+  .post('/upload', upload, async (req: Request, res: Response): Promise<any> => {
+    if (!req.file) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ error: 'No file uploaded' });
     }
-  );
+
+    const filePath = path.resolve(GCODE_DIRECTORY, req.file.originalname);
+
+    await fileSystem.promises.writeFile(filePath, req.file.stream, {
+      encoding: 'ascii',
+    });
+
+    response.sendStatus(StatusCodes.OK);
+  });
 
 export default FileRouter;

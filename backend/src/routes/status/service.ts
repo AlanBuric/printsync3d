@@ -19,7 +19,7 @@ export default class StatusService {
         }
 
         return resolve(port);
-      })
+      });
     });
   }
 }

@@ -24,8 +24,8 @@ export type PrinterStatus = {
 
 export type Printer = {
   name: string;
-  status: PrinterStatus,
-  usb: PrinterUsbConnection
+  status: PrinterStatus;
+  usb: PrinterUsbConnection;
 };
 
-export type PrinterControlType = typeof PRINTER_CONTROL_TYPES[number];
+export type PrinterControlType = (typeof PRINTER_CONTROL_TYPES)[number];

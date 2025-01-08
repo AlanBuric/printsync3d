@@ -4,14 +4,14 @@ const PRINTER_CONTROLS: Record<string, string[]> = {
   'preheat-pet': ['M140 R90', 'M104 R230'],
   'load-filament': ['M701'],
   'unload-filament': ['M702'],
-  'cooldown': ['M140 R0', 'M104 R0'],
+  cooldown: ['M140 R0', 'M104 R0'],
   'auto-home': ['G28'],
   'mesh-bed-leveling': ['G80', 'G29'],
   'reset-xyz': ['M502'],
-  'start': ['M75'],
-  'pause': ['M77'],
-  'resume': ['M24'],
-  'cancel': ['M577']
+  start: ['M75'],
+  pause: ['M77'],
+  resume: ['M24'],
+  cancel: ['M577'],
 };
 
 export default PRINTER_CONTROLS;

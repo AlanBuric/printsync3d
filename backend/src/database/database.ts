@@ -5,14 +5,12 @@ import path from 'path';
 
 const DATABASE_FILE_LOCATION = './database/database.json';
 
-type DatabaseSchema = {
-};
+type DatabaseSchema = {};
 
 let database: Low<DatabaseSchema> | undefined = undefined;
 
 function getDefaultData(): DatabaseSchema {
-  return {
-  };
+  return {};
 }
 
 export async function connectDatabase() {
@@ -32,7 +30,7 @@ export async function connectDatabase() {
 
 export function getDatabase(): Low<DatabaseSchema> {
   if (!database) {
-    throw new Error('Database isn\'t connected');
+    throw new Error("Database isn't connected");
   }
 
   return database;

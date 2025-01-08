@@ -38,10 +38,13 @@ export default class PrinterService {
 
     console.log(`${serialPorts.length} serial ports have been discovered.`);
 
-    printers = Object.fromEntries(serialPorts.map(port => ([port.path, this.createPrinter(port)])));
+    printers = Object.fromEntries(serialPorts.map((port) => [port.path, this.createPrinter(port)]));
   }
 
-  static createPrinter(port: Awaited<ReturnType<typeof SerialPort.list>>[number], name = 'Unknown printer'): Printer {
+  static createPrinter(
+    port: Awaited<ReturnType<typeof SerialPort.list>>[number],
+    name = 'Unknown printer',
+  ): Printer {
     return {
       name,
       status: {
@@ -51,17 +54,17 @@ export default class PrinterService {
         currentAxesPosition: {
           x: 0,
           y: 0,
-          z: 0
+          z: 0,
         },
         isFilamentLoaded: false,
-        isPaused: false
+        isPaused: false,
       },
       usb: {
         baudRate: 115200,
         usbVendorId: port.vendorId ?? '',
         path: port.path,
-        productId: port.productId ?? ''
-      }
+        productId: port.productId ?? '',
+      },
     };
   }
 
@@ -74,11 +77,11 @@ export default class PrinterService {
   }
 
   static createConnection(path: string): SerialPort {
-    return connections[path] = new SerialPort({
+    return (connections[path] = new SerialPort({
       path: path,
       baudRate: 115200,
-      autoOpen: false
-    });
+      autoOpen: false,
+    }));
   }
 
   static closeConnection(path: string) {

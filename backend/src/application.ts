@@ -9,11 +9,14 @@ export default function createApplication() {
   return express()
     .use('/printsync3d', express.static('static'))
     .get('/printsync3d', (request: Request, response: Response) => response.sendFile('index.html'))
-    .use('/api',
-      json(), urlencoded({ extended: true }),
+    .use(
+      '/api',
+      json(),
+      urlencoded({ extended: true }),
       PrinterRouter,
       ControlRouter,
       StatusRouter,
       FileRouter,
-      handleServerError);
+      handleServerError,
+    );
 }
