@@ -6,7 +6,7 @@ let lastIndex = 0;
 
 type MockedPrinterArgs = {
   name: string;
-  port: string
+  port: string;
 };
 
 function createMockedPrinter({ name, port }: MockedPrinterArgs): Printer {
@@ -16,7 +16,7 @@ function createMockedPrinter({ name, port }: MockedPrinterArgs): Printer {
       usbVendorId: `test-${lastIndex}`,
       productId: `test-${lastIndex++}`,
       port,
-      baudRate: 115200
+      baudRate: 115200,
     },
     status: {
       progress: 0,
@@ -25,45 +25,35 @@ function createMockedPrinter({ name, port }: MockedPrinterArgs): Printer {
       currentAxesPosition: {
         x: 0,
         y: 0,
-        z: 0
+        z: 0,
       },
-      isPaused: true
-    }
+      isPaused: true,
+      isFilamentLoaded: false,
+    },
   };
 }
 
-// TODO: this is mocked data
 export const usePrinterStore = defineStore('printer', () => {
   const printers = ref<Printer[]>([
     createMockedPrinter({
-      name: 'Prusa i3 MK2S',
-      port: '/dev/COM3'
+      name: 'Fake test Prusa i3 MK2S',
+      port: '/dev/ttyUSB0',
     }),
-    createMockedPrinter({
-      name: 'Prusa i3 MK2',
-      port: '/dev/ttyUSB0'
-    }),
-    createMockedPrinter({
-      name: 'Prusa MK2S 1',
-      port: '/dev/serial/by-id/usb-Prusa_Research-0'
-    }),
-    createMockedPrinter({
-      name: 'Prusa MK2S 1',
-      port: '/dev/serial/by-id/usb-Prusa_Research-1'
-    }),
-    createMockedPrinter({
-      name: 'Prusa MK2S 1',
-      port: '/dev/serial/by-id/usb-Prusa_Research-2'
-    }),
-    createMockedPrinter({
-      name: 'Prusa MK2S 1',
-      port: '/dev/serial/by-id/usb-Prusa_Research-3'
-    })
   ]);
 
   function deletePrinter(productId: string) {
-    printers.value = printers.value.filter(printer => printer.usb.productId != productId);
+    printers.value = printers.value.filter((printer) => printer.usb.productId != productId);
   }
 
-  return { printers, deletePrinter };
+  function refreshPrinters(refresh: boolean = false) {
+    const query = refresh ? `?refresh=${refresh}` : '';
+
+    fetch(`http://localhost:3000/api/printer${query}`)
+      .then((response) => response.json())
+      .then((foundPrinters) => (printers.value = foundPrinters));
+  }
+
+  refreshPrinters();
+
+  return { printers, deletePrinter, refreshPrinters };
 });

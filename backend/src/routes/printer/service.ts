@@ -1,12 +1,23 @@
 import PRINTER_CONTROLS from '../../gcode/known-controls.js';
 import { Printer, PrinterControlType } from '../../types/types.js';
 import { SerialPort } from 'serialport';
+import validateEnvVariable from '../../util/validate-env.js';
 
 const commandQueues: Record<string, string[]> = {};
 const connections: Record<string, SerialPort> = {};
 let printers: Record<string, Printer> = {};
 
+let isRefreshing = false;
+
 export default class PrinterService {
+  static SERIAL_PORT_REFRESH_LIMIT_MILLISECONDS: number = 5000;
+
+  constructor() {
+    PrinterService.SERIAL_PORT_REFRESH_LIMIT_MILLISECONDS = parseInt(
+      validateEnvVariable('SERIAL_PORT_REFRESH_LIMIT_MILLISECONDS'),
+    );
+  }
+
   static startPrinting(printerId: string) {
     const queue = commandQueues[printerId];
     const connection = this.getConnection(printerId) ?? this.createConnection(printerId);
@@ -32,13 +43,19 @@ export default class PrinterService {
   }
 
   static async refreshConnections() {
-    console.log('Listing connected serial ports...');
+    if (isRefreshing) {
+      return false;
+    }
 
+    isRefreshing = true;
     const serialPorts = await SerialPort.list();
 
-    console.log(`${serialPorts.length} serial ports have been discovered.`);
+    console.log(`[${new Date().toISOString()}] [API] ${serialPorts.length} serial ports have been discovered.`);
 
     printers = Object.fromEntries(serialPorts.map((port) => [port.path, this.createPrinter(port)]));
+    setTimeout(() => (isRefreshing = false), PrinterService.SERIAL_PORT_REFRESH_LIMIT_MILLISECONDS);
+
+    return true;
   }
 
   static createPrinter(
