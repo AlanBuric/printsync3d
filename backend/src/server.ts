@@ -14,9 +14,9 @@ createApplication().listen(port, () => {
   console.log(
     chalk.blueBright.bold('✔ PrintSync3D service is up and running:'),
     '\n',
-    chalk.blue(`• Website route: ${chalk.underline(`http://0.0.0.0:${port}/printsync3d`)}`),
+    chalk.blue(`• Website route: ${chalk.underline(`http://localhost:${port}/printsync3d`)}`),
     '\n',
-    chalk.blue(`• API route: ${chalk.underline(`http://0.0.0.0:${port}/api`)}`),
+    chalk.blue(`• API route: ${chalk.underline(`http://localhost:${port}/api`)}`),
   );
 
   PrinterService.refreshConnections();

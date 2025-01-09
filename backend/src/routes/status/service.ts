@@ -3,7 +3,7 @@ import PrinterService from '../printer/service.js';
 
 export default class StatusService {
   static async getSerialConnection(printerPath: string): Promise<SerialPort> {
-    let port = PrinterService.getConnection(printerPath);
+    let port = PrinterService.getSerialConnection(printerPath);
 
     if (port) {
       return port;

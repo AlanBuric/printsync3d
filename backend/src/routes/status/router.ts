@@ -13,7 +13,7 @@ const StatusRouter = Router().get(
   async (request: Request, response: Response): Promise<any> => {
     const { printerId } = matchedData(request);
 
-    if (!PrinterService.getConnection(printerId)) {
+    if (!PrinterService.getPrinter(printerId)) {
       return response.sendStatus(StatusCodes.NOT_FOUND);
     }
 

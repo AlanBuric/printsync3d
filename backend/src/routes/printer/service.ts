@@ -20,7 +20,7 @@ export default class PrinterService {
 
   static startPrinting(printerId: string) {
     const queue = commandQueues[printerId];
-    const connection = this.getConnection(printerId) ?? this.createConnection(printerId);
+    const connection = connections[printerId] ?? this.createConnection(printerId);
 
     const processQueue = () => {
       if (queue.length === 0) {
@@ -89,7 +89,11 @@ export default class PrinterService {
     commandQueues[printerId].unshift(...PRINTER_CONTROLS[controlType]);
   }
 
-  static getConnection(path: string): SerialPort | undefined {
+  static getPrinter(path: string): Printer {
+    return printers[path];
+  }
+
+  static getSerialConnection(path: string): SerialPort | undefined {
     return connections[path];
   }
 
