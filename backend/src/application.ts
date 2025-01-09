@@ -18,7 +18,7 @@ export default function createApplication() {
       PrinterRouter,
       ControlRouter,
       StatusRouter,
-      FileRouter,
+      FileRouter(),
       handleServerError,
     );
 }
