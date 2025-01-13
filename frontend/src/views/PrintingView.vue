@@ -34,7 +34,7 @@
 
     const body = new FormData();
 
-    body.append('file', file);
+    body.append('files', file);
 
     fetch('http://localhost:3000/api/upload', { method: 'POST', body }).then(response => {
       console.debug(response.status);

@@ -1,11 +1,7 @@
-import { PRINTER_CONTROL_TYPES } from '../gcode/known-controls.js';
-
-export type PrinterUsbConnection = {
-  baudRate: number;
-  usbVendorId: string;
-  productId: string;
-  path: string;
-};
+import PRINTER_CONTROLS from '../routes/printer/known-controls.js';
+import { PortInfo } from '@serialport/bindings-cpp';
+import { SerialPort } from 'serialport';
+import { Response } from 'express';
 
 export type AxesPosition = {
   x: number;
@@ -25,7 +21,17 @@ export type PrinterStatus = {
 export type Printer = {
   name: string;
   status: PrinterStatus;
-  usb: PrinterUsbConnection;
 };
 
-export type PrinterControlType = (typeof PRINTER_CONTROL_TYPES)[number];
+export type PrinterControlType = keyof typeof PRINTER_CONTROLS;
+
+export type ConnectedPrinter = {
+  printer: Printer;
+  serialPort: SerialPort;
+  serialPortInfo: PortInfo;
+  waitingStatusResponses: Response[];
+};
+
+export type StoredPrinter = {
+  displayName: string;
+};

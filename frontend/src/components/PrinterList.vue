@@ -41,7 +41,7 @@
     <div class="flex justify-center">
       <button
         class="rounded-full text-xl text-cyan-500 hover:text-cyan-400 bg-zinc-200 dark:bg-zinc-900 hover:dark:bg-zinc-950 hover:bg-gray-200 dark:hover:bg-zinc-800 w-10 h-10"
-        @click="usePrinterStore().refreshPrinters(true)"
+        @click="usePrinterStore().getPrinters(true)"
       >
         ⟳
       </button>

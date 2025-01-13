@@ -1,23 +1,29 @@
-import dotenv from 'dotenv';
 import createApplication from './application.js';
 import PrinterService from './routes/printer/service.js';
-import validateEnvVariable from './util/validate-env.js';
 import chalk from 'chalk';
+import { connectDatabase, getDatabase } from './database/database.js';
+import PrintSync3DConfig from './config/config.js';
 
-dotenv.config();
+const handleShutdown = async () => getDatabase().write();
 
+new PrintSync3DConfig();
 new PrinterService();
 
-const port = validateEnvVariable('PORT');
+await connectDatabase();
 
-createApplication().listen(port, () => {
-  console.log(
-    chalk.blueBright.bold('✔ PrintSync3D service is up and running:'),
-    '\n',
-    chalk.blue(`• Website route: ${chalk.underline(`http://localhost:${port}/printsync3d`)}`),
-    '\n',
-    chalk.blue(`• API route: ${chalk.underline(`http://localhost:${port}/api`)}`),
-  );
+createApplication()
+  .listen(PrintSync3DConfig.PORT, () => {
+    console.log(
+      chalk.blueBright.bold('✔ PrintSync3D service is up and running:'),
+      '\n',
+      chalk.blue(
+        `• API routes: ${chalk.underline(`http://localhost:${PrintSync3DConfig.PORT}/api`)}`,
+      ),
+    );
 
-  PrinterService.refreshConnections();
-});
+    PrinterService.refreshConnections();
+  })
+  .on('close', handleShutdown);
+
+process.on('SIGTERM', handleShutdown);
+process.on('SIGINT', handleShutdown);

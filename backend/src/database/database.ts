@@ -2,15 +2,22 @@ import { Low } from 'lowdb';
 import { JSONFilePreset } from 'lowdb/node';
 import fileSystem from 'fs';
 import path from 'path';
+import { StoredPrinter } from '../types/types.js';
 
 const DATABASE_FILE_LOCATION = './database/database.json';
 
-type DatabaseSchema = object;
+type DatabaseSchema = {
+  models: Record<string, string>
+  printers: Record<string, StoredPrinter>
+};
 
 let database: Low<DatabaseSchema> | undefined = undefined;
 
 function getDefaultData(): DatabaseSchema {
-  return {};
+  return {
+    models: {},
+    printers: {},
+  };
 }
 
 export async function connectDatabase() {

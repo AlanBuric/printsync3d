@@ -129,7 +129,11 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# Our project
+# IDE
+vcs.xml
+
+# PrintSync3D
 build
 backend/static
 gcode-files
+database.json

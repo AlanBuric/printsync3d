@@ -36,7 +36,7 @@ function createMockedPrinter({ name, port }: MockedPrinterArgs): Printer {
 export const usePrinterStore = defineStore('printer', () => {
   const printers = ref<Printer[]>([
     createMockedPrinter({
-      name: 'Fake test Prusa i3 MK2S',
+      name: 'Test Prusa i3 MK2S',
       port: '/dev/ttyUSB0',
     }),
   ]);
@@ -45,15 +45,15 @@ export const usePrinterStore = defineStore('printer', () => {
     printers.value = printers.value.filter((printer) => printer.usb.productId != productId);
   }
 
-  function refreshPrinters(refresh: boolean = false) {
-    const query = refresh ? `?refresh=${refresh}` : '';
-
-    fetch(`http://localhost:3000/api/printer${query}`)
+  function getPrinters(refresh: boolean = false) {
+    fetch(`http://localhost:3000/api/${refresh ? 'refresh' : 'printer'}`, {
+      method: refresh ? 'POST' : 'GET',
+    })
       .then((response) => response.json())
       .then((foundPrinters) => (printers.value = foundPrinters));
   }
 
-  refreshPrinters();
+  getPrinters();
 
-  return { printers, deletePrinter, refreshPrinters };
+  return { printers, deletePrinter, getPrinters };
 });
