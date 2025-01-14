@@ -1,48 +1,15 @@
-import { ref } from 'vue';
+import { reactive } from 'vue';
 import { defineStore } from 'pinia';
-import type { Printer } from '@/types';
-
-let lastIndex = 0;
-
-type MockedPrinterArgs = {
-  name: string;
-  port: string;
-};
-
-function createMockedPrinter({ name, port }: MockedPrinterArgs): Printer {
-  return {
-    name,
-    usb: {
-      usbVendorId: `test-${lastIndex}`,
-      productId: `test-${lastIndex++}`,
-      port,
-      baudRate: 115200,
-    },
-    status: {
-      progress: 0,
-      currentModel: 'Plastic Cup',
-      currentTemperature: 200,
-      currentAxesPosition: {
-        x: 0,
-        y: 0,
-        z: 0,
-      },
-      isPaused: true,
-      isFilamentLoaded: false,
-    },
-  };
-}
+import type { PrinterResponse } from '@shared-types/data-transfer-objects.ts';
 
 export const usePrinterStore = defineStore('printer', () => {
-  const printers = ref<Printer[]>([
-    createMockedPrinter({
-      name: 'Test Prusa i3 MK2S',
-      port: '/dev/ttyUSB0',
-    }),
-  ]);
+  const printers = reactive<PrinterResponse[]>([]);
 
-  function deletePrinter(productId: string) {
-    printers.value = printers.value.filter((printer) => printer.usb.productId != productId);
+  function deletePrinter(printerId: string) {
+    printers.splice(
+      printers.findIndex((printer) => printer.printerId == printerId),
+      1,
+    );
   }
 
   function getPrinters(refresh: boolean = false) {
@@ -50,7 +17,7 @@ export const usePrinterStore = defineStore('printer', () => {
       method: refresh ? 'POST' : 'GET',
     })
       .then((response) => response.json())
-      .then((foundPrinters) => (printers.value = foundPrinters));
+      .then((foundPrinters) => Object.assign(printers, foundPrinters));
   }
 
   getPrinters();

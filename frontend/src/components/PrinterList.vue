@@ -7,12 +7,12 @@
 <template>
   <section class="flex items-center flex-col w-full max-lg:px-4 gap-y-10" id="printers">
     <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-16 gap-y-16 w-full">
-      <li v-for="printer in usePrinterStore().printers" :key="printer.usb.productId">
+      <li v-for="printer in usePrinterStore().printers" :key="printer.printerId">
         <ul
           class="flex items-center justify-between p-4 bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-900 hover:dark:bg-zinc-950 text-zinc-600 dark:text-zinc-300 min-w-72 px-6 py-4 rounded-xl"
         >
           <li>
-            <RouterLink :to="`/printer/${printer.usb.productId}`" class="flex w-full">
+            <RouterLink :to="`/printer/${printer.printerId}`" class="flex w-full">
               <span class="flex-1 text-center cursor-pointer">{{ printer.name }}</span>
             </RouterLink>
           </li>
@@ -20,7 +20,7 @@
             <ul class="flex gap-x-4">
               <li>
                 <button class="hover:bg-gray-200 dark:hover:bg-zinc-800 p-2 rounded-full">
-                  <RouterLink :to="`/printer/${printer.usb.productId}`">
+                  <RouterLink :to="`/printer/${printer.printerId}`">
                     <InfoIcon class="fill-cyan-500 hover:fill-cyan-400" />
                   </RouterLink>
                 </button>
@@ -28,7 +28,7 @@
               <li>
                 <button
                   class="hover:bg-gray-200 dark:hover:bg-zinc-800 p-2 rounded-full"
-                  @click="usePrinterStore().deletePrinter(printer.usb.productId)"
+                  @click="usePrinterStore().deletePrinter(printer.printerId)"
                 >
                   <TrashIcon class="fill-cyan-500 hover:fill-cyan-400" />
                 </button>
