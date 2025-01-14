@@ -1,47 +1,62 @@
-import { Request, response, Response, Router } from 'express';
+import { Request, Response, Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import path from 'path';
-import fileSystem from 'fs';
 import multer from 'multer';
-import dotenv from 'dotenv';
 import ModelService from './service.js';
-import PrintSync3DConfig from '../../config/config.js';
-import getLoggingPrefix from '../../util/logging.js';
+import { ModelInformation, ModelsResponse } from '../../types/data-transfer-objects.js';
+import { body, matchedData, param } from 'express-validator';
+import handleValidationResults from '../../middleware/validation-handler.js';
 
-dotenv.config();
+const modelIdValidator = param('modelId').notEmpty().withMessage('Model ID is required');
 
 const ModelRouter = () => {
-  const GCODE_DIRECTORY = path.resolve(PrintSync3DConfig.GCODE_UPLOAD_DIRECTORY);
-
-  if (!fileSystem.existsSync(GCODE_DIRECTORY)) {
-    console.log(
-      `${getLoggingPrefix()} GCODE directory doesn't exist. Creating one at ${GCODE_DIRECTORY}.`,
-    );
-    fileSystem.mkdirSync(GCODE_DIRECTORY, { recursive: true });
-  }
-
   const storage = multer.diskStorage({
-    destination: GCODE_DIRECTORY,
-    filename: (_request, _file, callback) => callback(null, ModelService.createFilename()),
+    destination: ModelService.GCODE_UPLOAD_DIRECTORY,
+    filename: (_request, file, callback) => {
+      callback(null, ModelService.registerNewFileAndGetName(file));
+    },
   });
 
   return Router()
     .get(
       '',
-      (_request: Request, response: Response): Promise<any> =>
-        fileSystem.promises
-          .readdir(GCODE_DIRECTORY)
-          .then((files) => response.send(files.map((file) => file.split('.')[0]))),
+      (_request: Request, response: Response<ModelsResponse>): Promise<any> =>
+        ModelService.getAllModels().then((models) => response.send(models)),
     )
+    .get(
+      '/:modelId',
+      modelIdValidator,
+      handleValidationResults,
+      async (request: Request, response: Response<ModelInformation>): Promise<any> => {
+        const { modelId } = matchedData(request);
+        return response.send(await ModelService.getModel(modelId));
+      },
+    )
+    .patch(
+      '/:modelId',
+      modelIdValidator,
+      body('displayName').notEmpty().withMessage('Display name is required'),
+      handleValidationResults,
+      (request: Request, response: Response) => {
+        const { modelId, displayName } = matchedData(request);
+
+        ModelService.editModel(modelId, displayName).then(() =>
+          response.sendStatus(StatusCodes.OK),
+        );
+      },
+    )
+    .delete('/:modelId', modelIdValidator, (request: Request, response: Response) => {
+      const { modelId } = matchedData(request);
+      ModelService.deleteModel(modelId).then(() => response.sendStatus(StatusCodes.OK));
+    })
     .post(
       '',
       multer({ storage }).array('files'),
-      async (req: Request, res: Response): Promise<any> => {
-        if (!req.files || !Object.keys(req.files).length) {
-          return res.status(StatusCodes.BAD_REQUEST).send('No files uploaded');
+      async (request: Request, response: Response): Promise<any> => {
+        if (!request.files || !Object.keys(request.files).length) {
+          return response.status(StatusCodes.BAD_REQUEST).send('No files uploaded');
         }
 
-        response.sendStatus(StatusCodes.OK);
+        response.sendStatus(StatusCodes.CREATED);
       },
     );
 };

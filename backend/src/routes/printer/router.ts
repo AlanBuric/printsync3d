@@ -2,7 +2,7 @@ import { Request, Response, Router } from 'express';
 import PrinterService from './service.js';
 import { Printer } from '../../types/types.js';
 import { body, matchedData, param } from 'express-validator';
-import processValidation from '../../middleware/process-validation.js';
+import handleValidationResults from '../../middleware/validation-handler.js';
 import { StatusCodes } from 'http-status-codes';
 import PRINTER_CONTROLS, { PRINTER_CONTROL_TYPES } from './known-controls.js';
 import ModelService from '../model/service.js';
@@ -32,7 +32,7 @@ const PrinterRouter = Router()
   .get(
     '/:printerId/status',
     printerIdValidator,
-    processValidation,
+    handleValidationResults,
     (request: Request, response: Response) => {
       const { printerId } = matchedData(request);
       PrinterService.handleStatus(PrinterService.getConnectedPrinter(printerId), response);
@@ -51,7 +51,7 @@ const PrinterRouter = Router()
       .withMessage(
         `Control type needs to be one of the following strings: ${PRINTER_CONTROL_TYPES.join(', ')}`,
       ),
-    processValidation,
+    handleValidationResults,
     async (request: Request, response: Response): Promise<any> => {
       const { printerId, controlType } = matchedData(request);
 
@@ -65,7 +65,7 @@ const PrinterRouter = Router()
 
     PrinterService.printGCodeModel(
       PrinterService.getConnectedPrinter(printerId),
-      ModelService.getFileStream(modelId),
+      ModelService.getModelFileStream(modelId),
       modelId,
     );
 

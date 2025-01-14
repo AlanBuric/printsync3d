@@ -2,12 +2,12 @@ import { Low } from 'lowdb';
 import { JSONFilePreset } from 'lowdb/node';
 import fileSystem from 'fs';
 import path from 'path';
-import { StoredPrinter } from '../types/types.js';
+import { StoredModel, StoredPrinter } from '../types/types.js';
 
 const DATABASE_FILE_LOCATION = './database/database.json';
 
 type DatabaseSchema = {
-  models: Record<string, string>
+  models: Record<string, StoredModel>
   printers: Record<string, StoredPrinter>
 };
 

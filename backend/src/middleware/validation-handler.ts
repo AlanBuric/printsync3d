@@ -1,10 +1,11 @@
 import type { NextFunction, Request, Response } from 'express';
 import { validationResult } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
+import { ValidationErrorResponse } from '../types/data-transfer-objects.js';
 
-export default function processValidation(
+export default function handleValidationResults(
   request: Request,
-  response: Response,
+  response: Response<ValidationErrorResponse>,
   next: NextFunction,
 ): any {
   const results = validationResult(request);
@@ -13,7 +14,5 @@ export default function processValidation(
     return next();
   }
 
-  const errors = results.array().map((error) => error.msg);
-
-  response.status(StatusCodes.BAD_REQUEST).send({ error: errors[0], errors });
+  response.status(StatusCodes.BAD_REQUEST).send({ errors: results.array() });
 }

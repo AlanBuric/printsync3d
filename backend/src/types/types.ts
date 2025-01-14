@@ -9,18 +9,13 @@ export type AxesPosition = {
   z: number;
 };
 
-export type PrinterStatus = {
+export type Printer = {
   progress: number;
   currentModel?: string;
   currentTemperature: number;
   currentAxesPosition: AxesPosition;
   isFilamentLoaded: boolean;
   isPaused: boolean;
-};
-
-export type Printer = {
-  name: string;
-  status: PrinterStatus;
 };
 
 export type PrinterControlType = keyof typeof PRINTER_CONTROLS;
@@ -35,3 +30,10 @@ export type ConnectedPrinter = {
 export type StoredPrinter = {
   displayName: string;
 };
+
+export type StoredModel = {
+  /**
+   * Display name of the model as originally uploaded by the user or custom set.
+   */
+  displayName: string;
+}

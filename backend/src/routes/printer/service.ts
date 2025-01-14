@@ -1,36 +1,45 @@
 import PRINTER_CONTROLS from './known-controls.js';
-import { ConnectedPrinter, Printer, PrinterControlType } from '../../types/types.js';
+import { ConnectedPrinter, PrinterControlType } from '../../types/types.js';
 import { ReadlineParser, SerialPort } from 'serialport';
+import { getDatabase } from '../../database/database.js';
 import { PortInfo } from '@serialport/bindings-cpp';
-import RequestError from '../../util/RequestError.js';
 import { StatusCodes } from 'http-status-codes';
-import express from 'express';
 import getLoggingPrefix from '../../util/logging.js';
 import PrintSync3DConfig from '../../config/config.js';
-import { getDatabase } from '../../database/database.js';
-import {Interface} from 'readline';
+import RequestError from '../../util/RequestError.js';
+import { Interface } from 'readline';
+import express from 'express';
+import { PrinterResponse } from '../../types/data-transfer-objects.js';
 
 export default class PrinterService {
   static connectedPrinters: Record<string, ConnectedPrinter> = {};
   static isRefreshing = false;
 
-  static async printGCodeModel(connectedPrinter: ConnectedPrinter, fileStream: Interface, fileId: string) {
+  static async printGCodeModel(
+    connectedPrinter: ConnectedPrinter,
+    fileStream: Interface,
+    modelId: string,
+  ) {
     const connection = connectedPrinter.serialPort;
 
-    connectedPrinter.printer.status.currentModel = getDatabase().data.models[fileId] ?? fileId;
-    connectedPrinter.printer.status.isPaused = false;
+    connectedPrinter.printer.currentModel =
+      getDatabase().data.models[modelId]?.displayName ?? modelId;
+    connectedPrinter.printer.isPaused = false;
 
     try {
       for await (const line of fileStream) {
         connection.write(line);
-        connectedPrinter.printer.status.progress++;
+        connectedPrinter.printer.progress++;
       }
     } catch (error) {
       console.error(
-        `${getLoggingPrefix()} Error occurred while writing GCODE model to 3D printer ${connectedPrinter.serialPortInfo.path}`,
+        `${getLoggingPrefix()} Error occurred while writing GCODE model with ID ${modelId} to 3D printer ${connectedPrinter.serialPortInfo.path}`,
         error,
       );
-      throw new RequestError(StatusCodes.NOT_FOUND, `GCODE model with ID ${fileId} not found.`);
+      throw new RequestError(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        `An error occurred while 3D printing model ${connectedPrinter.printer.currentModel}.`,
+      );
     }
   }
 
@@ -91,7 +100,7 @@ export default class PrinterService {
     }
   }
 
-  static createConnectedPrinter(portInfo: PortInfo, name = 'Unknown device'): ConnectedPrinter {
+  static createConnectedPrinter(portInfo: PortInfo): ConnectedPrinter {
     const serialPort = PrinterService.createAndOpenSerialPort(portInfo.path);
 
     serialPort.on('error', (error: Error) =>
@@ -101,19 +110,16 @@ export default class PrinterService {
     return {
       serialPort,
       printer: {
-        name,
-        status: {
-          progress: 0,
-          currentModel: undefined,
-          currentTemperature: 0,
-          currentAxesPosition: {
-            x: 0,
-            y: 0,
-            z: 0,
-          },
-          isFilamentLoaded: false,
-          isPaused: false,
+        progress: 0,
+        currentModel: undefined,
+        currentTemperature: 0,
+        currentAxesPosition: {
+          x: 0,
+          y: 0,
+          z: 0,
         },
+        isFilamentLoaded: false,
+        isPaused: false,
       },
       serialPortInfo: portInfo,
       waitingStatusResponses: [],
@@ -141,8 +147,28 @@ export default class PrinterService {
     });
   }
 
-  static getPrinters(): Printer[] {
-    return Object.values(this.connectedPrinters).map((printer) => printer.printer);
+  static getPrinters(): PrinterResponse[] {
+    return Object.values(this.connectedPrinters).map(this.mapPrinterToPrinterResponse);
+  }
+
+  static getPrinter(printerId: string): PrinterResponse {
+    const connectedPrinter = this.connectedPrinters[printerId];
+
+    if (!connectedPrinter) {
+      throw new RequestError(
+        StatusCodes.NOT_FOUND,
+        `Printer with printer ID ${printerId} not found`,
+      );
+    }
+
+    return this.mapPrinterToPrinterResponse(connectedPrinter);
+  }
+
+  static mapPrinterToPrinterResponse(connectedPrinter: ConnectedPrinter): PrinterResponse {
+    return {
+      ...connectedPrinter.printer,
+      printerId: connectedPrinter.serialPortInfo.path,
+    };
   }
 
   static handleStatus(connectedPrinter: ConnectedPrinter, response: express.Response): void {
