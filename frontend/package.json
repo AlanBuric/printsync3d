@@ -1,5 +1,5 @@
 {
-  "name": "printsync3d",
+  "name": "printsync3d-ui",
   "version": "1.0.0",
   "author": "Alan Burić",
   "description": "Web application for centralized management of 3D printers via a Vue.js website",

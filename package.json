@@ -1,0 +1,26 @@
+{
+  "name": "printsync3d-root",
+  "version": "1.0.0",
+  "description": "Common packages and scripts for both projects.",
+  "homepage": "https://github.com/AlanBuric/printsync3d#readme",
+  "bugs": {
+    "url": "https://github.com/AlanBuric/printsync3d/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlanBuric/printsync3d.git"
+  },
+  "license": "MIT",
+  "author": "Alan Burić",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "setup": "npm ci && concurrently \"cd backend && npm ci\" \"cd frontend && npm ci\"",
+    "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm run dev\"",
+    "build": "concurrently \"cd backend && npm run build:tsc\" \"cd frontend && npm run build-only\"",
+    "start": "concurrently \"cd backend && npm run start:tsc\" \"cd frontend && npm run preview\""
+  },
+  "dependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
