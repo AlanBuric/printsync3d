@@ -18,6 +18,11 @@ const router = createRouter({
       path: '/printing/:id',
       name: 'printing',
       component: () => import('./views/PrintingView.vue')
+    },
+    {
+      path: '/models',
+      name: 'models',
+      component: () => import('./views/ModelsView.vue')
     }
   ]
 });

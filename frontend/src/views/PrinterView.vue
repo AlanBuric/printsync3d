@@ -2,9 +2,29 @@
   import { useRoute } from 'vue-router';
   import { usePrinterStore } from '@/stores/printer';
   import PlayIcon from '@/components/icons/PlayIcon.vue';
+  import { ref } from 'vue';
 
-  const printerId = useRoute().params.id;
+  const printerId = useRoute().params.id.toString();
   const printer = usePrinterStore().printers.find((printer) => printer.printerId === printerId);
+
+  const editableDisplayName = ref(printer?.displayName);
+
+  function editPrinterDisplayName() {
+    if (editableDisplayName.value == printer?.displayName) {
+      return;
+    }
+
+    fetch(`http://localhost:3000/api/printer/${encodeURIComponent(printerId)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ displayName: editableDisplayName.value }),
+      headers: { 'Content-Type': 'application/json' },
+    }).then((response) => {
+      if (!response.ok) {
+        editableDisplayName.value = printer?.displayName;
+        response.text().then(alert);
+      }
+    });
+  }
 </script>
 
 <template>
@@ -13,7 +33,14 @@
       <template v-if="printer">
         <section class="gap-y-4 flex flex-col flex-grow">
           <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-2 rounded-lg w-fit">
-            <h1 class="text-xl text-zinc-900 dark:text-zinc-100">{{ printer.name }}</h1>
+            <h1
+              class="text-xl text-zinc-900 dark:text-zinc-100"
+              contenteditable
+              @input="({ target }) => (editableDisplayName = (target as any).innerText)"
+              @blur="editPrinterDisplayName"
+            >
+              {{ editableDisplayName }}
+            </h1>
           </div>
           <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4">
             <h2 class="text-xl text-zinc-800 dark:text-zinc-200 mb-2">Printer status</h2>

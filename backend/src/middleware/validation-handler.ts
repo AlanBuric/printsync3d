@@ -14,5 +14,5 @@ export default function handleValidationResults(
     return next();
   }
 
-  response.status(StatusCodes.BAD_REQUEST).send({ errors: results.array() });
+  response.status(StatusCodes.BAD_REQUEST).send(results.array()[0].msg);
 }
