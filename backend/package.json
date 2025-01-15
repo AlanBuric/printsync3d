@@ -14,7 +14,7 @@
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "tsx watch --clear-screen=false src/server.ts",
     "build:tsc": "tsc -b tsconfig.json",
     "build:esbuild": "node esbuild.js",
     "start:tsc": "node dist/src/server.js",

@@ -24,6 +24,8 @@ We usually use the latest Node.js and NPM versions. Simply run `npm run setup` i
 Use the `dev` scripts defined in both directory `package.json` files to launch one of the servers, or `npm run dev` in
 the root directory to launch both at once.
 
+The `-r` flag is required for `concurrently` because the console log and color control doesn't let the backend start up.
+
 ## Deployment
 
 ### Option 1. Fully reliable deployment

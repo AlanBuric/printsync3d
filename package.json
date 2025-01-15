@@ -16,7 +16,7 @@
   "main": "index.js",
   "scripts": {
     "setup": "npm ci && concurrently \"cd backend && npm ci\" \"cd frontend && npm ci\"",
-    "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm run dev\"",
+    "dev": "concurrently -r \"npm --prefix ./backend run dev\" \"npm --prefix ./frontend run dev\"",
     "build": "concurrently \"cd backend && npm run build:tsc\" \"cd frontend && npm run build-only\"",
     "start": "concurrently \"cd backend && npm run start:tsc\" \"cd frontend && npm run preview\""
   },
