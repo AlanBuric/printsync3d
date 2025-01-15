@@ -28,12 +28,15 @@ export type ConnectedPrinter = {
 };
 
 export type StoredPrinter = {
+  /**
+   * Display name of the model as originally uploaded by the user or custom set afterward.
+   */
   displayName: string;
 };
 
 export type StoredModel = {
   /**
-   * Display name of the model as originally uploaded by the user or custom set.
+   * Display name of the model as originally uploaded by the user or custom set afterward.
    */
   displayName: string;
 }

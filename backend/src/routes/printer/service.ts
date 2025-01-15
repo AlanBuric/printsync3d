@@ -165,9 +165,12 @@ export default class PrinterService {
   }
 
   static mapPrinterToPrinterResponse(connectedPrinter: ConnectedPrinter): PrinterResponse {
+    const printerId = connectedPrinter.serialPortInfo.path;
+
     return {
       ...connectedPrinter.printer,
-      printerId: connectedPrinter.serialPortInfo.path,
+      displayName: getDatabase().data.printers[printerId]?.displayName ?? printerId,
+      printerId,
     };
   }
 
