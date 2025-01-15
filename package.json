@@ -1,7 +1,7 @@
 {
   "name": "printsync3d-root",
   "version": "1.0.0",
-  "description": "Common packages and scripts for both projects.",
+  "description": "Scripts for running both projects at the same time.",
   "homepage": "https://github.com/AlanBuric/printsync3d#readme",
   "bugs": {
     "url": "https://github.com/AlanBuric/printsync3d/issues"
@@ -15,10 +15,10 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "setup": "npm ci && concurrently \"cd backend && npm ci\" \"cd frontend && npm ci\"",
+    "setup": "npm ci && concurrently \"npm --prefix ./backend ci\" \"npm --prefix ./frontend ci\"",
     "dev": "concurrently -r \"npm --prefix ./backend run dev\" \"npm --prefix ./frontend run dev\"",
-    "build": "concurrently \"cd backend && npm run build:tsc\" \"cd frontend && npm run build-only\"",
-    "start": "concurrently \"cd backend && npm run start:tsc\" \"cd frontend && npm run preview\""
+    "build": "concurrently \"npm --prefix ./backend run build:tsc\" \"npm --prefix ./frontend run build-only\"",
+    "start": "concurrently \"npm --prefix ./backend run start:tsc\" \"npm --prefix ./frontend run preview\""
   },
   "dependencies": {
     "concurrently": "^9.1.2"
