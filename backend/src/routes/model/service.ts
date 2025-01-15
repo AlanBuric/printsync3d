@@ -49,7 +49,7 @@ export default class ModelService {
 
             modelsResponse[basename] = this.mapFileStatsToInformation(
               stats,
-              modelsResponse[basename].displayName ?? basename,
+              models[basename].displayName ?? basename,
             );
           }
         }),
