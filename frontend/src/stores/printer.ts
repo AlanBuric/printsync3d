@@ -13,7 +13,7 @@ export const usePrinterStore = defineStore('printer', () => {
   }
 
   function getPrinters(refresh: boolean = false) {
-    fetch(`http://localhost:3000/api/${refresh ? 'refresh' : 'printer'}`, {
+    fetch(`http://localhost:3000/api/${refresh ? 'printer/refresh' : 'printer'}`, {
       method: refresh ? 'POST' : 'GET',
     })
       .then((response) => response.json())
