@@ -2,17 +2,26 @@
   import { usePrinterStore } from '@/stores/printer.js';
   import TrashIcon from '@/components/icons/TrashIcon.vue';
   import InfoIcon from '@/components/icons/InfoIcon.vue';
+  import { useI18n } from 'vue-i18n';
+
+  const { t } = useI18n();
 </script>
 
 <template>
   <section class="flex items-center flex-col w-full max-lg:px-4 gap-y-10" id="printers">
-    <ul v-if="usePrinterStore().printers.length" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-16 gap-y-16 w-full">
+    <ul
+      v-if="usePrinterStore().printers.length"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-16 gap-y-16 w-full"
+    >
       <li v-for="printer in usePrinterStore().printers" :key="printer.printerId">
         <ul
           class="flex items-center justify-between p-4 bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-900 hover:dark:bg-zinc-950 text-zinc-600 dark:text-zinc-300 min-w-72 px-6 py-4 rounded-xl"
         >
           <li>
-            <RouterLink :to="`/printer/${encodeURIComponent(printer.printerId)}`" class="flex w-full">
+            <RouterLink
+              :to="`/printer/${encodeURIComponent(printer.printerId)}`"
+              class="flex w-full"
+            >
               <span class="flex-1 text-center cursor-pointer">{{ printer.displayName }}</span>
             </RouterLink>
           </li>
@@ -38,14 +47,31 @@
         </ul>
       </li>
     </ul>
-    <p v-else>No printers have been detected yet.</p>
+    <p v-else>{{ t('noPrintersFound') }}</p>
     <div class="flex justify-center">
       <button
         class="rounded-full text-xl text-cyan-500 hover:text-cyan-400 bg-zinc-200 dark:bg-zinc-900 hover:dark:bg-zinc-950 hover:bg-gray-200 dark:hover:bg-zinc-800 px-4 py-1"
         @click="usePrinterStore().getPrinters(true)"
       >
-        Refresh
+        {{ t('refresh') }}
       </button>
     </div>
   </section>
 </template>
+
+<i18n>
+{
+  "en": {
+    "refresh": "Refresh",
+    "noPrintersFound": "No 3D printers have been detected yet."
+  },
+  "hr": {
+    "refresh": "Osvježi",
+    "noPrintersFound": "Novi 3D printeri nisu pronađeni."
+  },
+  "it": {
+    "refresh": "Aggiorna",
+    "noPrintersFound": "Non sono ancora state rilevate stampanti 3D."
+  }
+}
+</i18n>

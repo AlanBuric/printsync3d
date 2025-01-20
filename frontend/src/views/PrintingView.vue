@@ -4,6 +4,9 @@
   import { ref } from 'vue';
   import { useModelStore } from '@/stores/models';
   import type { PrinterControlType } from '@shared-types/types';
+  import { useI18n } from 'vue-i18n';
+
+  const { t } = useI18n();
 
   const FILAMENT_TYPES = ['PLA', 'ABS', 'PET'];
 
@@ -86,7 +89,7 @@
         </h1>
         <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-3xl flex flex-col">
           <label for="gcode-upload" class="text-zinc-800 dark:text-zinc-200 text-lg">
-            Upload GCODE file
+            {{ t('uploadGcodeFile') }}
           </label>
           <input
             type="file"
@@ -95,13 +98,13 @@
             @change="handleFileUpload"
             class="mb-2"
           />
-          <span class="text-zinc-700 dark:text-zinc-400">Acceptable: .gcode files.</span>
+          <span class="text-zinc-700 dark:text-zinc-400">{{ t('acceptableFiles') }}</span>
         </div>
 
         <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-3xl flex flex-col">
-          <label for="model-select" class="text-zinc-800 dark:text-zinc-200 text-lg"
-            >Select GCODE file</label
-          >
+          <label for="model-select" class="text-zinc-800 dark:text-zinc-200 text-lg">{{
+            t('selectGcodeFile')
+          }}</label>
           <select
             id="model-select"
             name="model"
@@ -109,7 +112,7 @@
             :disabled="!!printer.currentModel"
             class="text-zinc-800 bg-zinc-200 dark:text-zinc-200 dark:bg-zinc-900 rounded-md py-1"
           >
-            <option value="" disabled selected>Select a recent model</option>
+            <option value="" disabled selected>{{ t('selectRecentModel') }}</option>
             <option
               v-for="[modelId, modelName] in Object.entries(useModelStore().models)"
               :key="modelId"
@@ -121,16 +124,15 @@
         </div>
 
         <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-3xl flex flex-col">
-          <label for="preheat-filament" class="text-zinc-800 dark:text-zinc-200 text-lg"
-            >Preheat filament</label
-          >
-          <!-- :disabled="isFilamentReadyToBeLoaded" -->
+          <label for="preheat-filament" class="text-zinc-800 dark:text-zinc-200 text-lg">{{
+            t('preheatFilament')
+          }}</label>
           <select
             id="preheat-filament"
             name="preheat-filament"
             class="text-zinc-800 bg-zinc-200 dark:text-zinc-300 dark:bg-zinc-900 rounded-md py-1"
           >
-            <option value="" disabled selected>Select a filament type</option>
+            <option value="" disabled selected>{{ t('selectFilamentType') }}</option>
             <option v-for="filament in FILAMENT_TYPES" :key="filament" :value="filament">
               {{ filament }}
             </option>
@@ -138,54 +140,103 @@
         </div>
 
         <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-3xl flex flex-col">
-          <span class="text-zinc-800 dark:text-zinc-200 text-lg">Control filament</span>
+          <span class="text-zinc-800 dark:text-zinc-200 text-lg">{{ t('controlFilament') }}</span>
           <div class="gap-y-2 flex flex-col">
-            <!-- :disabled="!isFilamentReadyToBeLoaded()" -->
             <button
               class="w-fit bg-zinc-300 dark:bg-zinc-700 px-2 py-0.5 rounded-full"
               @click="sendControl('load-filament')"
             >
-              Load filament
+              {{ t('loadFilament') }}
             </button>
             <button
               class="w-fit bg-zinc-300 dark:bg-zinc-700 px-2 py-0.5 rounded-full"
               @click="sendControl('unload-filament')"
             >
-              Unload filament
+              {{ t('unloadFilament') }}
             </button>
           </div>
         </div>
 
         <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-3xl flex flex-col">
-          <span class="text-zinc-800 dark:text-zinc-200 text-lg">Calibrate</span>
+          <span class="text-zinc-800 dark:text-zinc-200 text-lg">{{ t('calibrate') }}</span>
           <div class="gap-y-2 flex flex-col">
             <button
               class="w-fit bg-zinc-300 dark:bg-zinc-700 px-2 py-0.5 rounded-full"
               @click="sendControl('auto-home')"
             >
-              Auto home
+              {{ t('autoHome') }}
             </button>
             <button
               class="w-fit bg-zinc-300 dark:bg-zinc-700 px-2 py-0.5 rounded-full"
               @click="sendControl('mesh-bed-leveling')"
             >
-              Mesh bed leveling
+              {{ t('meshBedLeveling') }}
             </button>
             <button
               class="w-fit bg-zinc-300 dark:bg-zinc-700 px-2 py-0.5 rounded-full"
               @click="sendControl('reset-xyz')"
             >
-              Reset XYZ calibration
+              {{ t('resetXYZCalibration') }}
             </button>
           </div>
         </div>
       </div>
       <div class="text-center" v-else>
-        <h3 class="text-2xl font-semibold text-zinc-400">Printer not found</h3>
+        <h3 class="text-2xl font-semibold text-zinc-400">{{ t('printerNotFound') }}</h3>
         <p class="text-zinc-500 mt-2">
-          It seems the printer you're looking for doesn't exist or isn't connected.
+          {{ t('printerNotFoundDetailed') }}
         </p>
       </div>
     </div>
   </main>
 </template>
+
+<i18n>
+{
+  "en": {
+    "uploadGcodeFile": "Upload GCODE file",
+    "acceptableFiles": "Acceptable: .gcode files.",
+    "selectGcodeFile": "Select GCODE file",
+    "selectRecentModel": "Select a recent model",
+    "preheatFilament": "Preheat filament",
+    "selectFilamentType": "Select a filament type",
+    "controlFilament": "Control filament",
+    "loadFilament": "Load filament",
+    "unloadFilament": "Unload filament",
+    "calibrate": "Calibrate",
+    "autoHome": "Auto home",
+    "meshBedLeveling": "Mesh bed leveling",
+    "resetXYZCalibration": "Reset XYZ calibration"
+  },
+  "hr": {
+    "uploadGcodeFile": "Prenesi GCODE datoteku",
+    "acceptableFiles": "Prihvatljivo: .gcode datoteke.",
+    "selectGcodeFile": "Odaberi GCODE datoteku",
+    "selectRecentModel": "Odaberi nedavni model",
+    "preheatFilament": "Zagrijavanje filamenta",
+    "selectFilamentType": "Odaberi vrstu filamenta",
+    "controlFilament": "Upravljanje filamentom",
+    "loadFilament": "Učitaj filament",
+    "unloadFilament": "Isprazni filament",
+    "calibrate": "Kalibracija",
+    "autoHome": "Automatsko poravnanje",
+    "meshBedLeveling": "Poravnanje mreže stola",
+    "resetXYZCalibration": "Poništi XYZ kalibraciju"
+  },
+  "it": {
+    "uploadGcodeFile": "Carica file GCODE",
+    "acceptableFiles": "Accettabili: file .gcode.",
+    "selectGcodeFile": "Seleziona file GCODE",
+    "selectRecentModel": "Seleziona un modello recente",
+    "preheatFilament": "Pre-riscalda filamento",
+    "selectFilamentType": "Seleziona tipo di filamento",
+    "controlFilament": "Controlla filamento",
+    "loadFilament": "Carica filamento",
+    "unloadFilament": "Scarica filamento",
+    "calibrate": "Calibrazione",
+    "autoHome": "Auto home",
+    "meshBedLeveling": "Livellamento del piano",
+    "resetXYZCalibration": "Reset calibrazione XYZ"
+  }
+}
+</i18n>

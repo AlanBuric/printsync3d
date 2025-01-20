@@ -5,9 +5,11 @@
   import useGlobalStore from '@/stores/global';
   import { usePrinterStore } from '@/stores/printer';
   import { getRandomElement } from '@/scripts/utils';
+  import { useI18n } from 'vue-i18n';
 
   const route = useRoute();
   const randomPrinter = getRandomElement(usePrinterStore().printers);
+  const { t } = useI18n();
 </script>
 
 <template>
@@ -41,27 +43,27 @@
             href="#printers"
             class="flex text-lg font-light text-gray-700 dark:text-gray-300 hover:text-cyan-500 dark:hover:text-cyan-400"
           >
-            Printers
+            {{ t('btnPrinters') }}
           </a>
           <RouterLink
             v-else
             to="/#printers"
             class="text-lg font-light text-gray-700 dark:text-gray-300 hover:text-cyan-500 dark:hover:text-cyan-400"
           >
-            Printers
+            {{ t('btnPrinters') }}
           </RouterLink>
           <RouterLink
             v-if="randomPrinter"
             :to="`/printing/${encodeURIComponent(randomPrinter.printerId)}`"
             class="text-lg font-light text-gray-700 dark:text-gray-300 hover:text-cyan-500 dark:hover:text-cyan-400"
           >
-            Start printing
+            {{ t('btnStart') }}
           </RouterLink>
           <RouterLink
             to="/models"
             class="text-lg font-light text-gray-700 dark:text-gray-300 hover:text-cyan-500 dark:hover:text-cyan-400"
           >
-            Models
+            {{ t('btnModels') }}
           </RouterLink>
         </nav>
       </div>
@@ -72,3 +74,23 @@
     </div>
   </div>
 </template>
+
+<i18n>
+{
+  "en": {
+    "btnPrinters": "Printers",
+    "btnStart": "Start printing",
+    "btnModels": "Models"
+  },
+  "hr": {
+    "btnPrinters": "Printeri",
+    "btnStart": "Kreni printati",
+    "btnModels": "Modeli"
+  },
+  "it": {
+    "btnPrinters": "Stampanti",
+    "btnStart": "Avvia stampa",
+    "btnModels": "Modelli"
+  }
+}
+</i18n>
