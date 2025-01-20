@@ -9,8 +9,6 @@
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
     "build-gh-pages": "vite build --base=/printsync3d/",
-    "build:backend:dev": "vite build --base=/printsync3d/ --outDir=../backend/static",
-    "build:backend:prod": "vite build --base=/printsync3d/ --outDir=../backend/dist/static",
     "start:vite": "vite preview",
     "start:vite-expose": "vite preview --host",
     "test:unit": "vitest",

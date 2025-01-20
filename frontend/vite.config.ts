@@ -22,9 +22,6 @@ export default defineConfig({
       }
     }
   },
-  build: {
-    emptyOutDir: true
-  },
   test: {
     environment: 'jsdom',
     exclude: [...configDefaults.exclude, 'e2e/**'],
