@@ -5,10 +5,7 @@
 
   const { locale } = useI18n();
 
-  watch(locale, (current) => {
-    localStorage.setItem('locale', current);
-    console.log("Called")
-  });
+  watch(locale, (current) => localStorage.setItem('locale', current));
 </script>
 
 <template>

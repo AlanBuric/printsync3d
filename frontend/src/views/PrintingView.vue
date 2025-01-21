@@ -5,8 +5,10 @@
   import { useModelStore } from '@/stores/models';
   import type { PrinterControlType } from '@shared-types/types';
   import { useI18n } from 'vue-i18n';
+  import EmptyState from '@/components/EmptyState.vue';
 
   const { t } = useI18n();
+  const modelStore = useModelStore();
 
   const FILAMENT_TYPES = ['PLA', 'ABS', 'PET'];
 
@@ -114,7 +116,7 @@
           >
             <option value="" disabled selected>{{ t('selectRecentModel') }}</option>
             <option
-              v-for="[modelId, modelName] in Object.entries(useModelStore().models)"
+              v-for="[modelId, modelName] in Object.entries(modelStore.models)"
               :key="modelId"
               :value="modelId"
             >
@@ -182,10 +184,10 @@
         </div>
       </div>
       <div class="text-center" v-else>
-        <h3 class="text-2xl font-semibold text-zinc-400">{{ t('printerNotFound') }}</h3>
-        <p class="text-zinc-500 mt-2">
-          {{ t('printerNotFoundDetailed') }}
-        </p>
+        <EmptyState
+          header-locale-key="printerNotFound"
+          description-locale-key="printerNotFoundDetails"
+        />
       </div>
     </div>
   </main>

@@ -15,17 +15,20 @@ const i18n = createI18n({
   availableLocales: availableLocales.map((locale) => locale[0]),
   messages: {
     en: {
+      refresh: 'Refresh',
       printerNotFound: 'Printer not found',
-      printerNotFoundDetailed:
+      printerNotFoundDetails:
         "It seems the printer you're looking for doesn't exist or isn't connected.",
     },
     hr: {
+      refresh: 'Osvježi',
       printerNotFound: 'Printer nije pronađen',
-      printerNotFoundDetailed: 'Izgleda da printer koji tražite ne postoji ili nije povezan.',
+      printerNotFoundDetails: 'Izgleda da printer koji tražite ne postoji ili nije povezan.',
     },
     it: {
+      refresh: 'Aggiorna',
       printerNotFound: 'Stampante non trovata',
-      printerNotFoundDetailed:
+      printerNotFoundDetails:
         'Sembra che la stampante che stai cercando non esista o non sia collegata.',
     },
   },

@@ -4,6 +4,7 @@
   import PlayIcon from '@/components/icons/PlayIcon.vue';
   import { ref } from 'vue';
   import { useI18n } from 'vue-i18n';
+  import EmptyState from '@/components/EmptyState.vue';
 
   const { t } = useI18n();
 
@@ -100,10 +101,10 @@
 
       <template v-else>
         <div class="text-center">
-          <h3 class="text-2xl font-semibold text-zinc-400">{{ t('printerNotFound') }}</h3>
-          <p class="text-zinc-500 mt-2">
-            {{ t('printerNotFoundDetailed') }}
-          </p>
+          <EmptyState
+            header-locale-key="printerNotFound"
+            description-locale-key="printerNotFoundDetails"
+          />
         </div>
       </template>
     </div>

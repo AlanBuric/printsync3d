@@ -1,4 +1,4 @@
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { defineStore } from 'pinia';
 import type { PrinterResponse } from '@shared-types/data-transfer-objects.ts';
 
@@ -15,6 +15,7 @@ export const usePrinterStore = defineStore('printer', () => {
       isPaused: false,
     },
   ]);
+  const isLoading = ref(false);
 
   function deletePrinter(printerId: string) {
     printers.splice(
@@ -24,14 +25,21 @@ export const usePrinterStore = defineStore('printer', () => {
   }
 
   function getPrinters(refresh: boolean = false) {
+    if (isLoading.value) {
+      return;
+    }
+
+    isLoading.value = true;
+
     fetch(`http://localhost:3000/api/${refresh ? 'printer/refresh' : 'printer'}`, {
       method: refresh ? 'POST' : 'GET',
     })
       .then((response) => response.json())
-      .then((foundPrinters) => Object.assign(printers, foundPrinters));
+      .then((foundPrinters) => Object.assign(printers, foundPrinters))
+      .finally(() => (isLoading.value = false));
   }
 
   //getPrinters();
 
-  return { printers, deletePrinter, getPrinters };
+  return { printers, isLoading, deletePrinter, getPrinters };
 });
