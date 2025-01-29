@@ -1,3 +1,3 @@
 export default function getLoggingPrefix() {
-  return `[${new Date().toISOString()}] [printsync3d]`;
+  return `[${new Date().toISOString()}] [PrintSync3D]`;
 }

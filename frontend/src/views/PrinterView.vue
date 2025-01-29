@@ -29,6 +29,10 @@
       }
     });
   }
+
+  function formatTemperature(value: string | undefined): string {
+    return value ? `${value} °C` : t('unknown');
+  }
 </script>
 
 <template>
@@ -60,10 +64,16 @@
                 }}</span>
               </li>
               <li>
-                <span>{{ t('temperature') }}:</span>
-                <span class="ml-1 text-zinc-700 dark:text-zinc-400"
-                  >{{ printer.currentTemperature }}°C</span
-                >
+                <span>{{ t('extruderTemperature') }}:</span>
+                <span class="ml-1 text-zinc-700 dark:text-zinc-400">{{
+                  formatTemperature(printer.temperatureReport.extruder)
+                }}</span>
+              </li>
+              <li>
+                <span>{{ t('bedTemperature') }}:</span>
+                <span class="ml-1 text-zinc-700 dark:text-zinc-400">{{
+                  formatTemperature(printer.temperatureReport.bed)
+                }}</span>
               </li>
               <li>
                 <span>{{ t('paused') }}:</span>
@@ -117,7 +127,9 @@
     "printerStatus": "Printer status",
     "progress": "Progress",
     "currentModel": "Current model",
-    "temperature": "Temperature",
+    "extruderTemperature": "Extruder temperature",
+    "bedTemperature": "Bed temperature",
+    "unknown": "Unknown",
     "paused": "Paused",
     "axesPosition": "Axes position",
     "yes": "Yes",
@@ -129,7 +141,9 @@
     "printerStatus": "Status printera",
     "progress": "Napredak",
     "currentModel": "Trenutni model",
-    "temperature": "Temperatura",
+    "extruderTemperature": "Temperatura mlaznice",
+    "bedTemperature": "Temperatura podloge",
+    "unknown": "Nepoznato",
     "paused": "Pauziran",
     "axesPosition": "Pozicije osi",
     "yes": "Da",

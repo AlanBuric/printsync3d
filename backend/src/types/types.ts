@@ -1,6 +1,6 @@
 import PRINTER_CONTROLS from '../routes/printer/known-controls.js';
 import { PortInfo } from '@serialport/bindings-cpp';
-import { SerialPort } from 'serialport';
+import { ReadlineParser, SerialPort } from 'serialport';
 import { Response } from 'express';
 
 export type AxesPosition = {
@@ -9,10 +9,33 @@ export type AxesPosition = {
   z: number;
 };
 
+/**
+ * Printer temperatures from the expected M105 command response
+ */
+export type TemperatureReport = {
+  /**
+   * Single-extruder firmware might report "T:190 /210"
+   */
+  extruder?: string;
+  /**
+   * Multi-extruder firmware might report "T0:90 /100" or "T1:80/150" etc.
+   */
+  extruders: Record<number, string>;
+  /**
+   * Bed temperature, e.g. "B:80 /50"
+   */
+  bed?: string;
+
+  /**
+   * Chamber temperature, e.g. "C:28 /50"
+   */
+  chamber?: string;
+};
+
 export type PrinterStatus = {
   progress: number;
   currentModel?: string;
-  currentTemperature: number;
+  temperatureReport: TemperatureReport;
   currentAxesPosition: AxesPosition;
   isFilamentLoaded: boolean;
   isPaused: boolean;
@@ -22,8 +45,9 @@ export type PrinterControlType = keyof typeof PRINTER_CONTROLS;
 
 export type ConnectedPrinter = {
   status: PrinterStatus;
+  parser: ReadlineParser;
   serialPort: SerialPort;
-  serialPortInfo: PortInfo;
+  portInfo: PortInfo;
   waitingStatusResponses: Response[];
 };
 

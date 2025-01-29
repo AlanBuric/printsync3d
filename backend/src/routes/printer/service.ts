@@ -8,7 +8,10 @@ import getLoggingPrefix from '../../util/logging.js';
 import PrintSync3DConfig from '../../config/config.js';
 import RequestError from '../../util/RequestError.js';
 import { Interface } from 'readline';
-import express from 'express';
+import { parseTemperatureReport } from './reporting.js';
+
+const OK_ATTEMPTS = 5;
+const SERIAL_PORT_REFRESH_LIMIT_MILLISECONDS = 5000;
 
 export default class PrinterService {
   static connectedPrinters: Record<string, ConnectedPrinter> = {};
@@ -18,25 +21,40 @@ export default class PrinterService {
     const connection = printer.serialPort;
 
     printer.status.currentModel = getDatabase().data.models[modelId]?.displayName ?? modelId;
-    printer.status.isPaused = false;
 
     try {
       for await (const line of fileStream) {
+        console.info(`${getLoggingPrefix()} Write ${line} to ${printer.portInfo.path}`);
+
         connection.write(line);
+
+        for (let i = 0; i < OK_ATTEMPTS; i++) {
+          const data: string = await new Promise((resolve) => {
+            printer.parser.once('data', (data) => resolve(data));
+          });
+
+          if (data.startsWith('ok')) {
+            console.info(data);
+            break;
+          }
+        }
+
+        // TODO: tell the printer the overall file progress via M73
         printer.status.progress++;
       }
     } catch (error) {
       console.error(
-        `${getLoggingPrefix()} Error occurred while writing GCODE model with ID ${modelId} to 3D printer ${printer.serialPortInfo.path}`,
-        error,
+        `${getLoggingPrefix()} Error occurred while writing GCODE model with ID ${modelId} to 3D printer ${printer.portInfo.path}`,
       );
-      throw new RequestError(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        `An error occurred while 3D printing model ${printer.status.currentModel}.`,
-      );
+      console.error(error);
+    } finally {
+      printer.status.currentModel = undefined;
     }
   }
 
+  /**
+   * Lists currently connected serial ports, removes those that are gone and adds new printer connections if they're missing.
+   */
   static async refreshConnections() {
     if (this.isRefreshing) {
       return;
@@ -45,7 +63,7 @@ export default class PrinterService {
     this.isRefreshing = true;
     const portInfos = await SerialPort.list();
 
-    console.log(`${getLoggingPrefix()} ${portInfos.length} serial ports have been discovered.`);
+    console.info(`${getLoggingPrefix()} ${portInfos.length} serial ports have been discovered.`);
 
     const oldPaths = new Set(Object.keys(this.connectedPrinters));
     const newPaths = new Set(portInfos.map((portInfo) => portInfo.path));
@@ -54,10 +72,7 @@ export default class PrinterService {
 
     await Promise.allSettled(portInfos.map(this.connectPrinter));
 
-    setTimeout(
-      () => (this.isRefreshing = false),
-      PrintSync3DConfig.SERIAL_PORT_REFRESH_LIMIT_MILLISECONDS,
-    );
+    setTimeout(() => (this.isRefreshing = false), SERIAL_PORT_REFRESH_LIMIT_MILLISECONDS);
   }
 
   static removePrinter(path: string) {
@@ -73,40 +88,31 @@ export default class PrinterService {
     const existing = this.connectedPrinters[portInfo.path];
 
     if (existing) {
-      existing.serialPortInfo = portInfo;
+      existing.portInfo = portInfo;
       return;
     }
 
-    const printer = (this.connectedPrinters[portInfo.path] = this.createConnectedPrinter(portInfo));
-
-    printer.serialPort
-      .pipe(new ReadlineParser())
-      .on('data', (status: string) =>
-        printer.waitingStatusResponses.forEach((response) =>
-          response.json({
-            path: portInfo.path,
-            status,
-          }),
-        ),
-      )
-      .on('close', () => {
-        delete this.connectedPrinters[portInfo.path];
-      });
-  }
-
-  static createConnectedPrinter(portInfo: PortInfo): ConnectedPrinter {
-    const serialPort = PrinterService.createAndOpenSerialPort(portInfo.path);
+    const serialPort = new SerialPort({
+      baudRate: PrintSync3DConfig.BAUD_RATE,
+      path: portInfo.path,
+    });
 
     serialPort.on('error', (error: Error) =>
       console.error(`${getLoggingPrefix()} Error occurred on SerialPort ${portInfo.path}`, error),
     );
 
-    return {
+    const parser = new ReadlineParser({ delimiter: '\r\n' });
+
+    const printer: ConnectedPrinter = {
       serialPort,
+      portInfo,
+      parser,
       status: {
         progress: 0,
         currentModel: undefined,
-        currentTemperature: 0,
+        temperatureReport: {
+          extruders: {},
+        },
         currentAxesPosition: {
           x: 0,
           y: 0,
@@ -115,9 +121,26 @@ export default class PrinterService {
         isFilamentLoaded: false,
         isPaused: false,
       },
-      serialPortInfo: portInfo,
       waitingStatusResponses: [],
     };
+    this.connectedPrinters[portInfo.path] = printer;
+
+    parser.on('data', (data: string) => {
+      console.info(`${getLoggingPrefix()} Received ${data}`);
+
+      if (data.includes('T')) {
+        printer.status.temperatureReport = parseTemperatureReport(data);
+      }
+    });
+
+    serialPort
+      .pipe(parser)
+      .on('close', () => delete this.connectedPrinters[portInfo.path])
+      /**
+       * Commands the printer to report temperatures, fans and positions every 20 seconds.
+       * Source: https://reprap.org/wiki/G-code#M155:_Automatically_send_temperatures.
+       */
+      .write('M155 S20 C7\n');
   }
 
   static sendGCode(printer: ConnectedPrinter, controlType: PrinterControlType) {
@@ -132,20 +155,5 @@ export default class PrinterService {
     }
 
     return printer;
-  }
-
-  static createAndOpenSerialPort(path: string): SerialPort {
-    return new SerialPort({
-      baudRate: PrintSync3DConfig.BAUD_RATE,
-      path: path,
-    });
-  }
-
-  static handleStatus(printer: ConnectedPrinter, response: express.Response): void {
-    printer.waitingStatusResponses.push(response);
-
-    if (!printer.waitingStatusResponses.length) {
-      this.sendGCode(printer, 'status');
-    }
   }
 }

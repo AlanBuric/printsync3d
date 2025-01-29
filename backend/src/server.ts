@@ -5,6 +5,7 @@ import { connectDatabase, getDatabase } from './database/database.js';
 import PrintSync3DConfig from './config/config.js';
 import ModelService from './routes/model/service.js';
 import getLoggingPrefix from './util/logging.js';
+import { styleText } from 'util';
 
 new PrintSync3DConfig();
 new PrinterService();
@@ -13,11 +14,12 @@ new ModelService();
 await connectDatabase();
 
 const server = createApplication().listen(PrintSync3DConfig.PORT, () => {
-  console.log(
-    chalk.blueBright.bold('✔ PrintSync3D service is up and running:'),
+  console.info(
+    styleText(['blueBright', 'bold'], '✔ PrintSync3D service is up and running:'),
     '\n',
-    chalk.blue(
-      `➥ API routes: ${chalk.underline(`http://localhost:${PrintSync3DConfig.PORT}/api`)}`,
+    styleText(
+      ['blue'],
+      `➥ API routes: ${styleText(['underline'], `http://localhost:${PrintSync3DConfig.PORT}/api`)}`,
     ),
   );
 
@@ -25,8 +27,10 @@ const server = createApplication().listen(PrintSync3DConfig.PORT, () => {
 });
 
 const handleShutdown = async () => {
-  console.log(chalk.blueBright.bold(`${getLoggingPrefix()} PrintSync3D is shutting down.`));
+  console.info(chalk.blueBright.bold(`${getLoggingPrefix()} PrintSync3D is shutting down.`));
+
   await getDatabase().write();
+
   server.close((error) => {
     console.error('An error occurred while shutting downthe PrintSync3D server', error);
   });

@@ -7,7 +7,7 @@ import { getDatabase } from '../../database/database.js';
 
 export default class PrinterController {
   static mapPrinterToPrinterResponse(printer: ConnectedPrinter): PrinterResponse {
-    const printerId = printer.serialPortInfo.path;
+    const printerId = printer.portInfo.path;
 
     return {
       ...printer.status,

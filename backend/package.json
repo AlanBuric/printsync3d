@@ -19,10 +19,10 @@
     "build:esbuild": "node esbuild.js",
     "start:tsc": "node dist/src/server.js",
     "start:esbuild": "node dist/PrintSync3D.js",
-    "test": "vitest"
+    "test:dev": "vitest",
+    "test:prod": "vitest run"
   },
   "dependencies": {
-    "chalk": "^5.4.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^5.0.1",

@@ -63,15 +63,6 @@ const PrinterRouter = Router()
     PrinterService.removePrinter(printerId);
     response.sendStatus(StatusCodes.OK);
   })
-  .get(
-    '/:printerId/status',
-    PRINTER_ID_VALIDATOR,
-    handleValidationResults,
-    (request: Request, response: Response) => {
-      const { printerId } = matchedData(request);
-      PrinterService.handleStatus(PrinterService.getConnectedPrinter(printerId), response);
-    },
-  )
   .get('/control', (_request: Request, response: Response): any =>
     response.send(Object.keys(PRINTER_CONTROLS)),
   )

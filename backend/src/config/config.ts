@@ -1,7 +1,6 @@
 import dotenv from 'dotenv';
 
 export default class PrintSync3DConfig {
-  static SERIAL_PORT_REFRESH_LIMIT_MILLISECONDS: number;
   static GCODE_UPLOAD_DIRECTORY: string;
   static BAUD_RATE: number;
   static PORT: number;
@@ -9,7 +8,6 @@ export default class PrintSync3DConfig {
   constructor() {
     dotenv.config();
 
-    PrintSync3DConfig.SERIAL_PORT_REFRESH_LIMIT_MILLISECONDS = PrintSync3DConfig.parseValidInt('SERIAL_PORT_REFRESH_LIMIT_MILLISECONDS');
     PrintSync3DConfig.GCODE_UPLOAD_DIRECTORY = PrintSync3DConfig.validateEnvVariable('GCODE_UPLOAD_DIRECTORY');
     PrintSync3DConfig.BAUD_RATE = PrintSync3DConfig.parseValidInt('BAUD_RATE');
     PrintSync3DConfig.PORT = PrintSync3DConfig.parseValidInt('PORT');

@@ -17,7 +17,7 @@ export default class ModelService {
     ModelService.GCODE_UPLOAD_DIRECTORY = path.resolve(PrintSync3DConfig.GCODE_UPLOAD_DIRECTORY);
 
     if (!fileSystem.existsSync(ModelService.GCODE_UPLOAD_DIRECTORY)) {
-      console.log(
+      console.info(
         `${getLoggingPrefix()} GCODE directory doesn't exist. Creating one at ${ModelService.GCODE_UPLOAD_DIRECTORY}.`,
       );
       fileSystem.mkdirSync(ModelService.GCODE_UPLOAD_DIRECTORY, { recursive: true });

@@ -9,7 +9,11 @@ export const usePrinterStore = defineStore('printer', () => {
       displayName: 'Test Prusa i3 MK2S',
       progress: 100,
       currentModel: 'Vase',
-      currentTemperature: 200,
+      temperatureReport: {
+        extruder: 'T:190 /210',
+        extruders: {},
+        bed: 'B:80 /50'
+      },
       currentAxesPosition: { x: 0, y: 0, z: 0 },
       isFilamentLoaded: false,
       isPaused: false,
