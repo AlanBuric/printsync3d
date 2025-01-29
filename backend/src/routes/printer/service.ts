@@ -9,36 +9,30 @@ import PrintSync3DConfig from '../../config/config.js';
 import RequestError from '../../util/RequestError.js';
 import { Interface } from 'readline';
 import express from 'express';
-import { PrinterResponse } from '../../types/data-transfer-objects.js';
 
 export default class PrinterService {
   static connectedPrinters: Record<string, ConnectedPrinter> = {};
   static isRefreshing = false;
 
-  static async printGCodeModel(
-    connectedPrinter: ConnectedPrinter,
-    fileStream: Interface,
-    modelId: string,
-  ) {
-    const connection = connectedPrinter.serialPort;
+  static async printGCodeModel(printer: ConnectedPrinter, fileStream: Interface, modelId: string) {
+    const connection = printer.serialPort;
 
-    connectedPrinter.printer.currentModel =
-      getDatabase().data.models[modelId]?.displayName ?? modelId;
-    connectedPrinter.printer.isPaused = false;
+    printer.status.currentModel = getDatabase().data.models[modelId]?.displayName ?? modelId;
+    printer.status.isPaused = false;
 
     try {
       for await (const line of fileStream) {
         connection.write(line);
-        connectedPrinter.printer.progress++;
+        printer.status.progress++;
       }
     } catch (error) {
       console.error(
-        `${getLoggingPrefix()} Error occurred while writing GCODE model with ID ${modelId} to 3D printer ${connectedPrinter.serialPortInfo.path}`,
+        `${getLoggingPrefix()} Error occurred while writing GCODE model with ID ${modelId} to 3D printer ${printer.serialPortInfo.path}`,
         error,
       );
       throw new RequestError(
         StatusCodes.INTERNAL_SERVER_ERROR,
-        `An error occurred while 3D printing model ${connectedPrinter.printer.currentModel}.`,
+        `An error occurred while 3D printing model ${printer.status.currentModel}.`,
       );
     }
   }
@@ -80,24 +74,24 @@ export default class PrinterService {
 
     if (existing) {
       existing.serialPortInfo = portInfo;
-    } else {
-      const connectedPrinter = (this.connectedPrinters[portInfo.path] =
-        this.createConnectedPrinter(portInfo));
-
-      connectedPrinter.serialPort
-        .pipe(new ReadlineParser())
-        .on('data', (status: string) =>
-          connectedPrinter.waitingStatusResponses.forEach((response) =>
-            response.json({
-              path: portInfo.path,
-              status,
-            }),
-          ),
-        )
-        .on('close', () => {
-          delete this.connectedPrinters[portInfo.path];
-        });
+      return;
     }
+
+    const printer = (this.connectedPrinters[portInfo.path] = this.createConnectedPrinter(portInfo));
+
+    printer.serialPort
+      .pipe(new ReadlineParser())
+      .on('data', (status: string) =>
+        printer.waitingStatusResponses.forEach((response) =>
+          response.json({
+            path: portInfo.path,
+            status,
+          }),
+        ),
+      )
+      .on('close', () => {
+        delete this.connectedPrinters[portInfo.path];
+      });
   }
 
   static createConnectedPrinter(portInfo: PortInfo): ConnectedPrinter {
@@ -109,7 +103,7 @@ export default class PrinterService {
 
     return {
       serialPort,
-      printer: {
+      status: {
         progress: 0,
         currentModel: undefined,
         currentTemperature: 0,
@@ -126,18 +120,18 @@ export default class PrinterService {
     };
   }
 
-  static sendGCode(connectedPrinter: ConnectedPrinter, controlType: PrinterControlType) {
-    return connectedPrinter.serialPort.write(PRINTER_CONTROLS[controlType].join('\n'));
+  static sendGCode(printer: ConnectedPrinter, controlType: PrinterControlType) {
+    return printer.serialPort.write(PRINTER_CONTROLS[controlType].join('\n'));
   }
 
   static getConnectedPrinter(path: string): ConnectedPrinter {
-    const connectedPrinter = this.connectedPrinters[path];
+    const printer = this.connectedPrinters[path];
 
-    if (!connectedPrinter) {
+    if (!printer) {
       throw new RequestError(StatusCodes.NOT_FOUND, `Printer with path ${path} doesn't exist`);
     }
 
-    return connectedPrinter;
+    return printer;
   }
 
   static createAndOpenSerialPort(path: string): SerialPort {
@@ -147,38 +141,11 @@ export default class PrinterService {
     });
   }
 
-  static getPrinters(): PrinterResponse[] {
-    return Object.values(this.connectedPrinters).map(this.mapPrinterToPrinterResponse);
-  }
+  static handleStatus(printer: ConnectedPrinter, response: express.Response): void {
+    printer.waitingStatusResponses.push(response);
 
-  static getPrinter(printerId: string): PrinterResponse {
-    const connectedPrinter = this.connectedPrinters[printerId];
-
-    if (!connectedPrinter) {
-      throw new RequestError(
-        StatusCodes.NOT_FOUND,
-        `Printer with printer ID ${printerId} not found`,
-      );
-    }
-
-    return this.mapPrinterToPrinterResponse(connectedPrinter);
-  }
-
-  static mapPrinterToPrinterResponse(connectedPrinter: ConnectedPrinter): PrinterResponse {
-    const printerId = connectedPrinter.serialPortInfo.path;
-
-    return {
-      ...connectedPrinter.printer,
-      displayName: getDatabase().data.printers[printerId]?.displayName ?? printerId,
-      printerId,
-    };
-  }
-
-  static handleStatus(connectedPrinter: ConnectedPrinter, response: express.Response): void {
-    connectedPrinter.waitingStatusResponses.push(response);
-
-    if (!connectedPrinter.waitingStatusResponses.length) {
-      this.sendGCode(connectedPrinter, 'status');
+    if (!printer.waitingStatusResponses.length) {
+      this.sendGCode(printer, 'status');
     }
   }
 }

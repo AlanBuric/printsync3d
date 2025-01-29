@@ -9,7 +9,7 @@ export type AxesPosition = {
   z: number;
 };
 
-export type Printer = {
+export type PrinterStatus = {
   progress: number;
   currentModel?: string;
   currentTemperature: number;
@@ -21,7 +21,7 @@ export type Printer = {
 export type PrinterControlType = keyof typeof PRINTER_CONTROLS;
 
 export type ConnectedPrinter = {
-  printer: Printer;
+  status: PrinterStatus;
   serialPort: SerialPort;
   serialPortInfo: PortInfo;
   waitingStatusResponses: Response[];

@@ -1,6 +1,6 @@
 import { Request, Response, Router } from 'express';
 import PrinterService from './service.js';
-import { Printer } from '../../types/types.js';
+import { PrinterStatus } from '../../types/types.js';
 import { body, matchedData, param } from 'express-validator';
 import handleValidationResults from '../../middleware/validation-handler.js';
 import { StatusCodes } from 'http-status-codes';
@@ -9,8 +9,9 @@ import ModelService from '../model/service.js';
 import { ErrorResponse } from '../../types/data-transfer-objects.js';
 import { MinMaxOptions } from 'express-validator/lib/options.js';
 import { getDatabase } from '../../database/database.js';
+import PrinterController from './controller.js';
 
-const printerIdValidator = param('printerId')
+const PRINTER_ID_VALIDATOR = param('printerId')
   .notEmpty()
   .withMessage('Printer ID is a required string')
   .isString()
@@ -18,23 +19,23 @@ const printerIdValidator = param('printerId')
 const printerDisplayNameMinMax: MinMaxOptions = { min: 1, max: 50 };
 
 const PrinterRouter = Router()
-  .get('', (_request: Request, response: Response<Printer[]>): any =>
-    response.send(PrinterService.getPrinters()),
+  .get('', (_request: Request, response: Response<PrinterStatus[]>): any =>
+    response.send(PrinterController.getPrinters()),
   )
   .post('/refresh', async (_request: Request, response: Response): Promise<any> => {
     await PrinterService.refreshConnections();
-    response.send(PrinterService.getPrinters());
+    response.send(PrinterController.getPrinters());
   })
   .get(
     '/:printerId',
-    printerIdValidator,
+    PRINTER_ID_VALIDATOR,
     handleValidationResults,
-    (request: Request, response: Response<Printer>): any =>
-      response.send(PrinterService.getPrinter(matchedData(request).printerId)),
+    (request: Request, response: Response<PrinterStatus>): any =>
+      response.send(PrinterController.getPrinter(matchedData(request).printerId)),
   )
   .patch(
     '/:printerId',
-    printerIdValidator,
+    PRINTER_ID_VALIDATOR,
     body('displayName')
       .trim()
       .notEmpty()
@@ -57,14 +58,14 @@ const PrinterRouter = Router()
       printer.displayName = displayName;
     },
   )
-  .delete('/:printerId', printerIdValidator, (request: Request, response: Response) => {
+  .delete('/:printerId', PRINTER_ID_VALIDATOR, (request: Request, response: Response) => {
     const { printerId } = matchedData(request);
     PrinterService.removePrinter(printerId);
     response.sendStatus(StatusCodes.OK);
   })
   .get(
     '/:printerId/status',
-    printerIdValidator,
+    PRINTER_ID_VALIDATOR,
     handleValidationResults,
     (request: Request, response: Response) => {
       const { printerId } = matchedData(request);
@@ -76,7 +77,7 @@ const PrinterRouter = Router()
   )
   .post(
     '/:printerId/control',
-    printerIdValidator,
+    PRINTER_ID_VALIDATOR,
     body('controlType')
       .notEmpty()
       .withMessage('Control type is a required string')

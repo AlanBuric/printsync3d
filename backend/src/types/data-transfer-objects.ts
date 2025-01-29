@@ -1,4 +1,4 @@
-import { Printer, StoredModel, StoredPrinter } from './types.js';
+import { PrinterStatus, StoredModel, StoredPrinter } from './types.js';
 import { ValidationError } from 'express-validator';
 
 export type ErrorResponse = {
@@ -9,7 +9,7 @@ export type ValidationErrorResponse = {
   errors: ValidationError[];
 };
 
-export type PrinterResponse = Printer & StoredPrinter & { printerId: string };
+export type PrinterResponse = PrinterStatus & StoredPrinter & { printerId: string };
 
 export type ModelInformation = StoredModel & {
   /**
