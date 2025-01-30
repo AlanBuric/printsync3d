@@ -5,8 +5,10 @@ import ModelService from './service.js';
 import { ModelInformation, ModelsResponse } from '../../types/data-transfer-objects.js';
 import { body, matchedData, param } from 'express-validator';
 import handleValidationResults from '../../middleware/validation-handler.js';
+import { getDatabase } from '../../database/database.js';
+import getLoggingPrefix from '../../util/logging.js';
 
-const modelIdValidator = param('modelId').notEmpty().withMessage('Model ID is required');
+export const MODEL_ID_VALIDATOR = param('modelId').notEmpty().withMessage('Model ID is required');
 
 const ModelRouter = () => {
   const storage = multer.diskStorage({
@@ -24,7 +26,7 @@ const ModelRouter = () => {
     )
     .get(
       '/:modelId',
-      modelIdValidator,
+      MODEL_ID_VALIDATOR,
       handleValidationResults,
       async (request: Request, response: Response<ModelInformation>): Promise<any> => {
         const { modelId } = matchedData(request);
@@ -33,7 +35,7 @@ const ModelRouter = () => {
     )
     .patch(
       '/:modelId',
-      modelIdValidator,
+      MODEL_ID_VALIDATOR,
       body('displayName').notEmpty().withMessage('Display name is required'),
       handleValidationResults,
       (request: Request, response: Response) => {
@@ -44,7 +46,7 @@ const ModelRouter = () => {
         );
       },
     )
-    .delete('/:modelId', modelIdValidator, (request: Request, response: Response) => {
+    .delete('/:modelId', MODEL_ID_VALIDATOR, (request: Request, response: Response) => {
       const { modelId } = matchedData(request);
       ModelService.deleteModel(modelId).then(() => response.sendStatus(StatusCodes.OK));
     })
@@ -55,6 +57,9 @@ const ModelRouter = () => {
         if (!request.files || !Object.keys(request.files).length) {
           return response.status(StatusCodes.BAD_REQUEST).send('No files uploaded');
         }
+
+        await getDatabase().write();
+        console.info(`${getLoggingPrefix()} Uploaded ${request.files.length} models.`);
 
         response.sendStatus(StatusCodes.CREATED);
       },

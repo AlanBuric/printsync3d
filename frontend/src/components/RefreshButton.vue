@@ -4,7 +4,7 @@
 
   defineProps<{ isLoading: boolean }>();
 
-  const { t } = useI18n({ useScope: 'parent' });
+  const { t } = useI18n({ useScope: 'global' });
 </script>
 
 <template>

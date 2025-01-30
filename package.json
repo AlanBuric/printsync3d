@@ -16,9 +16,9 @@
   "main": "index.js",
   "scripts": {
     "setup": "npm ci && concurrently \"npm --prefix ./backend ci\" \"npm --prefix ./frontend ci\"",
-    "dev": "concurrently -r \"npm --prefix ./backend run dev\" \"npm --prefix ./frontend run dev\"",
+    "dev": "concurrently -r \"npm --prefix ./frontend run dev\" \"npm --prefix ./backend run dev\"",
     "build": "concurrently \"npm --prefix ./backend run build:tsc\" \"npm --prefix ./frontend run build-only\"",
-    "start": "concurrently \"npm --prefix ./backend run start:tsc\" \"npm --prefix ./frontend run preview\""
+    "start": "concurrently \"npm --prefix ./frontend run start:vite\" \"npm --prefix ./backend run start:tsc\""
   },
   "dependencies": {
     "concurrently": "^9.1.2"

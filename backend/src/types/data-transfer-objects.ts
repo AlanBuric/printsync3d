@@ -15,7 +15,7 @@ export type ModelInformation = StoredModel & {
   /**
    * Size of the model file in bytes.
    */
-  size?: number;
+  size: number;
   /**
    * Creation timestamp, or last modification timestamp if unavailable, of this file.
    */

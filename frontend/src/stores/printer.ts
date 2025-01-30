@@ -22,6 +22,14 @@ export const usePrinterStore = defineStore('printer', () => {
   const isLoading = ref(false);
 
   function deletePrinter(printerId: string) {
+    fetch(`http://localhost:8000/api/printers/${printerId}`, { method: 'DELETE' }).then(
+      async (response) => {
+        if (!response.ok) {
+          alert(`Error: ${await response.text()}`);
+        }
+      },
+    );
+
     printers.splice(
       printers.findIndex((printer) => printer.printerId == printerId),
       1,
@@ -39,7 +47,10 @@ export const usePrinterStore = defineStore('printer', () => {
       method: refresh ? 'POST' : 'GET',
     })
       .then((response) => response.json())
-      .then((foundPrinters) => Object.assign(printers, foundPrinters))
+      .then((foundPrinters: PrinterResponse[]) => {
+        printers.splice(0, printers.length);
+        Object.assign(printers, foundPrinters);
+      })
       .finally(() => (isLoading.value = false));
   }
 

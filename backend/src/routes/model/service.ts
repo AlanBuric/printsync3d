@@ -26,7 +26,7 @@ export default class ModelService {
 
   static async getAllModels(): Promise<ModelsResponse> {
     const models = getDatabase().data.models;
-    const modelsResponse: ModelsResponse = structuredClone(models);
+    const modelsResponse: ModelsResponse = structuredClone(models) as any;
 
     try {
       const files = await fileSystem.promises.readdir(this.GCODE_UPLOAD_DIRECTORY);
@@ -122,11 +122,13 @@ export default class ModelService {
     }
   }
 
-  static deleteModel(modelId: string) {
-    return Promise.all([
+  static async deleteModel(modelId: string) {
+    await Promise.all([
       fileSystem.promises.rm(this.getModelPathFromModelId(modelId)),
       getDatabase().update(({ models }) => delete models[modelId]),
     ]);
+
+    console.info(`${getLoggingPrefix()} Deleted model ${modelId}.gcode.`);
   }
 
   static getModelFileStream(modelId: string) {

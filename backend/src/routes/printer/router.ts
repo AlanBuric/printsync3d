@@ -10,6 +10,7 @@ import { ErrorResponse } from '../../types/data-transfer-objects.js';
 import { MinMaxOptions } from 'express-validator/lib/options.js';
 import { getDatabase } from '../../database/database.js';
 import PrinterController from './controller.js';
+import { MODEL_ID_VALIDATOR } from '../model/router.js';
 
 const PRINTER_ID_VALIDATOR = param('printerId')
   .notEmpty()
@@ -85,16 +86,23 @@ const PrinterRouter = Router()
       response.sendStatus(StatusCodes.OK);
     },
   )
-  .post('/:printId/print/:modelId', (request: Request, response: Response) => {
-    const { printerId, modelId } = matchedData(request);
+  .post(
+    '/:printerId/print/:modelId',
+    PRINTER_ID_VALIDATOR,
+    MODEL_ID_VALIDATOR,
+    handleValidationResults,
+    (request: Request, response: Response): any => {
+      const { printerId, modelId } = matchedData(request);
+      const printer = PrinterService.getConnectedPrinter(printerId);
 
-    PrinterService.printGCodeModel(
-      PrinterService.getConnectedPrinter(printerId),
-      ModelService.getModelFileStream(modelId),
-      modelId,
-    );
+      if (printer.status.currentModel) {
+        return response.status(StatusCodes.FORBIDDEN).send('Printer already has a selected model');
+      }
 
-    response.sendStatus(StatusCodes.OK);
-  });
+      PrinterService.printGCodeModel(printer, ModelService.getModelFileStream(modelId), modelId);
+
+      response.sendStatus(StatusCodes.OK);
+    },
+  );
 
 export default PrinterRouter;

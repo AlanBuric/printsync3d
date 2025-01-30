@@ -7,7 +7,13 @@ import { StoredModel, StoredPrinter } from '../types/types.js';
 const DATABASE_FILE_LOCATION = './database/database.json';
 
 type DatabaseSchema = {
+  /**
+   * Model file name as its ID to its custom display data
+   */
   models: Record<string, StoredModel>
+  /**
+   * Printer path as its ID to its custom display data
+   */
   printers: Record<string, StoredPrinter>
 };
 

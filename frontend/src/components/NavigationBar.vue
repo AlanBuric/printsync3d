@@ -3,12 +3,9 @@
   import LanguageSwitch from '@/components/LanguageSwitch.vue';
   import { useRoute } from 'vue-router';
   import useGlobalStore from '@/stores/global';
-  import { usePrinterStore } from '@/stores/printer';
-  import { getRandomElement } from '@/scripts/utils';
   import { useI18n } from 'vue-i18n';
 
   const route = useRoute();
-  const randomPrinter = getRandomElement(usePrinterStore().printers);
   const { t } = useI18n();
 </script>
 
@@ -53,13 +50,6 @@
             {{ t('btnPrinters') }}
           </RouterLink>
           <RouterLink
-            v-if="randomPrinter"
-            :to="`/printing/${encodeURIComponent(randomPrinter.printerId)}`"
-            class="text-lg font-light text-gray-700 dark:text-gray-300 hover:text-cyan-500 dark:hover:text-cyan-400"
-          >
-            {{ t('btnStart') }}
-          </RouterLink>
-          <RouterLink
             to="/models"
             class="text-lg font-light text-gray-700 dark:text-gray-300 hover:text-cyan-500 dark:hover:text-cyan-400"
           >
@@ -79,17 +69,14 @@
 {
   "en": {
     "btnPrinters": "Printers",
-    "btnStart": "Start printing",
     "btnModels": "Models"
   },
   "hr": {
     "btnPrinters": "Printeri",
-    "btnStart": "Kreni printati",
     "btnModels": "Modeli"
   },
   "it": {
     "btnPrinters": "Stampanti",
-    "btnStart": "Avvia stampa",
     "btnModels": "Modelli"
   }
 }

@@ -4,6 +4,9 @@
   import InfoIcon from '@/components/icons/InfoIcon.vue';
   import EmptyState from '@/components/EmptyState.vue';
   import RefreshButton from '@/components/RefreshButton.vue';
+  import { useI18n } from 'vue-i18n';
+
+  useI18n();
 
   const store = usePrinterStore();
 </script>
@@ -70,7 +73,6 @@
     "noPrintersFoundDetails": "Još nisu pronađeni 3D printeri, pokušajte spojiti jedan na ovo računalo."
   },
   "it": {
-    "refresh": "Aggiorna",
     "noPrintersFound": "Non sono ancora state rilevate stampanti 3D",
     "noPrintersFoundDetails": "Non sono ancora state rilevate stampanti 3D, prova a collegarne una a questo computer."
   }

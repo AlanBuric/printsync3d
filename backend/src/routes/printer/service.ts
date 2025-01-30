@@ -21,10 +21,11 @@ export default class PrinterService {
     const connection = printer.serialPort;
 
     printer.status.currentModel = getDatabase().data.models[modelId]?.displayName ?? modelId;
+    printer.status.progress = 0;
 
     try {
       for await (const line of fileStream) {
-        console.info(`${getLoggingPrefix()} Write ${line} to ${printer.portInfo.path}`);
+        console.info(`${getLoggingPrefix()} [${printer.portInfo.path}] Write '${line}'`);
 
         connection.write(line);
 
@@ -44,7 +45,7 @@ export default class PrinterService {
       }
     } catch (error) {
       console.error(
-        `${getLoggingPrefix()} Error occurred while writing GCODE model with ID ${modelId} to 3D printer ${printer.portInfo.path}`,
+        `${getLoggingPrefix()} Error occurred while writing GCODE model ${printer.status.currentModel} with ID ${modelId} to 3D printer ${printer.portInfo.path}`,
       );
       console.error(error);
     } finally {
