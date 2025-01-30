@@ -10,7 +10,7 @@ import RequestError from '../../util/RequestError.js';
 import { Interface } from 'readline';
 import { parseTemperatureReport } from './reporting.js';
 
-const OK_ATTEMPTS = 5;
+const OK_ATTEMPTS = 4;
 const SERIAL_PORT_REFRESH_LIMIT_MILLISECONDS = 5000;
 
 export default class PrinterService {
@@ -30,12 +30,12 @@ export default class PrinterService {
         connection.write(line);
 
         for (let i = 0; i < OK_ATTEMPTS; i++) {
-          const data: string = await new Promise((resolve) => {
+          const response: string = await new Promise((resolve) => {
             printer.parser.once('data', (data) => resolve(data));
           });
 
-          if (data.startsWith('ok')) {
-            console.info(data);
+          if (response.startsWith('ok')) {
+            console.info(response);
             break;
           }
         }
@@ -145,7 +145,7 @@ export default class PrinterService {
   }
 
   static sendGCode(printer: ConnectedPrinter, controlType: PrinterControlType) {
-    return printer.serialPort.write(PRINTER_CONTROLS[controlType].join('\n'));
+    return printer.serialPort.write(PRINTER_CONTROLS[controlType].join('\n') + '\n');
   }
 
   static getConnectedPrinter(path: string): ConnectedPrinter {

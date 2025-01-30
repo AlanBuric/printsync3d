@@ -83,7 +83,7 @@ return temperature >= 190;
 </script>
 
 <template>
-  <main class="w-full py-2 gap-16 mt-6 flex justify-center">
+  <main class="w-full py-2 px-1 gap-16 mt-6 flex justify-center">
     <div class="w-full max-w-screen-md justify-center flex max-lg:flex-col gap-y-10">
       <template v-if="printer">
         <section class="gap-y-4 flex flex-col flex-grow">
@@ -191,7 +191,7 @@ return temperature >= 190;
                   required
                 >
                   <option value="" disabled selected hidden>{{ t('selectFilamentType') }}</option>
-                  <option v-for="[control, name] in FILAMENTS" :key="control" :value="control">
+                  <option v-for="[control, name] in Object.entries(FILAMENTS)" :key="control" :value="control">
                     {{ name }}
                   </option>
                 </select>
@@ -227,6 +227,54 @@ return temperature >= 190;
             <span class="text-zinc-800 dark:text-zinc-200 text-lg mb-3">{{
               t('calibration')
             }}</span>
+            <div class="w-full flex items-center justify-center gap-3 mb-8">
+              <div class="inline-grid grid-rows-3 grid-cols-3 gap-1 items-center justify-center">
+                <button
+                  class="row-start-1 col-start-2 bg-zinc-300 dark:bg-zinc-700 text-black dark:text-white px-4 py-2 rounded-lg transform -rotate-90"
+                  @click="sendControl('move-up')"
+                  title="Up"
+                >
+                  ▶
+                </button>
+                <button
+                  class="row-start-2 col-start-1 bg-zinc-300 dark:bg-zinc-700 text-black dark:text-white px-4 py-2 rounded-lg transform rotate-180"
+                  @click="sendControl('move-left')"
+                  title="Left"
+                >
+                  ▶
+                </button>
+                <button
+                  class="row-start-2 col-start-3 bg-zinc-300 dark:bg-zinc-700 text-black dark:text-white px-4 py-2 rounded-lg transform rotate-0"
+                  @click="sendControl('move-right')"
+                  title="Right"
+                >
+                  ▶
+                </button>
+                <button
+                  class="row-start-3 col-start-2 bg-zinc-300 dark:bg-zinc-700 text-black dark:text-white px-4 py-2 rounded-lg transform rotate-90"
+                  @click="sendControl('move-down')"
+                  title="Down"
+                >
+                  ▶
+                </button>
+              </div>
+              <div class="flex flex-col gap-2">
+                <button
+                  class="row-start-1 col-start-2 bg-zinc-300 dark:bg-zinc-700 text-black dark:text-white px-4 py-2 rounded-lg transform -rotate-90"
+                  @click="sendControl('move-up')"
+                  title="Forward"
+                >
+                  ▶
+                </button>
+                <button
+                  class="row-start-3 col-start-2 bg-zinc-300 dark:bg-zinc-700 text-black dark:text-white px-4 py-2 rounded-lg transform rotate-90"
+                  @click="sendControl('move-down')"
+                  title="Backward"
+                >
+                  ▶
+                </button>
+              </div>
+            </div>
             <div class="gap-2 flex w-full">
               <button
                 class="bg-zinc-300 dark:bg-zinc-700 px-2 py-1 rounded-lg grow"
