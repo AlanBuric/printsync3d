@@ -97,7 +97,7 @@ return temperature >= 190;
               {{ editableDisplayName }}
             </h1>
           </div>
-          <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4">
+          <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-2xl">
             <h2 class="text-xl text-zinc-800 dark:text-zinc-200 mb-3">
               {{ t('printerStatus') }}
             </h2>
@@ -141,7 +141,7 @@ return temperature >= 190;
             </ul>
           </div>
 
-          <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-3xl flex flex-col">
+          <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-2xl flex flex-col">
             <label for="model-select" class="text-zinc-800 dark:text-zinc-200 text-lg mb-3">{{
               t('printModelTitle')
             }}</label>
@@ -177,7 +177,7 @@ return temperature >= 190;
             </RouterLink>
           </div>
 
-          <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-3xl flex flex-col">
+          <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-2xl flex flex-col">
             <label for="preheat-filament" class="text-zinc-800 dark:text-zinc-200 text-lg mb-3">{{
               t('filament')
             }}</label>
@@ -223,7 +223,7 @@ return temperature >= 190;
             </div>
           </div>
 
-          <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-3xl flex flex-col">
+          <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-2xl flex flex-col">
             <span class="text-zinc-800 dark:text-zinc-200 text-lg mb-3">{{
               t('calibration')
             }}</span>
