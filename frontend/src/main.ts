@@ -9,6 +9,7 @@ import { availableLocales, chooseAvailableLocale } from '@/scripts/translation.t
 const locale = chooseAvailableLocale();
 
 const i18n = createI18n({
+  warnHtmlInMessage: false,
   legacy: false,
   locale,
   fallbackLocale: 'en',

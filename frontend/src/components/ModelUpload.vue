@@ -97,15 +97,15 @@
     <p v-if="fileSize" class="mt-2 text-sm text-zinc-700 dark:text-zinc-300">
       {{ t('fileSize') }}: {{ fileSize }}
     </p>
-    <p class="mt-4 text-zinc-600 dark:text-zinc-200">{{ t('newModelDetails') }}</p>
-    <span class="text-zinc-700 dark:text-zinc-400">{{ t('acceptableFiles') }}</span>
+    <p class="mt-4 text-zinc-600 dark:text-zinc-200" v-html="t('newModelDetails')" />
+    <span class="text-zinc-700 dark:text-zinc-400" v-html="t('acceptableFiles')" />
   </div>
 </template>
 
 <i18n>
 {
   "en": {
-    "acceptableFiles": "We accept .gcode files only.",
+    "acceptableFiles": "We accept <span class=\"font-mono\">.gcode</span> files only.",
     "fileFailedToUpload": "Failed to upload the file. Error: {error}",
     "fileUploaded": "File uploaded successfully.",
     "fileSize": "File size",
@@ -114,7 +114,7 @@
     "newModelDetails": "Save a new model in the application for printing on all printers."
   },
   "hr": {
-    "acceptableFiles": "Prihvaćamo samo .gcode datoteke.",
+    "acceptableFiles": "Prihvaćamo samo <span class=\"font-mono\">.gcode</span> datoteke.",
     "fileFailedToUpload": "Neuspješno učitavanje datoteke. Pogreška: {error}",
     "fileUploaded": "Datoteka uspješno učitana.",
     "fileSize": "Veličina datoteke",
@@ -123,7 +123,7 @@
     "newModelDetails": "Spremite novi model u aplikaciju za ispis na svim pisačima."
   },
   "it": {
-    "acceptableFiles": "Accettiamo solo file .gcode.",
+    "acceptableFiles": "Accettiamo solo file <span class=\"font-mono\">.gcode</span>.",
     "fileFailedToUpload": "Caricamento del file non riuscito. Errore: {error}",
     "fileUploaded": "File caricato con successo.",
     "fileSize": "Dimensione del file",
