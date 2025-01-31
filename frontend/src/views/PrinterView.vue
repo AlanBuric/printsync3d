@@ -163,7 +163,7 @@ return temperature >= 190;
               </option>
             </select>
             <button
-              class="flex text-zinc-800 dark:text-zinc-200 bg-zinc-300 dark:bg-zinc-800 p-2 rounded-md self-start gap-1 mb-4 disabled:dark:text-zinc-400 disabled:text-zinc-500"
+              class="flex text-zinc-800 dark:text-zinc-200 bg-zinc-300 dark:bg-zinc-800 p-2 rounded-md self-start gap-1 mb-4 disabled:dark:text-zinc-400 disabled:text-zinc-500 transition"
               :disabled="!selectedModel"
               @click.prevent="printModel"
             >
@@ -197,7 +197,7 @@ return temperature >= 190;
                 </select>
                 <button
                   :disabled="!selectedFilamentType"
-                  class="flex text-zinc-800 dark:text-zinc-200 bg-zinc-300 dark:bg-zinc-800 p-2 rounded-md self-start gap-1 mb-4 disabled:dark:text-zinc-400 disabled:text-zinc-500"
+                  class="flex text-zinc-800 dark:text-zinc-200 bg-zinc-300 dark:bg-zinc-800 p-2 rounded-md self-start gap-1 mb-4 disabled:dark:text-zinc-400 disabled:text-zinc-500 transition"
                   @click="sendControl(selectedFilamentType as any)"
                 >
                   <PlayIcon
@@ -208,13 +208,13 @@ return temperature >= 190;
               </div>
               <div class="flex gap-2">
                 <button
-                  class="w-fit bg-zinc-300 dark:bg-zinc-700 px-2 py-1 rounded-lg grow"
+                  class="w-fit bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-800 px-2 py-1 rounded-lg grow transition"
                   @click="sendControl('load-filament')"
                 >
                   {{ t('loadFilament') }}
                 </button>
                 <button
-                  class="w-fit bg-zinc-300 dark:bg-zinc-700 px-2 py-1 rounded-lg grow"
+                  class="w-fit bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-800 px-2 py-1 rounded-lg grow transition"
                   @click="sendControl('unload-filament')"
                 >
                   {{ t('unloadFilament') }}
@@ -230,28 +230,28 @@ return temperature >= 190;
             <div class="w-full flex items-center justify-center gap-3 mb-8">
               <div class="inline-grid grid-rows-3 grid-cols-3 gap-1 items-center justify-center">
                 <button
-                  class="row-start-1 col-start-2 bg-zinc-300 dark:bg-zinc-700 text-black dark:text-white px-4 py-2 rounded-lg transform -rotate-90"
+                  class="row-start-1 col-start-2 bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-800 text-black dark:text-white px-4 py-2 rounded-lg transform -rotate-90 transition"
                   @click="sendControl('move-up')"
                   title="Up"
                 >
                   ▶
                 </button>
                 <button
-                  class="row-start-2 col-start-1 bg-zinc-300 dark:bg-zinc-700 text-black dark:text-white px-4 py-2 rounded-lg transform rotate-180"
+                  class="row-start-2 col-start-1 bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-800 text-black dark:text-white px-4 py-2 rounded-lg transform rotate-180 transition"
                   @click="sendControl('move-left')"
                   title="Left"
                 >
                   ▶
                 </button>
                 <button
-                  class="row-start-2 col-start-3 bg-zinc-300 dark:bg-zinc-700 text-black dark:text-white px-4 py-2 rounded-lg transform rotate-0"
+                  class="row-start-2 col-start-3 bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-800 text-black dark:text-white px-4 py-2 rounded-lg transform rotate-0 transition"
                   @click="sendControl('move-right')"
                   title="Right"
                 >
                   ▶
                 </button>
                 <button
-                  class="row-start-3 col-start-2 bg-zinc-300 dark:bg-zinc-700 text-black dark:text-white px-4 py-2 rounded-lg transform rotate-90"
+                  class="row-start-3 col-start-2 bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-800 text-black dark:text-white px-4 py-2 rounded-lg transform rotate-90 transition"
                   @click="sendControl('move-down')"
                   title="Down"
                 >
@@ -260,14 +260,14 @@ return temperature >= 190;
               </div>
               <div class="flex flex-col gap-2">
                 <button
-                  class="row-start-1 col-start-2 bg-zinc-300 dark:bg-zinc-700 text-black dark:text-white px-4 py-2 rounded-lg transform -rotate-90"
+                  class="row-start-1 col-start-2 bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-800 text-black dark:text-white px-4 py-2 rounded-lg transform -rotate-90 transition"
                   @click="sendControl('move-up')"
                   title="Forward"
                 >
                   ▶
                 </button>
                 <button
-                  class="row-start-3 col-start-2 bg-zinc-300 dark:bg-zinc-700 text-black dark:text-white px-4 py-2 rounded-lg transform rotate-90"
+                  class="row-start-3 col-start-2 bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-800 text-black dark:text-white px-4 py-2 rounded-lg transform rotate-90 transition"
                   @click="sendControl('move-down')"
                   title="Backward"
                 >
@@ -277,19 +277,19 @@ return temperature >= 190;
             </div>
             <div class="gap-2 flex w-full">
               <button
-                class="bg-zinc-300 dark:bg-zinc-700 px-2 py-1 rounded-lg grow"
+                class="bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-800 px-2 py-1 rounded-lg grow transition"
                 @click="sendControl('auto-home')"
               >
                 {{ t('autoHome') }}
               </button>
               <button
-                class="bg-zinc-300 dark:bg-zinc-700 px-2 py-1 rounded-lg grow"
+                class="bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-800 px-2 py-1 rounded-lg grow transition"
                 @click="sendControl('mesh-bed-leveling')"
               >
                 {{ t('meshBedLeveling') }}
               </button>
               <button
-                class="bg-zinc-300 dark:bg-zinc-700 px-2 py-1 rounded-lg grow"
+                class="bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-800 px-2 py-1 rounded-lg grow transition"
                 @click="sendControl('reset-xyz')"
               >
                 {{ t('resetXYZCalibration') }}
