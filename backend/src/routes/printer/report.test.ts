@@ -1,5 +1,6 @@
-import { describe, expect, test } from 'vitest';
-import { parseTemperatureReport } from './reporting.js';
+import { describe, test } from 'jsr:@std/testing/bdd';
+import { expect } from 'jsr:@std/expect';
+import { parseTemperatureReport } from './reporting.ts';
 
 describe('Temperature report string to TemperatureReport object parsing tests', () => {
   test('ok T:20.2 /0.0 B:19.1 /0.0 T0:20.2 /0.0 @:0 B@:0 P:19.8 A:26.4', () => {

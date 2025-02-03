@@ -1,20 +1,16 @@
-import dotenv from 'dotenv';
-
 export default class PrintSync3DConfig {
-  static GCODE_UPLOAD_DIRECTORY: string;
+  static MODEL_UPLOAD_DIRECTORY: string;
   static BAUD_RATE: number;
   static PORT: number;
 
   constructor() {
-    dotenv.config();
-
-    PrintSync3DConfig.GCODE_UPLOAD_DIRECTORY = PrintSync3DConfig.validateEnvVariable('GCODE_UPLOAD_DIRECTORY');
+    PrintSync3DConfig.MODEL_UPLOAD_DIRECTORY = PrintSync3DConfig.validateEnvVariable('MODEL_UPLOAD_DIRECTORY');
     PrintSync3DConfig.BAUD_RATE = PrintSync3DConfig.parseValidInt('BAUD_RATE');
     PrintSync3DConfig.PORT = PrintSync3DConfig.parseValidInt('PORT');
   }
 
   static validateEnvVariable(name: string): string {
-    const value = process.env[name];
+    const value = Deno.env.get(name);
 
     if (value == null) {
       throw new Error(`Environment ${name} variable wasn't defined`);

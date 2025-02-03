@@ -1,12 +1,12 @@
-import express, { json, urlencoded } from 'express';
-import cors from 'cors';
-import ModelRouter from './routes/model/router.js';
-import handleServerError from './middleware/error-handler.js';
-import PrinterRouter from './routes/printer/router.js';
+import express from 'npm:express@5.0.1';
+import cors from 'npm:cors@2.8.5';
+import ModelRouter from './routes/model/router.ts';
+import handleServerError from './middleware/error-handler.ts';
+import PrinterRouter from './routes/printer/router.ts';
 
 export default function createApplication() {
   return express()
-    .use('', cors(), json(), urlencoded({ extended: true }))
+    .use('', cors(), express.json(), express.urlencoded({ extended: true }))
     .use('/api/printer', PrinterRouter)
     .use('/api/model', ModelRouter())
     .use(handleServerError);

@@ -1,5 +1,5 @@
-import { PrinterStatus, StoredModel, StoredPrinter } from './types.js';
-import { ValidationError } from 'express-validator';
+import { PrinterStatus, StoredModel, StoredPrinter } from './types.ts';
+import { ValidationError } from 'npm:express-validator@7.2.1';
 
 export type ErrorResponse = {
   error: string;

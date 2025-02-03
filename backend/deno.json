@@ -1,0 +1,20 @@
+{
+  "tasks": {
+    "dev": "deno run --allow-read --allow-write --allow-net --allow-env --allow-ffi --allow-sys --no-clear-screen --env --watch src/server.ts",
+    "start": "deno run --allow-read --allow-write --allow-net --allow-env --allow-ffi --allow-sys --env src/server.ts",
+    "compile": "deno compile --allow-read --allow-write --allow-net --allow-env --allow-ffi --allow-sys --env --output PrintSync3D src/server.ts",
+    "build:esbuild": "node esbuild.js",
+    "start:esbuild": "node dist/PrintSync3D.js",
+    "test": "deno test --parallel"
+  },
+  "compilerOptions": {
+    "noImplicitAny": false
+  },
+  "imports": {
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.3",
+    "@std/path": "jsr:@std/path@^1.0.8",
+    "@std/streams": "jsr:@std/streams@^1.0.9",
+    "@std/testing": "jsr:@std/testing@^1.0.9"
+  },
+  "nodeModulesDir": "auto"
+}

@@ -1,7 +1,7 @@
-import PRINTER_CONTROLS from '../routes/printer/known-controls.js';
-import { PortInfo } from '@serialport/bindings-cpp';
-import { ReadlineParser, SerialPort } from 'serialport';
-import { Response } from 'express';
+import PRINTER_CONTROLS from '../routes/printer/known-controls.ts';
+import { PortInfo } from 'npm:@serialport/bindings-cpp@13.0.0';
+import { ReadlineParser, SerialPort } from 'npm:serialport@13.0.0';
+import type { Response } from 'npm:express@5.0.1';
 
 export type AxesPosition = {
   x: number;
@@ -63,4 +63,4 @@ export type StoredModel = {
    * Display name of the model as originally uploaded by the user or custom set afterward.
    */
   displayName: string;
-}
+};

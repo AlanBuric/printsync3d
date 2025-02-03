@@ -1,6 +1,6 @@
-import { NextFunction, Request, Response } from 'express';
-import RequestError from '../util/RequestError.js';
-import { StatusCodes } from 'http-status-codes';
+import { NextFunction, Request, Response } from 'npm:express@5.0.1';
+import RequestError from '../util/RequestError.ts';
+import { StatusCodes } from 'npm:http-status-codes@2.3.0';
 
 export default function handleServerError(
   error: any,
@@ -8,7 +8,7 @@ export default function handleServerError(
   response: Response<string>,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _next: NextFunction,
-): any {
+): Response {
   if (error instanceof RequestError) {
     return response.status(error.statusCode).send(error.message);
   }

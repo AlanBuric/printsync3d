@@ -1,4 +1,4 @@
-import { TemperatureReport } from '../../types/types.js';
+import { TemperatureReport } from '../../types/types.ts';
 
 export function parseTemperatureReport(line: string): TemperatureReport {
   const pattern = /(T\d*|B|C)\s*:\s*\d+(?:\.\d+)?(?:\s*\/\s*\d+(?:\.\d+)?)?/g;

@@ -1,26 +1,33 @@
-import { randomUUID } from 'crypto';
-import fileSystem from 'fs';
-import { createInterface } from 'readline';
-import PrintSync3DConfig from '../../config/config.js';
-import path from 'path';
-import getLoggingPrefix from '../../util/logging.js';
-import { getDatabase } from '../../database/database.js';
-import { ModelInformation, ModelsResponse } from '../../types/data-transfer-objects.js';
-import RequestError from '../../util/RequestError.js';
-import { StatusCodes } from 'http-status-codes';
+import * as path from "jsr:@std/path";
+import { TextLineStream } from 'jsr:@std/streams'
+import PrintSync3DConfig from "../../config/config.ts";
+import getLoggingPrefix from "../../util/logging.ts";
+import { getDatabase } from "../../database/database.ts";
+import {
+  ModelInformation,
+  ModelsResponse,
+} from "../../types/data-transfer-objects.ts";
+import RequestError from "../../util/RequestError.ts";
+import { StatusCodes } from "npm:http-status-codes@2.3.0";
 
 // TODO: delete from getDatabase() files that are actually gone in the fileSystem
 export default class ModelService {
-  static GCODE_UPLOAD_DIRECTORY: string;
+  static MODEL_UPLOAD_DIRECTORY: string;
 
   constructor() {
-    ModelService.GCODE_UPLOAD_DIRECTORY = path.resolve(PrintSync3DConfig.GCODE_UPLOAD_DIRECTORY);
+    ModelService.MODEL_UPLOAD_DIRECTORY = path.resolve(
+      PrintSync3DConfig.MODEL_UPLOAD_DIRECTORY,
+    );
 
-    if (!fileSystem.existsSync(ModelService.GCODE_UPLOAD_DIRECTORY)) {
+    try {
+      Deno.mkdirSync(ModelService.MODEL_UPLOAD_DIRECTORY, { recursive: true });
       console.info(
-        `${getLoggingPrefix()} GCODE directory doesn't exist. Creating one at ${ModelService.GCODE_UPLOAD_DIRECTORY}.`,
+        `${getLoggingPrefix()} Model directory didn't exist. Created one at ${ModelService.MODEL_UPLOAD_DIRECTORY}.`,
       );
-      fileSystem.mkdirSync(ModelService.GCODE_UPLOAD_DIRECTORY, { recursive: true });
+    } catch (error) {
+      if (!(error instanceof Deno.errors.AlreadyExists)) {
+        throw error;
+      }
     }
   }
 
@@ -29,33 +36,38 @@ export default class ModelService {
     const modelsResponse: ModelsResponse = structuredClone(models) as any;
 
     try {
-      const files = await fileSystem.promises.readdir(this.GCODE_UPLOAD_DIRECTORY);
+      const directories: Deno.DirEntry[] = [];
 
-      await Promise.allSettled(
-        files.map(async (filename) => {
-          const filePath = this.getModelPath(filename);
-          const basename = this.extractBasename(filename);
-          const stats = await fileSystem.promises.stat(filePath);
+      for await (const directory of Deno.readDir(this.MODEL_UPLOAD_DIRECTORY)) {
+        directories.push(directory);
+      }
 
-          if (stats.isFile()) {
-            /*
-             * In case new files were added.
-             */
-            if (!models[basename]) {
-              models[basename] = {
-                displayName: basename,
-              };
-            }
+      const tasks = directories.map(async (directory) => {
+        const filePath = this.getModelPath(directory.name);
+        const basename = this.extractBasename(directory.name);
+        const stats = await Deno.stat(filePath);
 
-            modelsResponse[basename] = this.mapFileStatsToInformation(
-              stats,
-              models[basename].displayName ?? basename,
-            );
+        if (stats.isFile) {
+          // In case new files were added externally, not via the API.
+          if (!models[basename]) {
+            models[basename] = {
+              displayName: basename,
+            };
           }
-        }),
-      );
+
+          modelsResponse[basename] = this.mapFileStatsToInformation(
+            stats,
+            models[basename].displayName ?? basename,
+          );
+        }
+      });
+
+      await Promise.allSettled(tasks);
     } catch (error) {
-      console.error(`${getLoggingPrefix()} Error reading GCODE model file information:`, error);
+      console.error(
+        `${getLoggingPrefix()} Error reading GCODE model file information:`,
+        error,
+      );
     }
 
     return modelsResponse;
@@ -65,44 +77,55 @@ export default class ModelService {
     const model = getDatabase().data.models[modelId];
 
     try {
-      if (!model) {
-        return await fileSystem.promises
-          .stat(this.getModelPathFromModelId(modelId))
-          .then((stats) => this.mapFileStatsToInformation(stats, modelId))
-          .then((modelInformation) => {
-            getDatabase().update(({ models }) => (models[modelId] = { displayName: modelId }));
-            return modelInformation;
-          });
+      if (model) {
+        return await Deno.stat(this.getModelPathFromModelId(modelId)).then(
+          (stats) => this.mapFileStatsToInformation(stats, model.displayName),
+        );
       }
 
-      return await fileSystem.promises
-        .stat(this.getModelPathFromModelId(modelId))
-        .then((stats) => this.mapFileStatsToInformation(stats, model.displayName));
+      return await Deno.stat(this.getModelPathFromModelId(modelId))
+        .then((stats) => this.mapFileStatsToInformation(stats, modelId))
+        .then((modelInformation) => {
+          getDatabase().update(
+            ({ models }) => (models[modelId] = { displayName: modelId }),
+          );
+          return modelInformation;
+        });
     } catch {
-      throw new RequestError(StatusCodes.NOT_FOUND, `Model with ID ${modelId} was not found.`);
+      throw new RequestError(
+        StatusCodes.NOT_FOUND,
+        `Model with ID ${modelId} was not found.`,
+      );
     }
   }
 
   private static mapFileStatsToInformation(
-    stats: fileSystem.Stats,
+    stats: Deno.FileInfo,
     displayName: string,
   ): ModelInformation {
     return {
       displayName: displayName,
       size: stats.size,
-      creationTimestamp: stats.birthtimeMs ?? stats.ctimeMs,
+      creationTimestamp: (
+        stats.birthtime ??
+          stats.ctime ??
+          stats.mtime ??
+          new Date()
+      )?.getTime(),
     };
   }
 
   static registerNewFileAndGetName(file: Express.Multer.File): string {
     const filename = this.createFileName();
 
-    getDatabase().data.models[this.extractBasename(filename)] = { displayName: file.originalname };
+    getDatabase().data.models[this.extractBasename(filename)] = {
+      displayName: file.originalname,
+    };
 
     return filename;
   }
 
-  static async editModel(modelId: string, displayName: string) {
+  static editModel(modelId: string, displayName: string) {
     const model = getDatabase().data.models[modelId];
 
     if (model) {
@@ -110,49 +133,43 @@ export default class ModelService {
       return getDatabase().write();
     }
 
-    try {
-      await fileSystem.promises.access(
-        this.getModelPathFromModelId(modelId),
-        fileSystem.constants.R_OK,
-      );
-      getDatabase().data.models[modelId] = { displayName };
-      return getDatabase().write();
-    } catch {
-      throw new RequestError(StatusCodes.NOT_FOUND, `Model with ID ${modelId} was not found.`);
-    }
+    throw new RequestError(
+      StatusCodes.NOT_FOUND,
+      `Model with ID ${modelId} was not found.`,
+    );
   }
 
   static async deleteModel(modelId: string) {
     await Promise.all([
-      fileSystem.promises.rm(this.getModelPathFromModelId(modelId)),
+      Deno.remove(this.getModelPathFromModelId(modelId)),
       getDatabase().update(({ models }) => delete models[modelId]),
     ]);
 
     console.info(`${getLoggingPrefix()} Deleted model ${modelId}.gcode.`);
   }
 
-  static getModelFileStream(modelId: string) {
-    return createInterface({
-      input: fileSystem.createReadStream(
-        path.resolve(path.join(this.GCODE_UPLOAD_DIRECTORY, this.createFileName(modelId))),
-      ),
-      crlfDelay: Infinity,
-    });
+  static async getModelFileStream(modelId: string) {
+    const modelPath = path.join(this.MODEL_UPLOAD_DIRECTORY, this.createFileName(modelId));
+    const file = await Deno.open(modelPath, {read: true});
+    return file
+      .readable
+      .pipeThrough(new TextDecoderStream())
+      .pipeThrough(new TextLineStream())
   }
 
   static createFileName(modelId?: string): string {
-    return `${modelId ?? randomUUID()}.gcode`;
+    return `${modelId ?? crypto.randomUUID()}.gcode`;
   }
 
-  static getModelPathFromModelId(modelId: string): fileSystem.PathLike {
+  static getModelPathFromModelId(modelId: string): string {
     return this.getModelPath(this.createFileName(modelId));
   }
 
-  static getModelPath(filename: string): fileSystem.PathLike {
-    return path.join(this.GCODE_UPLOAD_DIRECTORY, filename);
+  static getModelPath(filename: string): string {
+    return path.join(this.MODEL_UPLOAD_DIRECTORY, filename);
   }
 
   static extractBasename(filename: string) {
-    return filename.split('.')[0];
+    return filename.split(".")[0];
   }
 }

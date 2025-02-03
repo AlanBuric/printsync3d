@@ -1,18 +1,18 @@
-import { Request, Response, Router } from 'express';
-import { StatusCodes } from 'http-status-codes';
-import multer from 'multer';
-import ModelService from './service.js';
-import { ModelInformation, ModelsResponse } from '../../types/data-transfer-objects.js';
-import { body, matchedData, param } from 'express-validator';
-import handleValidationResults from '../../middleware/validation-handler.js';
-import { getDatabase } from '../../database/database.js';
-import getLoggingPrefix from '../../util/logging.js';
+import { Router, type Request, type Response } from 'npm:express@5.0.1';
+import { StatusCodes } from 'npm:http-status-codes@2.3.0';
+import multer from 'npm:multer@1.4.5-lts.1';
+import ModelService from './service.ts';
+import { ModelInformation, ModelsResponse } from '../../types/data-transfer-objects.ts';
+import { body, matchedData, param } from 'npm:express-validator@7.2.1';
+import handleValidationResults from '../../middleware/validation-handler.ts';
+import { getDatabase } from '../../database/database.ts';
+import getLoggingPrefix from '../../util/logging.ts';
 
 export const MODEL_ID_VALIDATOR = param('modelId').notEmpty().withMessage('Model ID is required');
 
 const ModelRouter = () => {
   const storage = multer.diskStorage({
-    destination: ModelService.GCODE_UPLOAD_DIRECTORY,
+    destination: ModelService.MODEL_UPLOAD_DIRECTORY,
     filename: (_request, file, callback) => {
       callback(null, ModelService.registerNewFileAndGetName(file));
     },

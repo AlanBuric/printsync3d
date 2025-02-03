@@ -1,4 +1,4 @@
-import { getReasonPhrase, StatusCodes } from 'http-status-codes';
+import { getReasonPhrase, StatusCodes } from 'npm:http-status-codes@2.3.0';
 
 export default class RequestError extends Error {
   readonly statusCode: number;
