@@ -1,6 +1,6 @@
-import type { NextFunction, Request, Response } from 'npm:express@5.0.1';
-import { validationResult } from 'npm:express-validator@7.2.1';
-import { StatusCodes } from 'npm:http-status-codes@2.3.0';
+import type { NextFunction, Request, Response } from 'express';
+import { validationResult } from 'express-validator';
+import { StatusCodes } from 'http-status-codes';
 import { ValidationErrorResponse } from '../types/data-transfer-objects.ts';
 
 export default function handleValidationResults(

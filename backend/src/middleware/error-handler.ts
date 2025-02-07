@@ -1,6 +1,6 @@
-import { NextFunction, Request, Response } from 'npm:express@5.0.1';
+import { NextFunction, Request, Response } from 'express';
 import RequestError from '../util/RequestError.ts';
-import { StatusCodes } from 'npm:http-status-codes@2.3.0';
+import { StatusCodes } from 'http-status-codes';
 
 export default function handleServerError(
   error: any,
@@ -17,5 +17,7 @@ export default function handleServerError(
     `An error was caught in the Express route ${request.method} ${request.originalUrl}:`,
     error,
   );
-  response.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internal server error");
+  response.status(StatusCodes.INTERNAL_SERVER_ERROR).send(
+    'Internal server error',
+  );
 }

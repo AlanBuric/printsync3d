@@ -1,4 +1,4 @@
-import express from 'npm:express@5.0.1';
+import express from 'express';
 import cors from 'npm:cors@2.8.5';
 import ModelRouter from './routes/model/router.ts';
 import handleServerError from './middleware/error-handler.ts';

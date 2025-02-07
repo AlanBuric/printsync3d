@@ -8,13 +8,28 @@
     "test": "deno test --parallel"
   },
   "compilerOptions": {
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "checkJs": true,
+    "types": [
+      "./node_modules/@types/multer/index.d.ts",
+      "./node_modules@types/express/index.d.ts"
+    ]
   },
   "imports": {
     "@std/dotenv": "jsr:@std/dotenv@^0.225.3",
     "@std/path": "jsr:@std/path@^1.0.8",
     "@std/streams": "jsr:@std/streams@^1.0.9",
-    "@std/testing": "jsr:@std/testing@^1.0.9"
+    "@std/testing": "jsr:@std/testing@^1.0.9",
+    "http-status-codes": "npm:http-status-codes",
+    "express": "npm:express",
+    "multer": "npm:multer",
+    "express-validator": "npm:express-validator",
+    "hono": "jsr:@hono/hono@^4.6.20"
   },
-  "nodeModulesDir": "auto"
+  "lint": {
+    "exclude": ["no-namespace"]
+  },
+  "fmt": {
+    "singleQuote": true
+  }
 }

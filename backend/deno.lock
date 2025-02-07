@@ -1,6 +1,7 @@
 {
   "version": "4",
   "specifiers": {
+    "jsr:@hono/hono@^4.6.20": "4.7.0",
     "jsr:@std/assert@^1.0.10": "1.0.11",
     "jsr:@std/async@^1.0.9": "1.0.10",
     "jsr:@std/bytes@^1.0.5": "1.0.5",
@@ -16,14 +17,18 @@
     "npm:@serialport/bindings-cpp@*": "13.0.1",
     "npm:@serialport/bindings-cpp@13.0.0": "13.0.0",
     "npm:cors@2.8.5": "2.8.5",
-    "npm:express-validator@7.2.1": "7.2.1",
-    "npm:express@5.0.1": "5.0.1",
+    "npm:express-validator@*": "7.2.1",
+    "npm:express@*": "5.0.1",
+    "npm:http-status-codes@*": "2.3.0",
     "npm:http-status-codes@2.3.0": "2.3.0",
     "npm:lowdb@7.0.1": "7.0.1",
-    "npm:multer@1.4.5-lts.1": "1.4.5-lts.1",
+    "npm:multer@*": "1.4.5-lts.1",
     "npm:serialport@13.0.0": "13.0.0"
   },
   "jsr": {
+    "@hono/hono@4.7.0": {
+      "integrity": "1eb10e1976d3dda22ab43115ecfa348a43cd17c8aea5c0039c9757ebded624f8"
+    },
     "@std/assert@1.0.11": {
       "integrity": "2461ef3c368fe88bc60e186e7744a93112f16fd110022e113a0849e94d1c83c1",
       "dependencies": [
@@ -754,10 +759,15 @@
   },
   "workspace": {
     "dependencies": [
+      "jsr:@hono/hono@^4.6.20",
       "jsr:@std/dotenv@~0.225.3",
       "jsr:@std/path@^1.0.8",
       "jsr:@std/streams@^1.0.9",
-      "jsr:@std/testing@^1.0.9"
+      "jsr:@std/testing@^1.0.9",
+      "npm:express-validator@*",
+      "npm:express@*",
+      "npm:http-status-codes@*",
+      "npm:multer@*"
     ]
   }
 }

@@ -1,14 +1,11 @@
-import * as path from "jsr:@std/path";
-import { TextLineStream } from 'jsr:@std/streams'
-import PrintSync3DConfig from "../../config/config.ts";
-import getLoggingPrefix from "../../util/logging.ts";
-import { getDatabase } from "../../database/database.ts";
-import {
-  ModelInformation,
-  ModelsResponse,
-} from "../../types/data-transfer-objects.ts";
-import RequestError from "../../util/RequestError.ts";
-import { StatusCodes } from "npm:http-status-codes@2.3.0";
+import * as path from 'jsr:@std/path';
+import { TextLineStream } from 'jsr:@std/streams';
+import PrintSync3DConfig from '../../config/config.ts';
+import getLoggingPrefix from '../../util/logging.ts';
+import { getDatabase } from '../../database/database.ts';
+import { ModelInformation, ModelsResponse } from '../../types/data-transfer-objects.ts';
+import RequestError from '../../util/RequestError.ts';
+import { StatusCodes } from 'http-status-codes';
 
 // TODO: delete from getDatabase() files that are actually gone in the fileSystem
 export default class ModelService {
@@ -149,12 +146,15 @@ export default class ModelService {
   }
 
   static async getModelFileStream(modelId: string) {
-    const modelPath = path.join(this.MODEL_UPLOAD_DIRECTORY, this.createFileName(modelId));
-    const file = await Deno.open(modelPath, {read: true});
-    return file
-      .readable
+    const modelPath = path.join(
+      this.MODEL_UPLOAD_DIRECTORY,
+      this.createFileName(modelId),
+    );
+    const file = await Deno.open(modelPath, { read: true });
+
+    return file.readable
       .pipeThrough(new TextDecoderStream())
-      .pipeThrough(new TextLineStream())
+      .pipeThrough(new TextLineStream());
   }
 
   static createFileName(modelId?: string): string {
@@ -170,6 +170,6 @@ export default class ModelService {
   }
 
   static extractBasename(filename: string) {
-    return filename.split(".")[0];
+    return filename.split('.')[0];
   }
 }

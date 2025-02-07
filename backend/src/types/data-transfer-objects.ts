@@ -1,5 +1,5 @@
 import { PrinterStatus, StoredModel, StoredPrinter } from './types.ts';
-import { ValidationError } from 'npm:express-validator@7.2.1';
+import { ValidationError } from 'express-validator';
 
 export type ErrorResponse = {
   error: string;
@@ -9,7 +9,10 @@ export type ValidationErrorResponse = {
   errors: ValidationError[];
 };
 
-export type PrinterResponse = PrinterStatus & StoredPrinter & { printerId: string };
+export type PrinterResponse =
+  & PrinterStatus
+  & StoredPrinter
+  & { printerId: string };
 
 export type ModelInformation = StoredModel & {
   /**
@@ -20,6 +23,6 @@ export type ModelInformation = StoredModel & {
    * Creation timestamp, or last modification timestamp if unavailable, of this file.
    */
   creationTimestamp?: number;
-}
+};
 
 export type ModelsResponse = Record<string, ModelInformation>;
