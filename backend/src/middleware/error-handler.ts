@@ -1,23 +1,25 @@
-import { NextFunction, Request, Response } from 'express';
+import type { Context } from 'hono';
 import RequestError from '../util/RequestError.ts';
 import { StatusCodes } from 'http-status-codes';
+import { ErrorHandler, HTTPResponseError } from 'hono/types';
 
-export default function handleServerError(
-  error: any,
-  request: Request,
-  response: Response<string>,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _next: NextFunction,
-): Response {
+const errorHandler: ErrorHandler = (
+  error: Error | HTTPResponseError,
+  context: Context,
+) => {
   if (error instanceof RequestError) {
-    return response.status(error.statusCode).send(error.message);
+    return context.text(error.message, error.statusCode);
   }
 
   console.error(
-    `An error was caught in the Express route ${request.method} ${request.originalUrl}:`,
+    `An error was caught in the route ${context.req.method} ${context.req.url}:`,
     error,
   );
-  response.status(StatusCodes.INTERNAL_SERVER_ERROR).send(
+
+  return context.text(
     'Internal server error',
+    StatusCodes.INTERNAL_SERVER_ERROR,
   );
-}
+};
+
+export default errorHandler;

@@ -9,27 +9,21 @@
   },
   "compilerOptions": {
     "noImplicitAny": false,
-    "checkJs": true,
-    "types": [
-      "./node_modules/@types/multer/index.d.ts",
-      "./node_modules@types/express/index.d.ts"
-    ]
+    "checkJs": true
   },
   "imports": {
+    "@hono/zod-validator": "npm:@hono/zod-validator@^0.4.2",
     "@std/dotenv": "jsr:@std/dotenv@^0.225.3",
+    "@std/http": "jsr:@std/http@^1.0.13",
     "@std/path": "jsr:@std/path@^1.0.8",
     "@std/streams": "jsr:@std/streams@^1.0.9",
     "@std/testing": "jsr:@std/testing@^1.0.9",
     "http-status-codes": "npm:http-status-codes",
-    "express": "npm:express",
-    "multer": "npm:multer",
-    "express-validator": "npm:express-validator",
-    "hono": "jsr:@hono/hono@^4.6.20"
-  },
-  "lint": {
-    "exclude": ["no-namespace"]
+    "hono": "jsr:@hono/hono@^4.7.0",
+    "zod": "npm:zod@^3.24.1"
   },
   "fmt": {
     "singleQuote": true
-  }
+  },
+  "nodeModulesDir": "auto"
 }

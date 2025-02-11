@@ -3,7 +3,10 @@ import { TextLineStream } from 'jsr:@std/streams';
 import PrintSync3DConfig from '../../config/config.ts';
 import getLoggingPrefix from '../../util/logging.ts';
 import { getDatabase } from '../../database/database.ts';
-import { ModelInformation, ModelsResponse } from '../../types/data-transfer-objects.ts';
+import {
+  ModelInformation,
+  ModelsResponse,
+} from '../../types/data-transfer-objects.ts';
 import RequestError from '../../util/RequestError.ts';
 import { StatusCodes } from 'http-status-codes';
 
@@ -112,12 +115,18 @@ export default class ModelService {
     };
   }
 
-  static registerNewFileAndGetName(file: Express.Multer.File): string {
+  static async addFile(file: File): Promise<string> {
     const filename = this.createFileName();
 
     getDatabase().data.models[this.extractBasename(filename)] = {
-      displayName: file.originalname,
+      displayName: file.name,
     };
+
+    const filePath = path.join(ModelService.MODEL_UPLOAD_DIRECTORY, filename);
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = new Uint8Array(arrayBuffer);
+
+    await Deno.writeFile(filePath, buffer);
 
     return filename;
   }

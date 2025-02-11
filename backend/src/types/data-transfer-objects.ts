@@ -1,12 +1,7 @@
 import { PrinterStatus, StoredModel, StoredPrinter } from './types.ts';
-import { ValidationError } from 'express-validator';
 
 export type ErrorResponse = {
   error: string;
-};
-
-export type ValidationErrorResponse = {
-  errors: ValidationError[];
 };
 
 export type PrinterResponse =

@@ -1,129 +1,123 @@
-import { Router } from 'express';
-import type { Request, Response } from 'npm:@types/express@5';
+import { Hono } from 'hono';
 import PrinterService from './service.ts';
-import { PrinterStatus } from '../../types/types.ts';
-import { body, matchedData, param } from 'express-validator';
-import handleValidationResults from '../../middleware/validation-handler.ts';
 import { StatusCodes } from 'http-status-codes';
 import PRINTER_CONTROLS, { PRINTER_CONTROL_TYPES } from './known-controls.ts';
 import ModelService from '../model/service.ts';
-import { ErrorResponse } from '../../types/data-transfer-objects.ts';
-import { MinMaxOptions } from 'express-validator/lib/options.d.ts';
 import { getDatabase } from '../../database/database.ts';
 import PrinterController from './controller.ts';
-import { MODEL_ID_VALIDATOR } from '../model/router.ts';
+import { PrinterControlType } from '../../types/types.ts';
 
-const PRINTER_ID_VALIDATOR = param('printerId')
-  .notEmpty()
-  .withMessage('Printer ID is a required string')
-  .isString()
-  .withMessage('Printer ID needs to be a string');
-const printerDisplayNameMinMax: MinMaxOptions = { min: 1, max: 50 };
-
-const PrinterRouter = Router()
-  .get(
-    '',
-    (_request: Request, response: Response<PrinterStatus[]>) =>
-      response.send(PrinterController.getPrinters()),
-  )
-  .post('/refresh', async (_request: Request, response: Response) => {
+const PrinterRouter = new Hono()
+  .get('/', (context) => context.json(PrinterController.getPrinters()))
+  .post('/refresh', async (context) => {
     await PrinterService.refreshConnections();
-    response.send(PrinterController.getPrinters());
+
+    return context.json(PrinterController.getPrinters());
+  }).get('/:printerId', (context) => {
+    const printerId = context.req.param('printerId');
+
+    if (!printerId || printerId.trim() === '') {
+      return context.text('Printer ID is a required string', 400);
+    }
+
+    return context.json(PrinterController.getPrinter(printerId));
+  }).patch('/:printerId', async (context) => {
+    const printerId = context.req.param('printerId');
+
+    if (!printerId || printerId.trim() === '') {
+      return context.text('Printer ID is a required string', 400);
+    }
+
+    const body = await context.req.json();
+    let displayName = body.displayName;
+
+    if (typeof displayName !== 'string' || displayName.trim() === '') {
+      return context.text('Display name is required', 400);
+    }
+
+    displayName = displayName.trim();
+
+    const min = 1, max = 50;
+
+    if (displayName.length < min || displayName.length > max) {
+      return context.text(
+        `Printer display name must be between ${min} and ${max} characters long`,
+        400,
+      );
+    }
+
+    const printer = getDatabase().data.printers[printerId];
+
+    if (!printer) {
+      return context.text('Printer not found', StatusCodes.NOT_FOUND);
+    }
+
+    printer.displayName = displayName;
+
+    return context.text('Updated', 200);
+  }).delete('/:printerId', (context) => {
+    const printerId = context.req.param('printerId');
+
+    if (!printerId || printerId.trim() === '') {
+      return context.text('Printer ID is a required string', 400);
+    }
+
+    PrinterService.removePrinter(printerId);
+
+    return context.text('', StatusCodes.OK);
   })
-  .get(
-    '/:printerId',
-    PRINTER_ID_VALIDATOR,
-    handleValidationResults,
-    (request: Request, response: Response<PrinterStatus>) =>
-      response.send(
-        PrinterController.getPrinter(matchedData(request).printerId),
-      ),
-  )
-  .patch(
-    '/:printerId',
-    PRINTER_ID_VALIDATOR,
-    body('displayName')
-      .trim()
-      .notEmpty()
-      .withMessage('Display name is required')
-      .bail()
-      .isLength(printerDisplayNameMinMax)
-      .withMessage(
-        `Printer display name must be between ${printerDisplayNameMinMax.min} and ${printerDisplayNameMinMax.max} characters long`,
-      )
-      .escape(),
-    handleValidationResults,
-    (request: Request, response: Response<ErrorResponse>) => {
-      const { printerId, displayName } = matchedData(request);
-      const printer = getDatabase().data.printers[printerId];
+  .get('/control', (context) => context.json(Object.keys(PRINTER_CONTROLS)))
+  .post('/:printerId/control', async (context) => {
+    const printerId = context.req.param('printerId');
 
-      if (!printer) {
-        return response.sendStatus(StatusCodes.NOT_FOUND);
-      }
+    if (!printerId || printerId.trim() === '') {
+      return context.text('Printer ID is a required string', 400);
+    }
 
-      printer.displayName = displayName;
-    },
-  )
-  .delete(
-    '/:printerId',
-    PRINTER_ID_VALIDATOR,
-    (request: Request, response: Response) => {
-      const { printerId } = matchedData(request);
-      PrinterService.removePrinter(printerId);
-      response.sendStatus(StatusCodes.OK);
-    },
-  )
-  .get(
-    '/control',
-    (_request: Request, response: Response) =>
-      response.send(Object.keys(PRINTER_CONTROLS)),
-  )
-  .post(
-    '/:printerId/control',
-    PRINTER_ID_VALIDATOR,
-    body('controlType')
-      .notEmpty()
-      .withMessage('Control type is a required string')
-      .isIn(PRINTER_CONTROL_TYPES)
-      .withMessage(
+    const body = await context.req.json();
+    const controlType: PrinterControlType = body.controlType;
+
+    if (!PRINTER_CONTROL_TYPES.includes(controlType)) {
+      return context.text(
         `Control type needs to be one of the following strings: ${
           PRINTER_CONTROL_TYPES.join(
             ', ',
           )
         }`,
-      ),
-    handleValidationResults,
-    (request: Request, response: Response) => {
-      const { printerId, controlType } = matchedData(request);
-
-      PrinterService.sendGCode(printerId, controlType);
-
-      response.sendStatus(StatusCodes.OK);
-    },
-  )
-  .post(
-    '/:printerId/print/:modelId',
-    PRINTER_ID_VALIDATOR,
-    MODEL_ID_VALIDATOR,
-    handleValidationResults,
-    async (request: Request, response: Response) => {
-      const { printerId, modelId } = matchedData(request);
-      const printer = PrinterService.getConnectedPrinter(printerId);
-
-      if (printer.status.currentModel) {
-        return response
-          .status(StatusCodes.FORBIDDEN)
-          .send('Printer already has a selected model');
-      }
-
-      PrinterService.printGCodeModel(
-        printer,
-        await ModelService.getModelFileStream(modelId),
-        modelId,
+        400,
       );
+    }
 
-      response.sendStatus(StatusCodes.OK);
-    },
-  );
+    PrinterService.sendGCode(
+      PrinterService.getConnectedPrinter(printerId),
+      controlType,
+    );
+
+    return context.text('', StatusCodes.OK);
+  }).post('/:printerId/print/:modelId', async (context) => {
+    const printerId = context.req.param('printerId');
+    const modelId = context.req.param('modelId');
+
+    if (!printerId || printerId.trim() === '') {
+      return context.text('Printer ID is a required string', 400);
+    } else if (!modelId || modelId.trim() === '') {
+      return context.text('Model ID is a required string', 400);
+    }
+
+    const printer = PrinterService.getConnectedPrinter(printerId);
+
+    if (printer.status?.currentModel) {
+      return context.text(
+        'Printer already has a selected model',
+        StatusCodes.CONFLICT,
+      );
+    }
+
+    const modelFileStream = await ModelService.getModelFileStream(modelId);
+
+    PrinterService.printGCodeModel(printer, modelFileStream, modelId);
+
+    return context.text('', StatusCodes.OK);
+  });
 
 export default PrinterRouter;
