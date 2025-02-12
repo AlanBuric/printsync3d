@@ -11,16 +11,16 @@ import { StatusCodes } from 'http-status-codes';
 
 // TODO: delete from getDatabase() files that are actually gone in the fileSystem
 export default class ModelService {
-  static GCODE_UPLOAD_DIRECTORY: string;
+  static MODEL_UPLOAD_DIRECTORY: string;
 
   constructor() {
-    ModelService.GCODE_UPLOAD_DIRECTORY = path.resolve(PrintSync3DConfig.GCODE_UPLOAD_DIRECTORY);
+    ModelService.MODEL_UPLOAD_DIRECTORY = path.resolve(PrintSync3DConfig.MODEL_UPLOAD_DIRECTORY);
 
-    if (!fileSystem.existsSync(ModelService.GCODE_UPLOAD_DIRECTORY)) {
+    if (!fileSystem.existsSync(ModelService.MODEL_UPLOAD_DIRECTORY)) {
       console.info(
-        `${getLoggingPrefix()} GCODE directory doesn't exist. Creating one at ${ModelService.GCODE_UPLOAD_DIRECTORY}.`,
+        `${getLoggingPrefix()} GCODE directory doesn't exist. Creating one at ${ModelService.MODEL_UPLOAD_DIRECTORY}.`,
       );
-      fileSystem.mkdirSync(ModelService.GCODE_UPLOAD_DIRECTORY, { recursive: true });
+      fileSystem.mkdirSync(ModelService.MODEL_UPLOAD_DIRECTORY, { recursive: true });
     }
   }
 
@@ -29,7 +29,7 @@ export default class ModelService {
     const modelsResponse: ModelsResponse = structuredClone(models) as any;
 
     try {
-      const files = await fileSystem.promises.readdir(this.GCODE_UPLOAD_DIRECTORY);
+      const files = await fileSystem.promises.readdir(this.MODEL_UPLOAD_DIRECTORY);
 
       await Promise.allSettled(
         files.map(async (filename) => {
@@ -97,7 +97,9 @@ export default class ModelService {
   static registerNewFileAndGetName(file: Express.Multer.File): string {
     const filename = this.createFileName();
 
-    getDatabase().data.models[this.extractBasename(filename)] = { displayName: file.originalname };
+    getDatabase().data.models[this.extractBasename(filename)] = {
+      displayName: file.originalname.split('.')[0] ?? file.originalname,
+    };
 
     return filename;
   }
@@ -134,7 +136,7 @@ export default class ModelService {
   static getModelFileStream(modelId: string) {
     return createInterface({
       input: fileSystem.createReadStream(
-        path.resolve(path.join(this.GCODE_UPLOAD_DIRECTORY, this.createFileName(modelId))),
+        path.resolve(path.join(this.MODEL_UPLOAD_DIRECTORY, this.createFileName(modelId))),
       ),
       crlfDelay: Infinity,
     });
@@ -149,7 +151,7 @@ export default class ModelService {
   }
 
   static getModelPath(filename: string): fileSystem.PathLike {
-    return path.join(this.GCODE_UPLOAD_DIRECTORY, filename);
+    return path.join(this.MODEL_UPLOAD_DIRECTORY, filename);
   }
 
   static extractBasename(filename: string) {

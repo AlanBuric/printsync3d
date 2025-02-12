@@ -1,6 +1,5 @@
 import createApplication from './application.js';
 import PrinterService from './routes/printer/service.js';
-import chalk from 'chalk';
 import { connectDatabase, getDatabase } from './database/database.js';
 import PrintSync3DConfig from './config/config.js';
 import ModelService from './routes/model/service.js';
@@ -27,7 +26,9 @@ const server = createApplication().listen(PrintSync3DConfig.PORT, () => {
 });
 
 const handleShutdown = async () => {
-  console.info(chalk.blueBright.bold(`${getLoggingPrefix()} PrintSync3D is shutting down.`));
+  console.info(
+    styleText(['blueBright', 'bold'], `${getLoggingPrefix()} PrintSync3D is shutting down.`),
+  );
 
   await getDatabase().write();
 
