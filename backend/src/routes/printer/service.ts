@@ -1,13 +1,13 @@
 import PRINTER_CONTROLS from './known-controls.ts';
 import { ConnectedPrinter, PrinterControlType } from '../../types/types.ts';
 import { getDatabase } from '../../database/database.ts';
-import { PortInfo } from 'npm:@serialport/bindings-cpp';
 import { StatusCodes } from 'http-status-codes';
 import getLoggingPrefix from '../../util/logging.ts';
 import PrintSync3DConfig from '../../config/config.ts';
 import RequestError from '../../util/RequestError.ts';
 import { parseTemperatureReport } from './reporting.ts';
-import { ReadlineParser, SerialPort } from 'npm:serialport@13.0.0';
+import { PortInfo } from '@serialport/bindings-cpp';
+import { ReadlineParser, SerialPort } from 'serialport';
 
 const OK_ATTEMPTS = 4;
 const SERIAL_PORT_REFRESH_LIMIT_MILLISECONDS = 5000;

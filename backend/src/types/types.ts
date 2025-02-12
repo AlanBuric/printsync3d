@@ -1,6 +1,6 @@
 import PRINTER_CONTROLS from '../routes/printer/known-controls.ts';
-import { PortInfo } from 'npm:@serialport/bindings-cpp@13.0.0';
-import { ReadlineParser, SerialPort } from 'npm:serialport@13.0.0';
+import { PortInfo } from '@serialport/bindings-cpp';
+import { ReadlineParser, SerialPort } from 'serialport';
 
 export type AxesPosition = {
   x: number;

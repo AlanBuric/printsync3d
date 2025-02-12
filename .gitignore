@@ -135,3 +135,5 @@ vcs.xml
 # PrintSync3D
 backend/models
 database.json
+vendor/
+*.exe

@@ -13,21 +13,25 @@ await connectDatabase();
 
 const PORT = PrintSync3DConfig.PORT;
 
-console.info(
-  `%c${getLoggingPrefix()} PrintSync3D is shutting down.`,
-  'color: blue',
-);
-
 const controller = new AbortController();
 const { signal } = controller;
 
-Deno.serve({ port: PORT, signal }, createApplication().fetch);
+Deno.serve({
+  port: PORT,
+  signal,
+  onListen: (address) =>
+    console.info(
+      `%c${getLoggingPrefix()} PrintSync3D server is up on http://localhost:${address.port}.`,
+      'color: blue',
+    ),
+}, createApplication().fetch);
 
 PrinterService.refreshConnections();
 
 const handleShutdown = async () => {
   console.info(
-    `${getLoggingPrefix()} PrintSync3D is shutting down.`,
+    `%c${getLoggingPrefix()} PrintSync3D is shutting down.`,
+    'color: blue',
   );
 
   await getDatabase().write();
