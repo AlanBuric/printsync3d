@@ -33,10 +33,13 @@ const handleShutdown = async () => {
   await getDatabase().write();
 
   server.close((error) => {
-    console.error('An error occurred while shutting downthe PrintSync3D server', error);
+    if (error) {
+      console.error('An error occurred while shutting downthe PrintSync3D server', error);
+    }
+
+    process.exit(0);
   });
 };
 
-server.on('close', handleShutdown);
 process.on('SIGTERM', handleShutdown);
 process.on('SIGINT', handleShutdown);
