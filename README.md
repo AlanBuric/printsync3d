@@ -21,10 +21,11 @@ We usually use the latest Node.js and NPM versions. Simply run `npm run setup` i
 
 ## Development
 
-Use the `dev` scripts defined in both directory `package.json` files to launch one of the servers, or `npm run dev` in
-the root directory to launch both at once.
+Use the `dev` scripts defined in both directories' `package.json` files to launch one of the servers, or `npm run dev`
+in the root directory to launch both at once.
 
-The `-r` flag is required for `concurrently` because the console log and color control doesn't let the backend start up.
+The `-r` flag is required for `concurrently` because the console log and/or color control doesn't let the backend start
+up.
 
 ## Deployment
 
@@ -34,7 +35,7 @@ The `-r` flag is required for `concurrently` because the console log and color c
 2. Copy the project onto the device.
 3. Run `npm run setup`.
 4. Run `npm run build`.
-5. Run `npm run start`, or create a custom setup for that utilizes each directory's `start` script, e.g. via services or
+5. Run `npm run start`, or create a custom setup that utilizes each directory's `start` script, e.g. via services or
    shells.
 
 ### Option 2. Minimized file size deployment

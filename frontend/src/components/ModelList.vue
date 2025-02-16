@@ -62,6 +62,31 @@
       alert(`Error: ${await response.text()}`);
     });
   }
+
+  /**
+   * Formats a file size in bytes to a string with the nearest magnitude suffix.
+   * For example:
+   *   800        -> "800 B"
+   *   2048       -> "2 KB"
+   *   3145728    -> "3 MB"
+   */
+  function formatBytes(bytes: number): string {
+    if (bytes < 1024) {
+      return `${bytes} B`;
+    }
+
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+
+    let i = 0;
+    let size = bytes;
+
+    while (size >= 1024 && i < units.length - 1) {
+      size /= 1024;
+      i++;
+    }
+
+    return `${parseFloat(size.toFixed(2))} ${units[i]}`;
+  }
 </script>
 
 <template>
@@ -82,7 +107,7 @@
                 {{ editableNames[id] }}
               </h4>
               <p class="text-zinc-600 dark:text-zinc-500">
-                {{ `${model.size} ${t('bytes')}` }}
+                {{ formatBytes(model.size) }}
               </p>
               <p v-if="model.creationTimestamp" class="text-zinc-600 dark:text-zinc-500">
                 {{ `${t('uploaded')} ${new Date(model.creationTimestamp).toLocaleString()}` }}
@@ -119,7 +144,6 @@
 <i18n>
 {
   "en": {
-    "bytes": "bytes",
     "confirmDeleteModel": "Are you sure you want to delete {displayName}?",
     "modelsNotFound": "No models found",
     "modelsNotFoundDetails": "Upload a new model to see it in this list.",
@@ -129,7 +153,6 @@
     "deleteModelTitle": "Click to delete the model"
   },
   "hr": {
-    "bytes": "bajtova",
     "confirmDeleteModel": "Jeste li sigurni da želite izbrisati {displayName}?",
     "modelsNotFound": "Modeli nisu pronađeni",
     "modelsNotFoundDetails": "Prenesite novi model kako biste ga vidjeli na ovom popisu.",
@@ -139,9 +162,10 @@
     "deleteModelTitle": "Izbrišite model"
   },
   "it": {
-    "bytes": "byte",
+    "confirmDeleteModel": "Sei sicuro di voler eliminare {displayName}?",
     "modelsNotFound": "Nessun modello trovato",
     "modelsNotFoundDetails": "Carica un nuovo modello per farlo apparire in questo elenco.",
+    "modelsTitle": "Modelli salvati",
     "uploaded": "Caricato",
     "downloadModelTitle": "Clicca per scaricare il file del modello",
     "deleteModelTitle": "Clicca per eliminare il modello"

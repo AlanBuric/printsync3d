@@ -18,7 +18,7 @@ export default class ModelService {
 
     if (!fileSystem.existsSync(ModelService.MODEL_UPLOAD_DIRECTORY)) {
       console.info(
-        `${getLoggingPrefix()} GCODE directory doesn't exist. Creating one at ${ModelService.MODEL_UPLOAD_DIRECTORY}.`,
+        `${getLoggingPrefix()} Model directory doesn't exist. Creating one at ${ModelService.MODEL_UPLOAD_DIRECTORY}.`,
       );
       fileSystem.mkdirSync(ModelService.MODEL_UPLOAD_DIRECTORY, { recursive: true });
     }
@@ -117,7 +117,9 @@ export default class ModelService {
         this.getModelPathFromModelId(modelId),
         fileSystem.constants.R_OK,
       );
+
       getDatabase().data.models[modelId] = { displayName };
+
       return getDatabase().write();
     } catch {
       throw new RequestError(StatusCodes.NOT_FOUND, `Model with ID ${modelId} was not found.`);
@@ -135,18 +137,16 @@ export default class ModelService {
 
   static getModelFileStream(modelId: string) {
     return createInterface({
-      input: fileSystem.createReadStream(
-        path.resolve(path.join(this.MODEL_UPLOAD_DIRECTORY, this.createFileName(modelId))),
-      ),
+      input: fileSystem.createReadStream(this.getModelPath(modelId)),
       crlfDelay: Infinity,
     });
   }
 
-  static createFileName(modelId?: string): string {
+  static createFileName(modelId?: string) {
     return `${modelId ?? randomUUID()}.gcode`;
   }
 
-  static getModelPathFromModelId(modelId: string): fileSystem.PathLike {
+  static getModelPathFromModelId(modelId: string) {
     return this.getModelPath(this.createFileName(modelId));
   }
 

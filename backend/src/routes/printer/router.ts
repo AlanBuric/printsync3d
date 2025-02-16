@@ -1,10 +1,10 @@
 import { Request, Response, Router } from 'express';
 import PrinterService from './service.js';
-import { PrinterStatus } from '../../types/types.js';
+import { PrinterControlType, PrinterStatus } from '../../types/types.js';
 import { body, matchedData, param } from 'express-validator';
 import handleValidationResults from '../../middleware/validation-handler.js';
 import { StatusCodes } from 'http-status-codes';
-import PRINTER_CONTROLS, { PRINTER_CONTROL_TYPES } from './known-controls.js';
+import PRINTER_CONTROLS, { PRINTER_CONTROL_TYPES } from '../../types/controls.js';
 import ModelService from '../model/service.js';
 import { ErrorResponse } from '../../types/data-transfer-objects.js';
 import { MinMaxOptions } from 'express-validator/lib/options.js';
@@ -79,9 +79,12 @@ const PrinterRouter = Router()
       ),
     handleValidationResults,
     async (request: Request, response: Response): Promise<any> => {
-      const { printerId, controlType } = matchedData(request);
+      const { printerId, controlType } = matchedData<{
+        printerId: string;
+        controlType: PrinterControlType;
+      }>(request);
 
-      PrinterService.sendGCode(printerId, controlType);
+      PrinterService.sendGCode(PrinterService.getConnectedPrinter(printerId), controlType);
 
       response.sendStatus(StatusCodes.OK);
     },
@@ -91,7 +94,7 @@ const PrinterRouter = Router()
     PRINTER_ID_VALIDATOR,
     MODEL_ID_VALIDATOR,
     handleValidationResults,
-    (request: Request, response: Response): any => {
+    async (request: Request, response: Response): Promise<any> => {
       const { printerId, modelId } = matchedData(request);
       const printer = PrinterService.getConnectedPrinter(printerId);
 

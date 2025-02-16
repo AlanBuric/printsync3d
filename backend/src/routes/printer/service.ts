@@ -1,4 +1,4 @@
-import PRINTER_CONTROLS from './known-controls.js';
+import PRINTER_CONTROLS from '../../types/controls.js';
 import { ConnectedPrinter, PrinterControlType } from '../../types/types.js';
 import { ReadlineParser, SerialPort } from 'serialport';
 import { getDatabase } from '../../database/database.js';
@@ -10,23 +10,29 @@ import RequestError from '../../util/RequestError.js';
 import { Interface } from 'readline';
 import { parseTemperatureReport } from './reporting.js';
 
-const OK_ATTEMPTS = 4;
-const SERIAL_PORT_REFRESH_LIMIT_MILLISECONDS = 5000;
+const OK_ATTEMPTS = 3;
+const REFRESH_LIMIT_MILLISECONDS = 5000;
 
 export default class PrinterService {
   static connectedPrinters: Record<string, ConnectedPrinter> = {};
-  static isRefreshing = false;
+  static lastRefresh = Date.now();
 
   static async printGCodeModel(printer: ConnectedPrinter, fileStream: Interface, modelId: string) {
     const connection = printer.serialPort;
 
     printer.status.currentModel = getDatabase().data.models[modelId]?.displayName ?? modelId;
-    printer.status.progress = 0;
 
     try {
-      for await (const line of fileStream) {
-        console.info(`${getLoggingPrefix()} [${printer.portInfo.path}] Write '${line}'`);
+      for await (let line of fileStream) {
+        // Ignore comments.
+        if (line.startsWith(';')) {
+          continue;
+        }
 
+        // Remove the comment at the end.
+        line = line.split(';')[0];
+
+        console.info(`${getLoggingPrefix()} [${printer.portInfo.path}] Write '${line}'`);
         connection.write(line);
 
         for (let i = 0; i < OK_ATTEMPTS; i++) {
@@ -39,9 +45,6 @@ export default class PrinterService {
             break;
           }
         }
-
-        // TODO: tell the printer the overall file progress via M73
-        printer.status.progress++;
       }
     } catch (error) {
       console.error(
@@ -50,6 +53,7 @@ export default class PrinterService {
       console.error(error);
     } finally {
       printer.status.currentModel = undefined;
+      fileStream.close();
     }
   }
 
@@ -57,11 +61,13 @@ export default class PrinterService {
    * Lists currently connected serial ports, removes those that are gone and adds new printer connections if they're missing.
    */
   static async refreshConnections() {
-    if (this.isRefreshing) {
+    const currentTime = Date.now();
+
+    if (currentTime - this.lastRefresh < REFRESH_LIMIT_MILLISECONDS) {
       return;
     }
 
-    this.isRefreshing = true;
+    this.lastRefresh = currentTime;
     const portInfos = await SerialPort.list();
 
     console.info(`${getLoggingPrefix()} ${portInfos.length} serial ports have been discovered.`);
@@ -72,8 +78,6 @@ export default class PrinterService {
     oldPaths.difference(newPaths).forEach(this.removePrinter);
 
     await Promise.allSettled(portInfos.map(this.connectPrinter));
-
-    setTimeout(() => (this.isRefreshing = false), SERIAL_PORT_REFRESH_LIMIT_MILLISECONDS);
   }
 
   static removePrinter(path: string) {
@@ -109,10 +113,9 @@ export default class PrinterService {
       portInfo,
       parser,
       status: {
-        progress: 0,
         currentModel: undefined,
         temperatureReport: {
-          extruders: {},
+          extruders: [],
         },
         currentAxesPosition: {
           x: 0,
@@ -120,7 +123,6 @@ export default class PrinterService {
           z: 0,
         },
         isFilamentLoaded: false,
-        isPaused: false,
       },
       waitingStatusResponses: [],
     };
@@ -138,14 +140,22 @@ export default class PrinterService {
       .pipe(parser)
       .on('close', () => delete this.connectedPrinters[portInfo.path])
       /**
-       * Commands the printer to report temperatures, fans and positions every 20 seconds.
+       * Commands the printer to report temperatures, fans and positions every 15 seconds.
        * Source: https://reprap.org/wiki/G-code#M155:_Automatically_send_temperatures.
        */
-      .write('M155 S20 C7\n');
+      .write('M155 S15 C7\n');
   }
 
   static sendGCode(printer: ConnectedPrinter, controlType: PrinterControlType) {
-    return printer.serialPort.write(PRINTER_CONTROLS[controlType].join('\n') + '\n');
+    printer.serialPort.write(PRINTER_CONTROLS[controlType].join('\n') + '\n');
+
+    switch (controlType) {
+      case 'preheatAbs':
+      case 'preheatPla':
+      case 'preheatPet':
+        printer.status.lastPreheatOption = controlType;
+        break;
+    }
   }
 
   static getConnectedPrinter(path: string): ConnectedPrinter {

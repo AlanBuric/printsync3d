@@ -14,7 +14,7 @@
     role="banner"
     class="bg-white dark:bg-zinc-900 w-full flex justify-center items-center shadow-md py-2 px-4 text-sm"
   >
-    <div class="w-full max-w-screen-2xl flex justify-between items-center">
+    <div class="w-full max-w-screen-xl flex justify-between items-center">
       <div class="flex items-center gap-6">
         <RouterLink to="/">
           <img
