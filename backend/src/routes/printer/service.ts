@@ -117,11 +117,6 @@ export default class PrinterService {
         temperatureReport: {
           extruders: [],
         },
-        currentAxesPosition: {
-          x: 0,
-          y: 0,
-          z: 0,
-        },
         isFilamentLoaded: false,
       },
       waitingStatusResponses: [],

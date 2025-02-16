@@ -7,7 +7,7 @@ export const usePrinterStore = defineStore('printer', () => {
     {
       printerId: '/dev/ttyAMC0',
       displayName: 'Test Prusa i3 MK2S',
-      currentModel: 'Vase',
+      currentModel: '3DBenchy',
       temperatureReport: {
         extruder: {
           actual: 190,
@@ -19,7 +19,6 @@ export const usePrinterStore = defineStore('printer', () => {
           target: 50,
         },
       },
-      currentAxesPosition: { x: 0, y: 0, z: 0 },
       isFilamentLoaded: false
     },
   ]);

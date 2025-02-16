@@ -2,25 +2,26 @@
   import { useRoute } from 'vue-router';
   import { usePrinterStore } from '@/stores/printer';
   import PlayIcon from '@/components/icons/PlayIcon.vue';
-  import { ref } from 'vue';
+  import { computed, ref } from 'vue';
   import { useI18n } from 'vue-i18n';
   import EmptyState from '@/components/EmptyState.vue';
   import { useModelStore } from '@/stores/models.ts';
-  import type { PrinterControlType } from '@shared-types/types.ts';
+  import type { PrinterControlType, TemperatureStatus } from '@shared-types/types.ts';
   import CooldownIcon from '@/components/icons/CooldownIcon.vue';
 
-  const FILAMENTS = {
-    preheatPla: 'PLA (bed 60 °C, extruder 215 °C)',
-    preheatAbs: 'ABS (bed 100 °C, extruder 240 °C)',
-    preheatPet: 'PET (bed 90 °C, extruder 230 °C)',
-  };
-
   const { t } = useI18n();
+  const FILAMENTS = computed(() => ({
+    preheatPla: t('preheatPla'),
+    preheatAbs: t('preheatAbs'),
+    preheatPet: t('preheatPet'),
+  }));
   const modelStore = useModelStore();
 
   const printerId = useRoute().params.id.toString();
   const printer = usePrinterStore().printers.find((printer) => printer.printerId === printerId);
-
+  const isFilamentReadyToBeLoaded = computed(
+    () => (printer?.temperatureReport.extruder?.actual ?? 0) >= 190,
+  );
   const editableDisplayName = ref(printer?.displayName);
   const selectedFilamentType = ref(printer?.lastPreheatOption ?? '');
   const selectedModel = ref('');
@@ -42,14 +43,22 @@
     });
   }
 
-  function formatTemperature(value: string | undefined): string {
-    return value ? `${value} °C` : t('unknown');
-  }
+  /**
+   * Formats a TemperatureStatus object.
+   * If a target temperature is provided, it returns "actual °C / target °C",
+   * otherwise just "actual °C". If the status is missing, returns the translated "unknown" string.
+   */
+  function formatTemperature(status: TemperatureStatus | undefined): string {
+    if (!status) return t('unknown');
 
-  /*function isFilamentReadyToBeLoaded(): boolean {
-const temperature = printer?.temperatureReport.extruder ?? 0;
-return temperature >= 190;
-}*/
+    let result = `${status.actual} °C`;
+
+    if (status.target != null) {
+      result += ` / ${status.target} °C`;
+    }
+
+    return result;
+  }
 
   function sendControl(controlType: PrinterControlType) {
     fetch(`http://localhost:3000/api/printer/${encodeURIComponent(printerId)}/control`, {
@@ -101,63 +110,93 @@ return temperature >= 190;
               {{ editableDisplayName }}
             </h1>
           </div>
-          <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-2xl">
+
+          <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-xl">
             <h2 class="text-xl text-zinc-800 dark:text-zinc-200 mb-3">
               {{ t('printerStatus') }}
             </h2>
-            <ul class="space-y-1 text-zinc-800 dark:text-zinc-300">
+            <ul class="space-y-1 text-zinc-800 dark:text-zinc-300 mb-4">
               <li>
                 <span>{{ t('currentModel') }}:</span>
-                <span class="ml-1 text-zinc-700 dark:text-zinc-400">{{
-                  printer.currentModel ?? t('noCurrentModel')
-                }}</span>
-              </li>
-              <li>
-                <span>{{ t('extruderTemperature') }}:</span>
-                <span class="ml-1 text-zinc-700 dark:text-zinc-400">{{
-                  formatTemperature(printer.temperatureReport.extruder)
-                }}</span>
-              </li>
-              <li>
-                <span>{{ t('bedTemperature') }}:</span>
-                <span class="ml-1 text-zinc-700 dark:text-zinc-400">{{
-                  formatTemperature(printer.temperatureReport.bed)
-                }}</span>
-              </li>
-              <!--<li>
-                <span>{{ t('axesPosition') }}:</span>
                 <span class="ml-1 text-zinc-700 dark:text-zinc-400">
-                  {{ Object.values(printer.currentAxesPosition).join(', ') }}
+                  {{ printer.currentModel ? printer.currentModel : t('noCurrentModel') }}
                 </span>
-              </li>-->
+              </li>
+              <li v-if="printer.temperatureReport.extruder">
+                <span>{{ t('extruderTemperature') }}:</span>
+                <span class="ml-1 text-zinc-700 dark:text-zinc-400">
+                  {{ formatTemperature(printer.temperatureReport.extruder) }}
+                </span>
+              </li>
+              <li v-for="(ext, index) in printer.temperatureReport.extruders" :key="index">
+                <span>{{ t('extruderTemperature') }} {{ index }}:</span>
+                <span class="ml-1 text-zinc-700 dark:text-zinc-400">
+                  {{ formatTemperature(ext) }}
+                </span>
+              </li>
+              <li v-if="printer.temperatureReport.bed">
+                <span>{{ t('bedTemperature') }}:</span>
+                <span class="ml-1 text-zinc-700 dark:text-zinc-400">
+                  {{ formatTemperature(printer.temperatureReport.bed) }}
+                </span>
+              </li>
+              <li v-if="printer.temperatureReport.chamber">
+                <span>{{ t('chamberTemperature') }}:</span>
+                <span class="ml-1 text-zinc-700 dark:text-zinc-400">
+                  {{ formatTemperature(printer.temperatureReport.chamber) }}
+                </span>
+              </li>
+              <li v-if="printer.temperatureReport.hotendPower != null">
+                <span>{{ t('hotendPower') }}:</span>
+                <span class="ml-1 text-zinc-700 dark:text-zinc-400">
+                  {{ printer.temperatureReport.hotendPower }}%
+                </span>
+              </li>
+              <li v-if="printer.temperatureReport.bedPower != null">
+                <span>{{ t('bedPower') }}:</span>
+                <span class="ml-1 text-zinc-700 dark:text-zinc-400">
+                  {{ printer.temperatureReport.bedPower }}%
+                </span>
+              </li>
+              <li v-if="printer.temperatureReport.pinda != null">
+                <span>{{ t('pindaTemperature') }}:</span>
+                <span class="ml-1 text-zinc-700 dark:text-zinc-400">
+                  {{ printer.temperatureReport.pinda }} °C
+                </span>
+              </li>
+              <li v-if="printer.temperatureReport.ambient != null">
+                <span>{{ t('ambientTemperature') }}:</span>
+                <span class="ml-1 text-zinc-700 dark:text-zinc-400">
+                  {{ printer.temperatureReport.ambient }} °C
+                </span>
+              </li>
             </ul>
+            <div class="w-full flex gap-2">
+              <button
+                @click="sendControl('resume')"
+                class="bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-800 px-3 py-1 rounded-xl flex-1"
+              >
+                {{ t('resume') }}
+              </button>
+              <button
+                @click="sendControl('pause')"
+                class="bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-800 px-3 py-1 rounded-xl flex-1"
+              >
+                {{ t('pause') }}
+              </button>
+              <button
+                @click="sendControl('cancel')"
+                class="bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-800 px-3 py-1 rounded-xl flex-1"
+              >
+                {{ t('cancel') }}
+              </button>
+            </div>
           </div>
 
-          <div class="w-full flex gap-2">
-            <button
-              @click="sendControl('resume')"
-              class="bg-zinc-200 dark:bg-zinc-900 px-3 py-1 rounded-2xl flex-1"
-            >
-              Resume
-            </button>
-            <button
-              @click="sendControl('pause')"
-              class="bg-zinc-200 dark:bg-zinc-900 px-3 py-1 rounded-2xl flex-1"
-            >
-              Pause
-            </button>
-            <button
-              @click="sendControl('cancel')"
-              class="bg-zinc-200 dark:bg-zinc-900 px-3 py-1 rounded-2xl flex-1"
-            >
-              Cancel
-            </button>
-          </div>
-
-          <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-2xl flex flex-col">
-            <label for="model-select" class="text-zinc-800 dark:text-zinc-200 text-lg mb-3">{{
-              t('printModelTitle')
-            }}</label>
+          <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-xl flex flex-col">
+            <label for="model-select" class="text-zinc-800 dark:text-zinc-200 text-lg mb-3">
+              {{ t('printModelTitle') }}
+            </label>
             <select
               id="model-select"
               name="model"
@@ -166,7 +205,9 @@ return temperature >= 190;
               class="text-zinc-800 invalid:text-zinc-500 bg-zinc-300 dark:text-zinc-200 dark:bg-zinc-800 rounded-md p-2 mb-2"
               required
             >
-              <option value="" disabled selected hidden>{{ t('selectModel') }}</option>
+              <option value="" disabled selected hidden>
+                {{ t('selectModel') }}
+              </option>
               <option
                 v-for="[modelId, model] in Object.entries(modelStore.models)"
                 :key="modelId"
@@ -176,7 +217,7 @@ return temperature >= 190;
               </option>
             </select>
             <button
-              class="flex text-zinc-800 dark:text-zinc-200 bg-zinc-300 dark:bg-zinc-700 enabled:hover:bg-zinc-400 enabled:dark:hover:bg-zinc-800 p-2 rounded-md self-start gap-1 mb-4 disabled:dark:text-zinc-400 disabled:text-zinc-500 transition"
+              class="flex text-zinc-800 dark:text-zinc-300 bg-zinc-300 dark:bg-zinc-700 enabled:hover:bg-zinc-400 enabled:dark:hover:bg-zinc-800 p-2 rounded-md self-start gap-1 mb-4 disabled:dark:text-zinc-400 disabled:text-zinc-500 transition"
               :disabled="!selectedModel"
               @click.prevent="printModel"
             >
@@ -185,25 +226,27 @@ return temperature >= 190;
               />
               <span>{{ t('printButton') }}</span>
             </button>
-            <RouterLink to="/models" class="text-cyan-500 underline hover:no-underline"
-              >{{ t('addNewModelLink') }}
+            <RouterLink to="/models" class="text-cyan-500 underline hover:no-underline">
+              {{ t('addNewModelLink') }}
             </RouterLink>
           </div>
 
-          <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-2xl flex flex-col">
-            <label for="preheat-filament" class="text-zinc-800 dark:text-zinc-200 text-lg mb-3">{{
-              t('filament')
-            }}</label>
+          <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-xl flex flex-col">
+            <label for="preheat-filament" class="text-zinc-800 dark:text-zinc-200 text-lg mb-3">
+              {{ t('filament') }}
+            </label>
             <div class="flex flex-col gap-3">
               <div class="flex flex-col gap-2">
                 <select
                   v-model="selectedFilamentType"
                   id="preheat-filament"
                   name="preheat-filament"
-                  class="text-zinc-800 invalid:text-zinc-500 bg-zinc-300 dark:text-zinc-200 dark:bg-zinc-800 rounded-md p-2 mb-2"
+                  class="text-zinc-800 invalid:text-zinc-500 bg-zinc-300 dark:text-zinc-300 dark:bg-zinc-800 rounded-md p-2 mb-2"
                   required
                 >
-                  <option value="" disabled selected hidden>{{ t('selectFilamentType') }}</option>
+                  <option value="" disabled selected hidden>
+                    {{ t('selectFilamentType') }}
+                  </option>
                   <option
                     v-for="[control, name] in Object.entries(FILAMENTS)"
                     :key="control"
@@ -212,10 +255,10 @@ return temperature >= 190;
                     {{ name }}
                   </option>
                 </select>
-                <div class="w-full flex gap-2">
+                <div class="w-full flex gap-2 mb-4">
                   <button
                     :disabled="!selectedFilamentType"
-                    class="flex text-zinc-800 dark:text-zinc-200 bg-zinc-300 dark:bg-zinc-700 enabled:hover:bg-zinc-400 enabled:dark:hover:bg-zinc-800 p-2 rounded-md gap-1 mb-4 disabled:dark:text-zinc-400 disabled:text-zinc-500 transition"
+                    class="flex text-zinc-800 dark:text-zinc-300 bg-zinc-300 dark:bg-zinc-700 enabled:hover:bg-zinc-400 enabled:dark:hover:bg-zinc-800 p-2 rounded-md gap-1 disabled:dark:text-zinc-400 disabled:text-zinc-500 transition"
                     @click="sendControl(selectedFilamentType as any)"
                   >
                     <PlayIcon
@@ -224,7 +267,7 @@ return temperature >= 190;
                     <span>{{ t('preheatFilament') }}</span>
                   </button>
                   <button
-                    class="flex text-zinc-800 dark:text-zinc-200 hover:bg-zinc-400 dark:hover:bg-zinc-800 bg-zinc-300 dark:bg-zinc-700 p-2 rounded-md gap-1 mb-4 transition"
+                    class="flex text-zinc-800 dark:text-zinc-300 hover:bg-zinc-400 dark:hover:bg-zinc-800 bg-zinc-300 dark:bg-zinc-700 p-2 rounded-md gap-1 disabled:dark:text-zinc-400 disabled:text-zinc-500 transition"
                     @click="sendControl('cooldown')"
                   >
                     <CooldownIcon
@@ -236,8 +279,9 @@ return temperature >= 190;
               </div>
               <div class="flex gap-2">
                 <button
-                  class="w-fit bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-800 px-2 py-1 rounded-lg grow transition"
+                  class="w-fit bg-zinc-300 dark:bg-zinc-700 enabled:hover:bg-zinc-400 enabled:dark:hover:bg-zinc-800 px-2 py-1 rounded-lg grow transition"
                   @click="sendControl('loadFilament')"
+                  :disabled="isFilamentReadyToBeLoaded"
                 >
                   {{ t('loadFilament') }}
                 </button>
@@ -251,10 +295,10 @@ return temperature >= 190;
             </div>
           </div>
 
-          <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-2xl flex flex-col">
-            <span class="text-zinc-800 dark:text-zinc-200 text-lg mb-3">{{
-              t('calibration')
-            }}</span>
+          <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-xl flex flex-col">
+            <span class="text-zinc-800 dark:text-zinc-200 text-lg mb-3">
+              {{ t('calibration') }}
+            </span>
             <div class="w-full flex items-center justify-center gap-3 mb-8">
               <div class="inline-grid grid-rows-3 grid-cols-3 gap-1 items-center justify-center">
                 <button
@@ -341,14 +385,18 @@ return temperature >= 190;
 {
   "en": {
     "alertModelNotSelected": "Please select a model to print.",
-    "alertStartPrinting": "'Printer will start printing {displayName}.'",
+    "alertStartPrinting": "Printer will start printing {displayName}.",
     "printerStatus": "Printer status",
     "currentModel": "Current printing model",
     "extruderTemperature": "Extruder temperature",
     "bedTemperature": "Bed temperature",
+    "chamberTemperature": "Chamber temperature",
+    "hotendPower": "Hotend power",
+    "bedPower": "Bed power",
+    "pindaTemperature": "PINDA temperature",
+    "ambientTemperature": "Ambient temperature",
     "unknown": "Unknown",
     "paused": "Paused",
-    "axesPosition": "Axes position",
     "yes": "Yes",
     "no": "No",
     "addNewModelLink": "Add a new model here",
@@ -366,7 +414,15 @@ return temperature >= 190;
     "meshBedLeveling": "Mesh bed leveling",
     "resetXYZCalibration": "Reset XYZ calibration",
     "noCurrentModel": "none",
-    "cooldown": "Cooldown"
+    "cooldown": "Cooldown",
+    "resume": "Resume",
+    "pause": "Pause",
+    "cancel": "Cancel",
+    "preheatPla": "PLA (bed 60 °C, extruder 215 °C)",
+    "preheatAbs": "ABS (bed 100 °C, extruder 240 °C)",
+    "preheatPet": "PET (bed 90 °C, extruder 230 °C)",
+    "printerNotFound": "Printer not found",
+    "printerNotFoundDetails": "The requested printer was not found."
   },
   "hr": {
     "alertModelNotSelected": "Odaberite model za ispis.",
@@ -375,18 +431,22 @@ return temperature >= 190;
     "currentModel": "Trenutni model na ispisu",
     "extruderTemperature": "Temperatura mlaznice",
     "bedTemperature": "Temperatura podloge",
+    "chamberTemperature": "Temperatura komore",
+    "hotendPower": "Snaga mlaznice",
+    "bedPower": "Snaga podloge",
+    "pindaTemperature": "PINDA temperatura",
+    "ambientTemperature": "Ambijentalna temperatura",
     "unknown": "Nepoznato",
     "paused": "Pauziran",
-    "axesPosition": "Pozicije osi",
     "yes": "Da",
     "no": "Ne",
     "addNewModelLink": "Ovdje dodajte novi model",
-    "printButton": "Isprintajte model",
+    "printButton": "Ispis",
     "printerPhoto": "Slika printera",
     "printModelTitle": "Printanje",
     "selectModel": "Odaberite spremljeni model...",
-    "filament": "Filament",
     "preheatFilament": "Zagrij filament",
+    "filament": "Filament",
     "selectFilamentType": "Odaberite vrstu filamenta...",
     "loadFilament": "Učitaj filament",
     "unloadFilament": "Isprazni filament",
@@ -395,26 +455,39 @@ return temperature >= 190;
     "meshBedLeveling": "Poravnanje mreže stola",
     "resetXYZCalibration": "Poništi XYZ kalibraciju",
     "noCurrentModel": "nijedan",
-    "cooldown": "Ohladi"
+    "cooldown": "Ohladi",
+    "resume": "Nastavi s radom",
+    "pause": "Pauziraj rad",
+    "cancel": "Prekid rada",
+    "preheatPla": "PLA (podloga 60 °C, mlaznica 215 °C)",
+    "preheatAbs": "ABS (podloga 100 °C, mlaznica 240 °C)",
+    "preheatPet": "PET (podloga 90 °C, mlaznica 230 °C)",
+    "printerNotFound": "Printer nije pronađen",
+    "printerNotFoundDetails": "Traženi printer nije pronađen."
   },
   "it": {
     "alertModelNotSelected": "Seleziona un modello da stampare.",
     "alertStartPrinting": "La stampante avvierà la stampa di {displayName}.",
-    "bedTemperature": "Temperatura del piano di stampa",
-    "unknown": "Sconosciuto",
-    "addNewModelLink": "Clicca qui per aggiungere un nuovo modello",
     "printerStatus": "Stato della stampante",
     "currentModel": "Modello corrente",
-    "temperature": "Temperatura",
+    "extruderTemperature": "Temperatura dell'estrusore",
+    "bedTemperature": "Temperatura del piano di stampa",
+    "chamberTemperature": "Temperatura della camera",
+    "hotendPower": "Potenza dell'estrusore",
+    "bedPower": "Potenza del piano",
+    "pindaTemperature": "Temperatura PINDA",
+    "ambientTemperature": "Temperatura ambiente",
+    "unknown": "Sconosciuto",
     "paused": "In pausa",
-    "axesPosition": "Posizione degli assi",
     "yes": "Sì",
     "no": "No",
+    "addNewModelLink": "Clicca qui per aggiungere un nuovo modello",
     "printButton": "Stampa",
     "printerPhoto": "Foto della stampante",
     "printModelTitle": "Avvia la stampa",
     "selectModel": "Seleziona un modello recente",
     "preheatFilament": "Pre-riscalda il filamento",
+    "filament": "Filamento",
     "selectFilamentType": "Seleziona tipo di filamento...",
     "loadFilament": "Carica filamento",
     "unloadFilament": "Rimuovi filamento",
@@ -422,7 +495,16 @@ return temperature >= 190;
     "autoHome": "Esegui Auto home",
     "meshBedLeveling": "Livellamento del piano a rete",
     "resetXYZCalibration": "Reimposta la calibrazione XYZ",
-    "noCurrentModel": "nessun"
+    "noCurrentModel": "nessun",
+    "cooldown": "Raffredda",
+    "resume": "Continua",
+    "pause": "Pausa",
+    "cancel": "Annulla",
+    "preheatPla": "PLA (piano 60 °C, estrusore 215 °C)",
+    "preheatAbs": "ABS (piano 100 °C, estrusore 240 °C)",
+    "preheatPet": "PET (piano 90 °C, estrusore 230 °C)",
+    "printerNotFound": "Stampante non trovata",
+    "printerNotFoundDetails": "La stampante richiesta non è stata trovata."
   }
 }
 </i18n>

@@ -3,12 +3,6 @@ import { PortInfo } from '@serialport/bindings-cpp';
 import { ReadlineParser, SerialPort } from 'serialport';
 import { Response } from 'express';
 
-export type AxesPosition = {
-  x: number;
-  y: number;
-  z: number;
-};
-
 /**
  * A heater temperature status. If a target temperature is reported,
  * it will be included; otherwise, only the actual temperature is available.
@@ -61,7 +55,6 @@ export type TemperatureReport = {
 
 export type PrinterStatus = {
   temperatureReport: TemperatureReport;
-  currentAxesPosition: AxesPosition;
   lastPreheatOption?: PreheatControlType;
   isFilamentLoaded: boolean;
   currentModel?: string;
