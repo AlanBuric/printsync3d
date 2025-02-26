@@ -1,4 +1,4 @@
-import { TemperatureReport, TemperatureStatus } from '../../types/types.js';
+import type { TemperatureReport, TemperatureStatus } from '../../types/types.js';
 
 const PATTERN = /(T\d*|B@|B|C|@|P|A)\s*:\s*(\d+(?:\.\d+)?)(?:\s*\/\s*(\d+(?:\.\d+)?))?/g;
 

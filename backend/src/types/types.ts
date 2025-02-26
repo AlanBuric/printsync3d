@@ -1,7 +1,8 @@
-import PRINTER_CONTROLS, { PreheatControlType } from './controls.js';
-import { PortInfo } from '@serialport/bindings-cpp';
+import PRINTER_CONTROLS, { type PreheatControlType } from './controls.js';
+import type { Response } from 'express';
 import { ReadlineParser, SerialPort } from 'serialport';
-import { Response } from 'express';
+
+export type PortInfo = Awaited<ReturnType<typeof SerialPort.list>>[number]
 
 /**
  * A heater temperature status. If a target temperature is reported,

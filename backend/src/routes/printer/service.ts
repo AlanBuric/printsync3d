@@ -1,8 +1,7 @@
 import PRINTER_CONTROLS from '../../types/controls.js';
-import { ConnectedPrinter, PrinterControlType } from '../../types/types.js';
+import type { ConnectedPrinter, PortInfo, PrinterControlType } from '../../types/types.js';
 import { ReadlineParser, SerialPort } from 'serialport';
 import { getDatabase } from '../../database/database.js';
-import { PortInfo } from '@serialport/bindings-cpp';
 import { StatusCodes } from 'http-status-codes';
 import getLoggingPrefix from '../../util/logging.js';
 import PrintSync3DConfig from '../../config/config.js';

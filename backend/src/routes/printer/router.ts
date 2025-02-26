@@ -1,13 +1,13 @@
-import { Request, Response, Router } from 'express';
+import { type Request, type Response, Router } from 'express';
 import PrinterService from './service.js';
-import { PrinterControlType, PrinterStatus } from '../../types/types.js';
+import type { PrinterControlType, PrinterStatus } from '../../types/types.js';
 import { body, matchedData, param } from 'express-validator';
 import handleValidationResults from '../../middleware/validation-handler.js';
 import { StatusCodes } from 'http-status-codes';
 import PRINTER_CONTROLS, { PRINTER_CONTROL_TYPES } from '../../types/controls.js';
 import ModelService from '../model/service.js';
-import { ErrorResponse } from '../../types/data-transfer-objects.js';
-import { MinMaxOptions } from 'express-validator/lib/options.js';
+import type { ErrorResponse } from '../../types/data-transfer-objects.js';
+import type { MinMaxOptions } from 'express-validator/lib/options.js';
 import { getDatabase } from '../../database/database.js';
 import PrinterController from './controller.js';
 import { MODEL_ID_VALIDATOR } from '../model/router.js';

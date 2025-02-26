@@ -6,7 +6,7 @@
   .loader {
     aspect-ratio: 1;
     border-radius: 50%;
-    --loader-color: theme(colors.cyan.500);
+    --loader-color: var(--color-cyan-500);
     background:
       radial-gradient(farthest-side, var(--loader-color) 94%, #0000) top/30% 30% no-repeat,
       conic-gradient(#0000 30%, var(--loader-color));

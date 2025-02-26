@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { parseTemperatureReport } from './reporting.js';
-import { TemperatureReport } from '../../types/types.js';
+import type { TemperatureReport } from '../../types/types.js';
 
 describe('Temperature report parser', () => {
   test.each<TemperatureReportTestCase>([

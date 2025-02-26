@@ -5,7 +5,7 @@ import PrintSync3DConfig from '../../config/config.js';
 import path from 'path';
 import getLoggingPrefix from '../../util/logging.js';
 import { getDatabase } from '../../database/database.js';
-import { ModelInformation, ModelsResponse } from '../../types/data-transfer-objects.js';
+import type { ModelInformation, ModelsResponse } from '../../types/data-transfer-objects.js';
 import RequestError from '../../util/RequestError.js';
 import { StatusCodes } from 'http-status-codes';
 

@@ -1,15 +1,15 @@
-import { Request, Response, Router } from 'express';
+import { type Request, type Response, Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import multer from 'multer';
 import ModelService from './service.js';
-import { ModelInformation, ModelsResponse } from '../../types/data-transfer-objects.js';
+import type { ModelInformation, ModelsResponse } from '../../types/data-transfer-objects.js';
 import { body, matchedData, param } from 'express-validator';
 import handleValidationResults from '../../middleware/validation-handler.js';
 import { getDatabase } from '../../database/database.js';
 import getLoggingPrefix from '../../util/logging.js';
 import path from 'path';
 import PrintSync3DConfig from '../../config/config.js';
-import { MinMaxOptions } from 'express-validator/lib/options.js';
+import type { MinMaxOptions } from 'express-validator/lib/options.js';
 
 export const MODEL_ID_VALIDATOR = param('modelId').notEmpty().withMessage('Model ID is required');
 const MAX_FILE_UPLOAD_COUNT = 20;

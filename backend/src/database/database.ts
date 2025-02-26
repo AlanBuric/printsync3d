@@ -2,7 +2,7 @@ import { Low } from 'lowdb';
 import { JSONFilePreset } from 'lowdb/node';
 import fileSystem from 'fs';
 import path from 'path';
-import { StoredModel, StoredPrinter } from '../types/types.js';
+import type { StoredModel, StoredPrinter } from '../types/types.js';
 
 const DATABASE_FILE_LOCATION = './database/database.json';
 

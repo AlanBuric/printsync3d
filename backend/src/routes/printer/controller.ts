@@ -1,8 +1,8 @@
-import { PrinterResponse } from '../../types/data-transfer-objects.js';
+import type { PrinterResponse } from '../../types/data-transfer-objects.js';
 import RequestError from '../../util/RequestError.js';
 import { StatusCodes } from 'http-status-codes';
 import PrinterService from './service.js';
-import { ConnectedPrinter } from '../../types/types.js';
+import type { ConnectedPrinter } from '../../types/types.js';
 import { getDatabase } from '../../database/database.js';
 
 export default class PrinterController {

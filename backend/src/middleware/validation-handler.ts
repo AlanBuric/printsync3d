@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import { validationResult } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
-import { ValidationErrorResponse } from '../types/data-transfer-objects.js';
+import type { ValidationErrorResponse } from '../types/data-transfer-objects.js';
 
 export default function handleValidationResults(
   request: Request,
