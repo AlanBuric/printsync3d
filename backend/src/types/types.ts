@@ -1,43 +1,64 @@
-import PRINTER_CONTROLS from '../routes/printer/known-controls.ts';
-import { PortInfo } from '@serialport/bindings-cpp';
-import { ReadlineParser, SerialPort } from 'serialport';
+import PRINTER_CONTROLS, {
+  type PreheatControlType,
+} from "../types/controls.ts";
+import type { PortInfo } from "@serialport/bindings-cpp";
+import { ReadlineParser, SerialPort } from "serialport";
 
-export type AxesPosition = {
-  x: number;
-  y: number;
-  z: number;
+/**
+ * A heater temperature status. If a target temperature is reported,
+ * it will be included; otherwise, only the actual temperature is available.
+ */
+export type TemperatureStatus = {
+  actual: number;
+  target?: number;
 };
 
 /**
- * Printer temperatures from the expected M105 command response
+ * Parsed response from a generalized M105 temperature report.
+ * Source: https://reprap.org/wiki/G-code#M105:_Get_Extruder_Temperature
  */
 export type TemperatureReport = {
   /**
-   * Single-extruder firmware might report "T:190 /210"
+   * In a single-extruder setup, only `T` will be reported.
+   * In a multi-extruder setup, some firmware variants omit `T0` – in that case,
+   * `T` should be considered the temperature of the first tool.
    */
-  extruder?: string;
+  extruder?: TemperatureStatus;
   /**
-   * Multi-extruder firmware might report "T0:90 /100" or "T1:80/150" etc.
+   * Temperatures of specific extruders, if multiple, prefix `T0:, T1:, ... Tn:`
    */
-  extruders: Record<number, string>;
+  extruders: TemperatureStatus[];
   /**
-   * Bed temperature, e.g. "B:80 /50"
+   * Bed temperature, prefix `B:`
    */
-  bed?: string;
-
+  bed?: TemperatureStatus;
   /**
-   * Chamber temperature, e.g. "C:28 /50"
+   * Chamber temperature, prefix `C:`
    */
-  chamber?: string;
+  chamber?: TemperatureStatus;
+  /**
+   * Hotend power, prefix `@:`
+   */
+  hotendPower?: number;
+  /**
+   * Bed power, prefix `B@:`
+   */
+  bedPower?: number;
+  /**
+   * Actual PINDA temperature for Prusa MK2.5/s, MK3/s, prefix `P:`
+   */
+  pinda?: number;
+  /**
+   * Ambient actual temperature (for Prusa MK3/s), prefix `A:`
+   */
+  ambient?: number;
 };
 
 export type PrinterStatus = {
-  progress: number;
-  currentModel?: string;
   temperatureReport: TemperatureReport;
-  currentAxesPosition: AxesPosition;
+  lastPreheatOption?: PreheatControlType;
   isFilamentLoaded: boolean;
-  isPaused: boolean;
+  currentModel?: string;
 };
 
 export type PrinterControlType = keyof typeof PRINTER_CONTROLS;

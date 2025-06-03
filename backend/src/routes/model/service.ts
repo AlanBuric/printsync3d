@@ -1,14 +1,14 @@
-import * as path from 'jsr:@std/path';
-import { TextLineStream } from 'jsr:@std/streams';
-import PrintSync3DConfig from '../../config/config.ts';
-import getLoggingPrefix from '../../util/logging.ts';
-import { getDatabase } from '../../database/database.ts';
+import * as path from "jsr:@std/path";
+import { TextLineStream } from "jsr:@std/streams";
+import PrintSync3DConfig from "../../config/config.ts";
+import getLoggingPrefix from "../../util/logging.ts";
+import { getDatabase } from "../../database/database.ts";
 import {
   ModelInformation,
   ModelsResponse,
-} from '../../types/data-transfer-objects.ts';
-import RequestError from '../../util/RequestError.ts';
-import { StatusCodes } from 'http-status-codes';
+} from "../../types/data-transfer-objects.ts";
+import RequestError from "../../util/RequestError.ts";
+import { StatusCodes } from "http-status-codes";
 
 // TODO: delete from getDatabase() files that are actually gone in the fileSystem
 export default class ModelService {
@@ -16,13 +16,13 @@ export default class ModelService {
 
   constructor() {
     ModelService.MODEL_UPLOAD_DIRECTORY = path.resolve(
-      PrintSync3DConfig.MODEL_UPLOAD_DIRECTORY,
+      PrintSync3DConfig.MODEL_UPLOAD_DIRECTORY
     );
 
     try {
       Deno.mkdirSync(ModelService.MODEL_UPLOAD_DIRECTORY, { recursive: true });
       console.info(
-        `${getLoggingPrefix()} Model directory didn't exist. Created one at ${ModelService.MODEL_UPLOAD_DIRECTORY}.`,
+        `${getLoggingPrefix()} Model directory didn't exist. Created one at ${ModelService.MODEL_UPLOAD_DIRECTORY}.`
       );
     } catch (error) {
       if (!(error instanceof Deno.errors.AlreadyExists)) {
@@ -57,7 +57,7 @@ export default class ModelService {
 
           modelsResponse[basename] = this.mapFileStatsToInformation(
             stats,
-            models[basename].displayName ?? basename,
+            models[basename].displayName ?? basename
           );
         }
       });
@@ -66,7 +66,7 @@ export default class ModelService {
     } catch (error) {
       console.error(
         `${getLoggingPrefix()} Error reading GCODE model file information:`,
-        error,
+        error
       );
     }
 
@@ -79,7 +79,7 @@ export default class ModelService {
     try {
       if (model) {
         return await Deno.stat(this.getModelPathFromModelId(modelId)).then(
-          (stats) => this.mapFileStatsToInformation(stats, model.displayName),
+          (stats) => this.mapFileStatsToInformation(stats, model.displayName)
         );
       }
 
@@ -87,30 +87,31 @@ export default class ModelService {
         .then((stats) => this.mapFileStatsToInformation(stats, modelId))
         .then((modelInformation) => {
           getDatabase().update(
-            ({ models }) => (models[modelId] = { displayName: modelId }),
+            ({ models }) => (models[modelId] = { displayName: modelId })
           );
+
           return modelInformation;
         });
     } catch {
       throw new RequestError(
         StatusCodes.NOT_FOUND,
-        `Model with ID ${modelId} was not found.`,
+        `Model with ID ${modelId} was not found.`
       );
     }
   }
 
   private static mapFileStatsToInformation(
     stats: Deno.FileInfo,
-    displayName: string,
+    displayName: string
   ): ModelInformation {
     return {
       displayName: displayName,
       size: stats.size,
       creationTimestamp: (
         stats.birthtime ??
-          stats.ctime ??
-          stats.mtime ??
-          new Date()
+        stats.ctime ??
+        stats.mtime ??
+        new Date()
       )?.getTime(),
     };
   }
@@ -119,7 +120,7 @@ export default class ModelService {
     const filename = this.createFileName();
 
     getDatabase().data.models[this.extractBasename(filename)] = {
-      displayName: file.name,
+      displayName: file.name.split(".")[0] ?? file.name,
     };
 
     const filePath = path.join(ModelService.MODEL_UPLOAD_DIRECTORY, filename);
@@ -141,7 +142,7 @@ export default class ModelService {
 
     throw new RequestError(
       StatusCodes.NOT_FOUND,
-      `Model with ID ${modelId} was not found.`,
+      `Model with ID ${modelId} was not found.`
     );
   }
 
@@ -155,10 +156,7 @@ export default class ModelService {
   }
 
   static async getModelFileStream(modelId: string) {
-    const modelPath = path.join(
-      this.MODEL_UPLOAD_DIRECTORY,
-      this.createFileName(modelId),
-    );
+    const modelPath = this.getModelPath(this.createFileName(modelId));
     const file = await Deno.open(modelPath, { read: true });
 
     return file.readable
@@ -179,6 +177,6 @@ export default class ModelService {
   }
 
   static extractBasename(filename: string) {
-    return filename.split('.')[0];
+    return filename.split(".")[0];
   }
 }

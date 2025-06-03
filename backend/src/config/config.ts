@@ -1,12 +1,14 @@
 export default class PrintSync3DConfig {
   static MODEL_UPLOAD_DIRECTORY: string;
+  static MODEL_UPLOAD_DIRECTORY: string;
   static BAUD_RATE: number;
   static PORT: number;
 
   constructor() {
-    PrintSync3DConfig.MODEL_UPLOAD_DIRECTORY = PrintSync3DConfig.validateEnvVariable('MODEL_UPLOAD_DIRECTORY');
-    PrintSync3DConfig.BAUD_RATE = PrintSync3DConfig.parseValidInt('BAUD_RATE');
-    PrintSync3DConfig.PORT = PrintSync3DConfig.parseValidInt('PORT');
+    PrintSync3DConfig.MODEL_UPLOAD_DIRECTORY =
+      PrintSync3DConfig.validateEnvVariable("MODEL_UPLOAD_DIRECTORY");
+    PrintSync3DConfig.BAUD_RATE = PrintSync3DConfig.parseValidInt("BAUD_RATE");
+    PrintSync3DConfig.PORT = PrintSync3DConfig.parseValidInt("PORT");
   }
 
   static validateEnvVariable(name: string): string {

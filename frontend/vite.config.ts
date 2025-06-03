@@ -1,13 +1,14 @@
 import { fileURLToPath, URL } from 'url';
 import { defineConfig } from 'vite';
-import { configDefaults } from 'vitest/config';
 import vue from '@vitejs/plugin-vue';
+import tailwindcss from "@tailwindcss/vite";
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import path from 'path';
 
 export default defineConfig({
   plugins: [
     vue(),
+    tailwindcss(),
     VueI18nPlugin({
       strictMessage: false,
     }),
@@ -25,10 +26,5 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
-  },
-  test: {
-    environment: 'jsdom',
-    exclude: [...configDefaults.exclude, 'e2e/**'],
-    root: fileURLToPath(new URL('./', import.meta.url)),
   },
 });

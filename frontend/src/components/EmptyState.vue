@@ -11,8 +11,8 @@
 
 <template>
   <div class="flex flex-col items-center">
-    <h3 class="text-2xl font-semibold text-zinc-400">{{ t(headerLocaleKey) }}</h3>
-    <p class="text-zinc-500 mt-2">
+    <h3 class="text-2xl font-semibold text-zinc-400 text-center">{{ t(headerLocaleKey) }}</h3>
+    <p class="text-zinc-500 mt-2 text-center">
       {{ t(descriptionLocaleKey) }}
     </p>
   </div>

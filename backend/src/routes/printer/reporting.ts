@@ -1,33 +1,43 @@
-import { TemperatureReport } from '../../types/types.ts';
+import type {
+  TemperatureReport,
+  TemperatureStatus,
+} from "../../types/types.ts";
+
+const PATTERN =
+  /(T\d*|B@|B|C|@|P|A)\s*:\s*(\d+(?:\.\d+)?)(?:\s*\/\s*(\d+(?:\.\d+)?))?/g;
 
 export function parseTemperatureReport(line: string): TemperatureReport {
-  const pattern = /(T\d*|B|C)\s*:\s*\d+(?:\.\d+)?(?:\s*\/\s*\d+(?:\.\d+)?)?/g;
-
   const result: TemperatureReport = {
-    extruders: {},
+    extruders: [],
   };
 
   let match: RegExpExecArray | null;
-
-  while ((match = pattern.exec(line)) !== null) {
+  while ((match = PATTERN.exec(line)) != null) {
     const label = match[1];
-    const entire = match[0].trim();
+    const actualStr = match[2];
+    const targetStr = match[3];
 
-    switch (label) {
-      case 'B':
-        result.bed = entire;
-        break;
-      case 'C':
-        result.chamber = entire;
-        break;
-      case 'T':
-        result.extruder = entire;
-        break;
-      default:
-        if (/^T\d+$/.test(label)) {
-          const extruderIndex = parseInt(label.slice(1));
-          result.extruders[extruderIndex] = entire;
-        }
+    const actual = parseFloat(actualStr);
+    const target = targetStr !== undefined ? parseFloat(targetStr) : undefined;
+    const status: TemperatureStatus = { actual, target };
+
+    if (label === "T") {
+      result.extruder = status;
+    } else if (/^T\d+$/.test(label)) {
+      const extruderIndex = parseInt(label.slice(1), 10);
+      result.extruders[extruderIndex] = status;
+    } else if (label === "B") {
+      result.bed = status;
+    } else if (label === "C") {
+      result.chamber = status;
+    } else if (label === "@") {
+      result.hotendPower = actual;
+    } else if (label === "B@") {
+      result.bedPower = actual;
+    } else if (label === "P") {
+      result.pinda = actual;
+    } else if (label === "A") {
+      result.ambient = actual;
     }
   }
 

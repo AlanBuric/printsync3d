@@ -70,7 +70,7 @@
   },
   "hr": {
     "noPrintersFound": "3D printeri nisu pronađeni",
-    "noPrintersFoundDetails": "Još nisu pronađeni 3D printeri, pokušajte spojiti jedan na ovo računalo."
+    "noPrintersFoundDetails": "Nisu pronađeni 3D printeri, a nove printere možete dodati spajanjem na ovo računalo."
   },
   "it": {
     "noPrintersFound": "Non sono ancora state rilevate stampanti 3D",

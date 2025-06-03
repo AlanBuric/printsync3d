@@ -16,15 +16,18 @@ const PORT = PrintSync3DConfig.PORT;
 const controller = new AbortController();
 const { signal } = controller;
 
-Deno.serve({
-  port: PORT,
-  signal,
-  onListen: (address) =>
-    console.info(
-      `%c${getLoggingPrefix()} PrintSync3D server is up on http://localhost:${address.port}.`,
-      'color: blue',
-    ),
-}, createApplication().fetch);
+Deno.serve(
+  {
+    port: PORT,
+    signal,
+    onListen: (address) =>
+      console.info(
+        `%c${getLoggingPrefix()} PrintSync3D server is up on http://localhost:${address.port}.`,
+        'color: blue',
+      ),
+  },
+  createApplication().fetch,
+);
 
 PrinterService.refreshConnections();
 

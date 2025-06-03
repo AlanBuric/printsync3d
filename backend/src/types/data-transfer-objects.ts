@@ -1,13 +1,11 @@
-import { PrinterStatus, StoredModel, StoredPrinter } from './types.ts';
+import type { PrinterStatus, StoredModel, StoredPrinter } from "./types.ts";
 
 export type ErrorResponse = {
   error: string;
 };
 
-export type PrinterResponse =
-  & PrinterStatus
-  & StoredPrinter
-  & { printerId: string };
+export type PrinterResponse = PrinterStatus &
+  StoredPrinter & { printerId: string };
 
 export type ModelInformation = StoredModel & {
   /**
