@@ -19,7 +19,7 @@ export const usePrinterStore = defineStore('printer', () => {
           target: 50,
         },
       },
-      isFilamentLoaded: false
+      isFilamentLoaded: false,
     },
   ]);
   const isLoading = ref(false);

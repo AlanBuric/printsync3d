@@ -1,7 +1,7 @@
 import { Low } from "npm:lowdb@7.0.1";
 import { JSONFilePreset } from "npm:lowdb@7.0.1/node";
 import * as path from "jsr:@std/path";
-import { StoredModel, StoredPrinter } from "../types/types.ts";
+import { StoredModel, StoredPrinter } from '../types/data-transfer-objects.ts';
 
 const DATABASE_FILE_LOCATION = "./database/database.json";
 

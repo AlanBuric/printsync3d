@@ -1,8 +1,5 @@
 import PRINTER_CONTROLS from '../../types/controls.ts';
-import type {
-  ConnectedPrinter,
-  PrinterControlType,
-} from '../../types/types.ts';
+import type { ConnectedPrinter } from '../../types/types.ts';
 import { getDatabase } from '../../database/database.ts';
 import { StatusCodes } from 'http-status-codes';
 import getLoggingPrefix from '../../util/logging.ts';
@@ -11,6 +8,7 @@ import RequestError from '../../util/RequestError.ts';
 import { parseTemperatureReport } from './reporting.ts';
 import { PortInfo } from '@serialport/bindings-cpp';
 import { ReadlineParser, SerialPort } from 'serialport';
+import { PrinterControlType } from '../../types/data-transfer-objects.ts';
 
 const OK_ATTEMPTS = 3;
 const REFRESH_LIMIT_MILLISECONDS = 5000;

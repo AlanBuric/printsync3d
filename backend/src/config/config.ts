@@ -1,6 +1,5 @@
 export default class PrintSync3DConfig {
   static MODEL_UPLOAD_DIRECTORY: string;
-  static MODEL_UPLOAD_DIRECTORY: string;
   static BAUD_RATE: number;
   static PORT: number;
 

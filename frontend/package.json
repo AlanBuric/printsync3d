@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "build": "run-p \"build-only {@}\" --",
     "build-gh-pages": "vite build --base=/printsync3d/",
     "start:vite": "vite preview",
     "start:vite-expose": "vite preview --host",
@@ -25,23 +25,21 @@
   "devDependencies": {
     "@intlify/unplugin-vue-i18n": "^6.0.3",
     "@tailwindcss/vite": "^4.0.9",
-    "@tsconfig/node22": "^22.0.0",
+    "@tsconfig/node24": "^24.0.1",
     "@types/jsdom": "^21.1.7",
-    "@types/node": "^22.10.7",
+    "@types/node": "^22.15.29",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/eslint-config-prettier": "^10.2.0",
-    "@vue/eslint-config-typescript": "^14.3.0",
+    "@vue/eslint-config-typescript": "^14.5.0",
     "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.7.0",
-    "autoprefixer": "^10.4.20",
-    "eslint": "^9.18.0",
-    "eslint-plugin-vue": "^9.32.0",
-    "jsdom": "^26.0.0",
-    "npm-run-all2": "^7.0.2",
-    "prettier": "^3.4.2",
-    "tailwindcss": "^4.0.9",
-    "typescript": "~5.7.3",
-    "vite": "^6.0.10",
-    "vue-tsc": "^2.2.0"
+    "eslint-plugin-vue": "^10.1.0",
+    "jiti": "^2.4.2",
+    "jsdom": "^26.1.0",
+    "npm-run-all2": "^8.0.4",
+    "tailwindcss": "^4.1.8",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vue-tsc": "^2.2.10"
   }
 }

@@ -1,7 +1,7 @@
 import type {
   TemperatureReport,
   TemperatureStatus,
-} from "../../types/types.ts";
+} from "../../types/data-transfer-objects.ts";
 
 const PATTERN =
   /(T\d*|B@|B|C|@|P|A)\s*:\s*(\d+(?:\.\d+)?)(?:\s*\/\s*(\d+(?:\.\d+)?))?/g;

@@ -39,10 +39,9 @@ const useGlobalStore = defineStore('global', () => {
    * 3. otherwise uses the default one used by the browser or system.
    */
   function loadPreferredTheme() {
-    const newTheme = getSavedTheme()
-      ?? (window.matchMedia('(prefers-color-scheme: dark').matches
-        ? 'dark'
-        : 'light');
+    const newTheme =
+      getSavedTheme() ??
+      (window.matchMedia('(prefers-color-scheme: dark').matches ? 'dark' : 'light');
 
     setTheme(newTheme);
   }

@@ -6,7 +6,10 @@
   import { useI18n } from 'vue-i18n';
   import EmptyState from '@/components/EmptyState.vue';
   import { useModelStore } from '@/stores/models.ts';
-  import type { PrinterControlType, TemperatureStatus } from '@shared-types/types.ts';
+  import type {
+    PrinterControlType,
+    TemperatureStatus,
+  } from '@shared-types/data-transfer-objects.ts';
   import CooldownIcon from '@/components/icons/CooldownIcon.vue';
 
   const { t } = useI18n();
