@@ -1,10 +1,9 @@
 {
   "tasks": {
     "dev": "deno run -A --no-clear-screen --env --watch src/server.ts",
+    "compile": "deno compile -A --env --output dist/PrintSync3D src/server.ts",
+    "compile:arm64": "deno compile -A --env --output dist/PrintSync3D --target aarch64-unknown-linux-gnu src/server.ts",
     "start": "deno run -A --env src/server.ts",
-    "compile": "deno compile -A --env --output PrintSync3D src/server.ts",
-    "build:esbuild": "node esbuild.js",
-    "start:esbuild": "node dist/PrintSync3D.js",
     "test": "deno test --parallel"
   },
   "compilerOptions": {
