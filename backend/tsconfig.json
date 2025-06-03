@@ -8,7 +8,7 @@
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
     "strict": true,
-    "outDir": "dist/src",
+    "outDir": "dist"
   },
   "include": ["./src"],
   "exclude": ["./dist", "node_modules"]

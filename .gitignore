@@ -134,6 +134,5 @@ vcs.xml
 
 # PrintSync3D
 build
-backend/static
-gcode-files
+models
 database.json

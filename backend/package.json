@@ -1,5 +1,6 @@
 {
-  "name": "printsync3d-api",
+  "name": "printsync3d-service",
+  "private": true,
   "version": "1.0.0",
   "author": "Alan Burić",
   "license": "MIT",
@@ -16,7 +17,7 @@
   "scripts": {
     "dev": "tsx watch --clear-screen=false src/server.ts",
     "build:tsc": "tsc -b tsconfig.json",
-    "start:tsc": "node dist/src/server.js",
+    "start:tsc": "node dist/server.js",
     "test:dev": "vitest",
     "test:prod": "vitest run"
   },

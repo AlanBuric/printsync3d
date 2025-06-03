@@ -1,5 +1,5 @@
 {
-  "name": "printsync3d-root",
+  "name": "printsync3d",
   "version": "1.0.0",
   "description": "Scripts for running both projects at the same time.",
   "homepage": "https://github.com/AlanBuric/printsync3d#readme",
@@ -13,7 +13,6 @@
   "license": "MIT",
   "author": "Alan Burić",
   "type": "module",
-  "main": "index.js",
   "scripts": {
     "setup": "npm ci && concurrently \"npm --prefix ./backend ci\" \"npm --prefix ./frontend ci\"",
     "dev": "concurrently -r \"npm --prefix ./frontend run dev\" \"npm --prefix ./backend run dev\"",
