@@ -64,7 +64,6 @@ function ModelRouter() {
         response.download(
           path.resolve(PrintSync3DConfig.MODEL_UPLOAD_DIRECTORY, `${modelId}.gcode`),
           `${foundModel.displayName}.gcode`,
-          { immutable: true },
         );
       },
     )

@@ -9,19 +9,41 @@ import type { ModelInformation, ModelsResponse } from '../../types/data-transfer
 import RequestError from '../../util/RequestError.js';
 import { StatusCodes } from 'http-status-codes';
 
-// TODO: delete from getDatabase() files that are actually gone in the fileSystem
 export default class ModelService {
   static MODEL_UPLOAD_DIRECTORY: string;
 
   constructor() {
     ModelService.MODEL_UPLOAD_DIRECTORY = path.resolve(PrintSync3DConfig.MODEL_UPLOAD_DIRECTORY);
 
-    if (!fileSystem.existsSync(ModelService.MODEL_UPLOAD_DIRECTORY)) {
-      console.info(
-        `${getLoggingPrefix()} Model directory doesn't exist. Creating one at ${ModelService.MODEL_UPLOAD_DIRECTORY}.`,
-      );
-      fileSystem.mkdirSync(ModelService.MODEL_UPLOAD_DIRECTORY, { recursive: true });
+    if (fileSystem.existsSync(ModelService.MODEL_UPLOAD_DIRECTORY)) {
+      ModelService.syncModelsWithFileSystem();
+    } else {
+      ModelService.createModelDirectory();
     }
+  }
+
+  private static async createModelDirectory() {
+    console.info(
+      `${getLoggingPrefix()} Model directory doesn't exist. Creating one at ${ModelService.MODEL_UPLOAD_DIRECTORY}.`,
+    );
+    fileSystem.mkdirSync(ModelService.MODEL_UPLOAD_DIRECTORY, { recursive: true });
+  }
+
+  private static async syncModelsWithFileSystem() {
+    fileSystem.promises.readdir(ModelService.MODEL_UPLOAD_DIRECTORY).then((files) => {
+      const allNames = new Set(Object.keys(getDatabase().data.models));
+
+      files.forEach((file) => {
+        const modelId = ModelService.extractBasename(file);
+
+        if (!allNames.delete(modelId)) {
+          getDatabase().data.models[modelId] = { displayName: modelId };
+        }
+      });
+
+      allNames.forEach((modelId) => delete getDatabase().data.models[modelId]);
+      getDatabase().write();
+    });
   }
 
   static async getAllModels(): Promise<ModelsResponse> {
@@ -71,6 +93,7 @@ export default class ModelService {
           .then((stats) => this.mapFileStatsToInformation(stats, modelId))
           .then((modelInformation) => {
             getDatabase().update(({ models }) => (models[modelId] = { displayName: modelId }));
+
             return modelInformation;
           });
       }
