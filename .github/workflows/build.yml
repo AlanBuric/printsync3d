@@ -14,11 +14,9 @@ jobs:
       run:
         working-directory: ./frontend
     steps:
-      - &checkout
-        name: 🗂️ Checkout repository
+      - name: 🗂️ Checkout repository
         uses: actions/checkout@v4
-      - &setup_node
-        name: 🟢 Setup Node.js
+      - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -32,8 +30,12 @@ jobs:
       run:
         working-directory: ./backend
     steps:
-      - *checkout
-      - *setup_node
+      - name: 🗂️ Checkout repository
+        uses: actions/checkout@v4
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
       - run: npm ci
       - run: npm run test:prod
       - run: npm run build
