@@ -4,6 +4,27 @@ Web application for centralized management of 3D printers via a Raspberry Pi and
 
 **Authors:** _Alan Burić, Filipa Bebek, Boris Vujica_
 
+## Features
+
+- **Printers:**
+  - connect via serial ports
+  - detect them in the web application
+  - give names to printers
+- **Printer controls:**
+  - auto home
+  - mesh bed leveling
+  - reset XYZ
+  - load filament, unload filament
+  - preheat for PLA, ABS, PET filament types
+  - cool down temperature
+  - pause, resume, cancel
+  - move up, down, left, right, forward, backward (XYZ +/-)
+- **Models:**
+  - upload models onto the server
+  - rename models
+  - delete models
+  - print uploaded models
+
 ## Hardware
 
 This application is intended for a computer with network access and ability to connect via serial ports to Prusa 3D printers. The applications were developed against the Prusa i3 MK2S models.

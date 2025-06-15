@@ -5,7 +5,7 @@ import EnvConfig from '../../config/config.js';
 import path from 'path';
 import getLoggingPrefix from '../../util/logging.js';
 import { getDatabase } from '../../database/database.js';
-import type { ModelInformation, ModelsResponse } from '../../types/data-transfer-objects.js';
+import type { Model } from '../../types/data-transfer-objects.js';
 import RequestError from '../../util/RequestError.js';
 import { StatusCodes } from 'http-status-codes';
 
@@ -48,9 +48,13 @@ export default class ModelService {
     });
   }
 
-  static async getAllModels(): Promise<ModelsResponse> {
+  /**
+   * Retrieves all models from the database and merges them their file information.
+   * @returns A promise that resolves to an object containing all models and their information.
+   */
+  static async getAllModels(): Promise<Model[]> {
     const models = getDatabase().data.models;
-    const modelsResponse: ModelsResponse = structuredClone(models) as any;
+    const fullModels: Model[] = [];
 
     try {
       const files = await fileSystem.promises.readdir(this.MODEL_DIRECTORY);
@@ -58,22 +62,21 @@ export default class ModelService {
       await Promise.allSettled(
         files.map(async (filename) => {
           const filePath = this.getModelPath(filename);
-          const basename = this.extractBasename(filename);
+          const modelId = this.extractBasename(filename);
           const stats = await fileSystem.promises.stat(filePath);
 
           if (stats.isFile()) {
             /*
              * In case new files were somehow added manually.
              */
-            if (!models[basename]) {
-              models[basename] = {
-                displayName: basename,
+            if (!models[modelId]) {
+              models[modelId] = {
+                displayName: modelId,
               };
             }
 
-            modelsResponse[basename] = this.mapFileStatsToInformation(
-              stats,
-              models[basename].displayName ?? basename,
+            fullModels.push(
+              this.mapFileStatsToModel(stats, models[modelId].displayName ?? modelId, modelId),
             );
           }
         }),
@@ -82,17 +85,21 @@ export default class ModelService {
       console.error(`${getLoggingPrefix()} Error reading GCODE model file information:`, error);
     }
 
-    return modelsResponse;
+    return fullModels;
   }
 
-  static async getModel(modelId: string): Promise<ModelInformation> {
+  /**
+   * Retrieves a model from the database and merges it with its file information.
+   * @returns A promise that resolves to an object containing the model.
+   */
+  static async getModel(modelId: string): Promise<Model> {
     const model = getDatabase().data.models[modelId];
 
     try {
       if (!model) {
         return await fileSystem.promises
           .stat(this.getModelPathFromModelId(modelId))
-          .then((stats) => this.mapFileStatsToInformation(stats, modelId))
+          .then((stats) => this.mapFileStatsToModel(stats, modelId, modelId))
           .then((modelInformation) => {
             getDatabase().update(({ models }) => (models[modelId] = { displayName: modelId }));
 
@@ -102,17 +109,19 @@ export default class ModelService {
 
       return await fileSystem.promises
         .stat(this.getModelPathFromModelId(modelId))
-        .then((stats) => this.mapFileStatsToInformation(stats, model.displayName));
+        .then((stats) => this.mapFileStatsToModel(stats, model.displayName, modelId));
     } catch {
       throw new RequestError(StatusCodes.NOT_FOUND, `Model with ID ${modelId} was not found.`);
     }
   }
 
-  private static mapFileStatsToInformation(
+  private static mapFileStatsToModel(
     stats: fileSystem.Stats,
     displayName: string,
-  ): ModelInformation {
+    modelId: string,
+  ): Model {
     return {
+      modelId,
       displayName: displayName,
       size: stats.size,
       creationTimestamp: stats.birthtimeMs ?? stats.ctimeMs,

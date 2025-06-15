@@ -7,7 +7,7 @@
   import EmptyState from '@/components/EmptyState.vue';
   import { useModelStore } from '@/stores/models.ts';
   import type { PrinterControlType, TemperatureStatus } from '@/scripts/types.ts';
-  import CooldownIcon from '@/components/icons/CooldownIcon.vue';
+  import CoolDownIcon from '@/components/icons/CoolDownIcon.vue';
 
   const { t } = useI18n();
   const FILAMENTS = computed(() => ({
@@ -82,11 +82,11 @@
       method: 'POST',
     }).then(async (response) => {
       if (response.ok) {
-        alert(
-          t('alertStartPrinting', {
-            displayName: modelStore.models[selectedModel.value]?.displayName ?? 'Unknown',
-          }),
-        );
+        const displayName =
+          modelStore.models.find((model) => model.modelId === selectedModel.value)?.displayName ??
+          'Unknown';
+
+        alert(t('alertStartPrinting', { displayName }));
       } else {
         alert(await response.text());
       }
@@ -267,12 +267,12 @@
                   </button>
                   <button
                     class="flex text-zinc-800 dark:text-zinc-300 hover:bg-zinc-400 dark:hover:bg-zinc-800 bg-zinc-300 dark:bg-zinc-700 p-2 rounded-md gap-1 disabled:dark:text-zinc-400 disabled:text-zinc-500 transition"
-                    @click="sendControl('cooldown')"
+                    @click="sendControl('coolDown')"
                   >
-                    <CooldownIcon
+                    <CoolDownIcon
                       class="fill-zinc-500 hover:fill-zinc-600 dark:hover:fill-zinc-400"
                     />
-                    <span>{{ t('cooldown') }}</span>
+                    <span>{{ t('coolDown') }}</span>
                   </button>
                 </div>
               </div>
@@ -413,7 +413,7 @@
     "meshBedLeveling": "Mesh bed leveling",
     "resetXYZCalibration": "Reset XYZ calibration",
     "noCurrentModel": "none",
-    "cooldown": "Cooldown",
+    "coolDown": "Cooldown",
     "resume": "Resume",
     "pause": "Pause",
     "cancel": "Cancel",
@@ -454,7 +454,7 @@
     "meshBedLeveling": "Poravnanje mreže stola",
     "resetXYZCalibration": "Poništi XYZ kalibraciju",
     "noCurrentModel": "nijedan",
-    "cooldown": "Ohladi",
+    "coolDown": "Ohladi",
     "resume": "Nastavi s radom",
     "pause": "Pauziraj rad",
     "cancel": "Prekid rada",
@@ -495,7 +495,7 @@
     "meshBedLeveling": "Livellamento del piano a rete",
     "resetXYZCalibration": "Reimposta la calibrazione XYZ",
     "noCurrentModel": "nessun",
-    "cooldown": "Raffredda",
+    "coolDown": "Raffredda",
     "resume": "Continua",
     "pause": "Pausa",
     "cancel": "Annulla",

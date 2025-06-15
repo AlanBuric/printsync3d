@@ -6,19 +6,6 @@ export const usePrinterStore = defineStore('printers', () => {
   const printers = reactive<PrinterResponse[]>([]);
   const isLoading = ref(false);
 
-  function deletePrinter(printerId: string) {
-    fetch(`/api/printers/${printerId}`, { method: 'DELETE' }).then(async (response) => {
-      if (!response.ok) {
-        alert(`Error: ${await response.text()}`);
-      }
-    });
-
-    printers.splice(
-      printers.findIndex((printer) => printer.printerId == printerId),
-      1,
-    );
-  }
-
   function getPrinters(refresh: boolean = false) {
     if (isLoading.value) {
       return;
@@ -39,5 +26,5 @@ export const usePrinterStore = defineStore('printers', () => {
 
   getPrinters();
 
-  return { printers, isLoading, deletePrinter, getPrinters };
+  return { printers, isLoading, getPrinters };
 });

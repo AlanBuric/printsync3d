@@ -16,13 +16,13 @@ export default class PrinterController {
     };
   }
 
-  static getPrinter(path: string): PrinterResponse {
-    const printer = PrinterService.connectedPrinters[path];
+  static getPrinter(printerId: string): PrinterResponse {
+    const printer = PrinterService.connectedPrinters[printerId];
 
     if (!printer) {
       throw new RequestError(
         StatusCodes.NOT_FOUND,
-        `Printer with printer ID ${path} not found`,
+        `Printer with printer ID ${printerId} not found`,
       );
     }
 

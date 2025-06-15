@@ -2,7 +2,7 @@ import PRINTER_CONTROLS, { type PreheatControlType } from './controls.js';
 import type { Response } from 'express';
 import { ReadlineParser, SerialPort } from 'serialport';
 
-export type PortInfo = Awaited<ReturnType<typeof SerialPort.list>>[number]
+export type PortInfo = Awaited<ReturnType<typeof SerialPort.list>>[number];
 
 /**
  * A heater temperature status. If a target temperature is reported,

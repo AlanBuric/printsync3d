@@ -11,7 +11,8 @@ export type ValidationErrorResponse = {
 
 export type PrinterResponse = PrinterStatus & StoredPrinter & { printerId: string };
 
-export type ModelInformation = StoredModel & {
+export type Model = StoredModel & {
+  modelId: string;
   /**
    * Size of the model file in bytes.
    */
@@ -21,5 +22,3 @@ export type ModelInformation = StoredModel & {
    */
   creationTimestamp?: number;
 };
-
-export type ModelsResponse = Record<string, ModelInformation>;

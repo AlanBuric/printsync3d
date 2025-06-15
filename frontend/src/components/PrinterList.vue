@@ -6,9 +6,24 @@
   import RefreshButton from '@/components/RefreshButton.vue';
   import { useI18n } from 'vue-i18n';
 
-  useI18n();
-
+  const { t } = useI18n();
   const store = usePrinterStore();
+
+  function deletePrinter(printerId: string) {
+    const printer = store.printers.find((printer) => printer.printerId == printerId) ?? printerId;
+
+    if (!confirm(t('confirmDeletePrinter', { displayName: printer ?? 'Unknown' }))) return;
+
+    fetch(`/api/printers/${printerId}`, { method: 'DELETE' }).then(async (response) => {
+      if (response.ok)
+        return store.printers.splice(
+          store.printers.findIndex((printer) => printer.printerId == printerId),
+          1,
+        );
+
+      alert(`Error: ${await response.text()}`);
+    });
+  }
 </script>
 
 <template>
@@ -41,7 +56,7 @@
               <li>
                 <button
                   class="hover:bg-gray-200 dark:hover:bg-zinc-800 p-2 rounded-full"
-                  @click="store.deletePrinter(printer.printerId)"
+                  @click="deletePrinter(printer.printerId)"
                 >
                   <TrashIcon class="fill-cyan-500 hover:fill-cyan-400" />
                 </button>
@@ -65,6 +80,7 @@
 <i18n>
 {
   "en": {
+    "confirmDeletePrinter": "Are you sure you want to disconnect the printer {displayName}?",
     "noPrintersFound": "No 3D printers found",
     "noPrintersFoundDetails": "No 3D printers have been detected yet, try plugging one into this computer."
   },

@@ -30,10 +30,7 @@
     body.append('files', file);
 
     fetch('/api/models', { method: 'POST', body }).then(async (response) => {
-      if (response.ok) {
-        alert(t('fileUploaded'));
-        useModelStore().getModels();
-      } else {
+      if (!response.ok) {
         alert(t('fileFailedToUpload', { error: await response.text() }));
       }
     });
@@ -107,7 +104,6 @@
   "en": {
     "acceptableFiles": "We accept <span class=\"font-mono\">.gcode</span> files only.",
     "fileFailedToUpload": "Failed to upload the file. Error: {error}",
-    "fileUploaded": "File uploaded successfully.",
     "fileSize": "File size",
     "selectFile": "Select File",
     "newModel": "Upload a new model",
@@ -116,7 +112,6 @@
   "hr": {
     "acceptableFiles": "Prihvaćamo samo <span class=\"font-mono\">.gcode</span> datoteke.",
     "fileFailedToUpload": "Neuspješno učitavanje datoteke. Pogreška: {error}",
-    "fileUploaded": "Datoteka uspješno učitana.",
     "fileSize": "Veličina datoteke",
     "selectFile": "Odaberi datoteku",
     "newModel": "Učitajte novi model",
@@ -125,7 +120,6 @@
   "it": {
     "acceptableFiles": "Accettiamo solo file <span class=\"font-mono\">.gcode</span>.",
     "fileFailedToUpload": "Caricamento del file non riuscito. Errore: {error}",
-    "fileUploaded": "File caricato con successo.",
     "fileSize": "Dimensione del file",
     "selectFile": "Seleziona file",
     "newModel": "Carica un nuovo modello",

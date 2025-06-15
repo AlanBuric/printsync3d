@@ -2,14 +2,14 @@ import { type Request, type Response, Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import multer from 'multer';
 import ModelService from './service.js';
-import type { ModelInformation, ModelsResponse } from '../../types/data-transfer-objects.js';
+import type { Model } from '../../types/data-transfer-objects.js';
 import { body, matchedData, param } from 'express-validator';
 import handleValidationResults from '../../middleware/validation-handler.js';
 import { getDatabase } from '../../database/database.js';
 import getLoggingPrefix from '../../util/logging.js';
 import path from 'path';
-import EnvConfig from '../../config/config.js';
 import type { MinMaxOptions } from 'express-validator/lib/options.js';
+import { sseChannel } from '../server-side-events.js';
 
 export const MODEL_ID_VALIDATOR = param('modelId').notEmpty().withMessage('Model ID is required');
 
@@ -38,14 +38,14 @@ function ModelRouter() {
   return Router()
     .get(
       '',
-      (_request: Request, response: Response<ModelsResponse>): Promise<any> =>
+      (_request: Request, response: Response<Model[]>): Promise<any> =>
         ModelService.getAllModels().then((models) => response.send(models)),
     )
     .get(
       '/:modelId',
       MODEL_ID_VALIDATOR,
       handleValidationResults,
-      async (request: Request, response: Response<ModelInformation>): Promise<any> => {
+      async (request: Request, response: Response<Model>): Promise<any> => {
         const { modelId } = matchedData(request);
         return response.send(await ModelService.getModel(modelId));
       },
@@ -72,8 +72,10 @@ function ModelRouter() {
       '/:modelId',
       MODEL_ID_VALIDATOR,
       body('displayName')
+        .isString()
+        .trim()
         .notEmpty()
-        .withMessage('Display name is required')
+        .withMessage("Display name can't be blank")
         .isLength(FILE_NAME_LIMITS)
         .withMessage(
           `Model display name needs to be between ${FILE_NAME_LIMITS.min} and ${FILE_NAME_LIMITS.max} characters long`,
@@ -82,14 +84,23 @@ function ModelRouter() {
       (request: Request, response: Response) => {
         const { modelId, displayName } = matchedData(request);
 
-        ModelService.editModel(modelId, displayName).then(() =>
-          response.sendStatus(StatusCodes.OK),
-        );
+        ModelService.editModel(modelId, displayName)
+          .then(async () => {
+            response.sendStatus(StatusCodes.OK);
+            sseChannel.broadcast({ displayName, modelId }, 'updateModel');
+          })
+          .catch((error) => {
+            console.error(`${getLoggingPrefix()} Failed to edit model ${modelId}:`, error);
+            response.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+          });
       },
     )
     .delete('/:modelId', MODEL_ID_VALIDATOR, (request: Request, response: Response) => {
       const { modelId } = matchedData(request);
-      ModelService.deleteModel(modelId).then(() => response.sendStatus(StatusCodes.OK));
+      ModelService.deleteModel(modelId).then(() => {
+        response.sendStatus(StatusCodes.OK);
+        sseChannel.broadcast(modelId, 'deleteModel');
+      });
     })
     .post('', createMulterHandler(), async (request: Request, response: Response): Promise<any> => {
       if (!request.files || !Object.keys(request.files).length) {
@@ -100,6 +111,7 @@ function ModelRouter() {
       console.info(`${getLoggingPrefix()} Uploaded ${request.files.length} models.`);
 
       response.sendStatus(StatusCodes.CREATED);
+      sseChannel.broadcast(await ModelService.getAllModels(), 'updateModels');
     });
 }
 

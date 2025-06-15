@@ -1,25 +1,19 @@
+import type { Model, ModelResponse } from '@/scripts/types';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import type { ModelsResponse } from '@/scripts/types.ts';
+
+export function mapModelResponse(model: ModelResponse): Model {
+  return { ...model, editableName: model.displayName };
+}
 
 export const useModelStore = defineStore('models', () => {
-  const models = ref<ModelsResponse>({});
-  const isLoading = ref(false);
+  const models = ref<Model[]>([]);
+  const isLoading = ref(true);
 
-  function getModels() {
-    if (isLoading.value) {
-      return;
-    }
+  fetch(`/api/models`)
+    .then((response) => response.json())
+    .then((foundModels: ModelResponse[]) => (models.value = foundModels.map(mapModelResponse)))
+    .finally(() => (isLoading.value = false));
 
-    isLoading.value = true;
-
-    fetch(`/api/models`)
-      .then((response) => response.json())
-      .then((foundModels) => (models.value = foundModels))
-      .finally(() => (isLoading.value = false));
-  }
-
-  getModels();
-
-  return { models, isLoading, getModels };
+  return { models, isLoading };
 });

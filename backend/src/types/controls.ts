@@ -10,7 +10,7 @@ const PRINTER_CONTROLS = {
   moveRight: ['G1 X10 F3000'],
   moveForward: ['G1 Y10 F3000'],
   moveBackward: ['G1 Y-10 F3000'],
-  cooldown: ['M140 S0', 'M104 S0'],
+  coolDown: ['M140 S0', 'M104 S0'],
   loadFilament: ['M701'],
   unloadFilament: ['M702'],
   autoHome: ['G28'],

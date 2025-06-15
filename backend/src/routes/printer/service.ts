@@ -8,6 +8,9 @@ import EnvConfig from '../../config/config.js';
 import RequestError from '../../util/RequestError.js';
 import { Interface } from 'readline';
 import { parseTemperatureReport } from './reporting.js';
+import { sseChannel } from '../server-side-events.js';
+import type { PrinterResponse } from '../../types/data-transfer-objects.js';
+import PrinterController from './controller.js';
 
 const OK_ATTEMPTS = 3;
 const REFRESH_LIMIT_MILLISECONDS = 5000;
@@ -24,12 +27,13 @@ export default class PrinterService {
     try {
       for await (let line of fileStream) {
         // Ignore comments.
-        if (line.startsWith(';')) {
-          continue;
-        }
+        if (line.startsWith(';')) continue;
 
         // Remove the comment at the end.
-        line = line.split(';')[0];
+        line = line.split(';')[0].trim();
+
+        // Skip blank lines.
+        if (!line) continue;
 
         console.info(`${getLoggingPrefix()} [${printer.portInfo.path}] Write '${line}'`);
         connection.write(line);
@@ -74,12 +78,12 @@ export default class PrinterService {
     const oldPaths = new Set(Object.keys(this.connectedPrinters));
     const newPaths = new Set(portInfos.map((portInfo) => portInfo.path));
 
-    oldPaths.difference(newPaths).forEach(this.removePrinter);
+    oldPaths.difference(newPaths).forEach(this.disconnectPrinter);
 
     await Promise.allSettled(portInfos.map(this.connectPrinter));
   }
 
-  static removePrinter(path: string) {
+  static disconnectPrinter(path: string) {
     const existing = this.connectedPrinters[path];
 
     if (existing) {
@@ -127,6 +131,11 @@ export default class PrinterService {
 
       if (data.includes('T')) {
         printer.status.temperatureReport = parseTemperatureReport(data);
+
+        sseChannel.broadcast(
+          PrinterController.mapPrinterToPrinterResponse(printer),
+          'updatePrinter',
+        );
       }
     });
 

@@ -4,6 +4,7 @@ import ModelRouter from './routes/model/router.js';
 import handleServerError from './middleware/error-handler.js';
 import PrinterRouter from './routes/printer/router.js';
 import healthcheck from './routes/healthcheck.js';
+import handleServerSideEvents from './routes/server-side-events.js';
 
 /**
  * Creates the Express application with all necessary middleware and routes.
@@ -13,6 +14,7 @@ export default function createApplication(): express.Express {
   return express()
     .use(cors(), json(), urlencoded({ extended: true }))
     .get('/health', healthcheck)
+    .get('/api/sse', handleServerSideEvents)
     .use('/api/printers', PrinterRouter)
     .use('/api/models', ModelRouter())
     .use(handleServerError);

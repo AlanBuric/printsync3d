@@ -44,6 +44,28 @@ export type TemperatureReport = {
   ambient?: number;
 };
 
+export type PrinterControlType =
+  | 'preheatPla'
+  | 'preheatAbs'
+  | 'preheatPet'
+  | 'moveUp'
+  | 'moveDown'
+  | 'moveLeft'
+  | 'moveRight'
+  | 'moveForward'
+  | 'moveBackward'
+  | 'coolDown'
+  | 'loadFilament'
+  | 'unloadFilament'
+  | 'autoHome'
+  | 'meshBedLeveling'
+  | 'resetXyz'
+  | 'resume'
+  | 'pause'
+  | 'cancel';
+
+export type PreheatControlType = 'preheatPla' | 'preheatAbs' | 'preheatPet';
+
 export type PrinterStatus = {
   temperatureReport: TemperatureReport;
   lastPreheatOption?: PreheatControlType;
@@ -51,52 +73,25 @@ export type PrinterStatus = {
   currentModel?: string;
 };
 
-const PRINTER_CONTROLS = {
-  preheatPla: ['M140 S60', 'M104 S215'],
-  preheatAbs: ['M140 S100', 'M104 S240'],
-  preheatPet: ['M140 S90', 'M104 S230'],
-  moveUp: ['G1 Z10 F3000'],
-  moveDown: ['G1 Z-10 F3000'],
-  moveLeft: ['G1 X-10 F3000'],
-  moveRight: ['G1 X10 F3000'],
-  moveForward: ['G1 Y10 F3000'],
-  moveBackward: ['G1 Y-10 F3000'],
-  cooldown: ['M140 S0', 'M104 S0'],
-  loadFilament: ['M701'],
-  unloadFilament: ['M702'],
-  autoHome: ['G28'],
-  meshBedLeveling: ['G80', 'G29'],
-  resetXyz: ['M502'],
-  resume: ['M24'],
-  pause: ['M25'],
-  cancel: ['M526'],
-} as const;
-
-export type PrinterControlType = keyof typeof PRINTER_CONTROLS;
-
-export type PreheatControlType = 'preheatPla' | 'preheatAbs' | 'preheatPet';
-
-export type StoredPrinter = {
-  /**
-   * Display name of the model as originally uploaded by the user or custom set afterward.
-   */
-  displayName: string;
-};
-
-export type StoredModel = {
-  /**
-   * Display name of the model as originally uploaded by the user or custom set afterward.
-   */
-  displayName: string;
-};
-
 export type ErrorResponse = {
   error: string;
 };
 
-export type PrinterResponse = PrinterStatus & StoredPrinter & { printerId: string };
+export type PrinterResponse = PrinterStatus & {
+  /**
+   * Display name of the model as originally uploaded by the user or custom set afterward.
+   */
+  displayName: string;
+  printerId: string;
+};
 
-export type ModelInformation = StoredModel & {
+export interface ModelResponse {
+  modelId: string;
+  editableName?: string | null;
+  /**
+   * Display name of the model as originally uploaded by the user or custom set afterward.
+   */
+  displayName: string;
   /**
    * Size of the model file in bytes.
    */
@@ -105,6 +100,8 @@ export type ModelInformation = StoredModel & {
    * Creation timestamp, or last modification timestamp if unavailable, of this file.
    */
   creationTimestamp?: number;
-};
+}
 
-export type ModelsResponse = Record<string, ModelInformation>;
+export interface Model extends ModelResponse {
+  editableName: string;
+}

@@ -4,62 +4,38 @@
   import DownloadIcon from '@/components/icons/DownloadIcon.vue';
   import { useModelStore } from '@/stores/models.ts';
   import { useI18n } from 'vue-i18n';
-  import { ref, watch } from 'vue';
   import { storeToRefs } from 'pinia';
+  import type { Model } from '@/scripts/types';
 
   const { t } = useI18n();
   const { models } = storeToRefs(useModelStore());
 
-  const editableNames = ref<Record<string, string>>({});
+  function editModelDisplayName(model: Model) {
+    const newName = model.editableName?.trim() ?? '';
 
-  watch(
-    models,
-    (newModels) => {
-      editableNames.value = Object.fromEntries(
-        Object.entries(newModels).map(([id, model]) => [id, model.displayName]),
-      );
-    },
-    { deep: true, immediate: true },
-  );
+    if (newName == model.displayName) return;
 
-  function editModelDisplayName(modelId: string) {
-    const newName = editableNames.value[modelId];
-
-    if (newName === models.value[modelId]?.displayName) {
-      return;
-    }
-
-    fetch(`/api/models/${encodeURIComponent(modelId)}`, {
+    fetch(`/api/models/${encodeURIComponent(model.modelId)}`, {
       method: 'PATCH',
       body: JSON.stringify({ displayName: newName }),
       headers: { 'Content-Type': 'application/json' },
     }).then((response) => {
       if (response.ok) {
-        models.value[modelId].displayName = newName;
+        model.editableName = model.displayName = newName;
       } else {
-        editableNames.value[modelId] = models.value[modelId]?.displayName;
+        model.editableName = model.displayName;
         response.text().then(alert);
       }
     });
   }
 
-  function deleteModel(modelId: string) {
-    if (
-      !confirm(
-        t('confirmDeleteModel', { displayName: models.value[modelId]?.displayName ?? 'Unknown' }),
-      )
-    ) {
-      return;
-    }
+  function deleteModel(model: Model, index: number) {
+    if (!confirm(t('confirmDeleteModel', { displayName: model.displayName }))) return;
 
-    fetch(`/api/models/${encodeURIComponent(modelId)}`, {
+    fetch(`/api/models/${encodeURIComponent(model.modelId)}`, {
       method: 'DELETE',
     }).then(async (response) => {
-      if (response.ok) {
-        return delete models.value[modelId];
-      }
-
-      alert(`Error: ${await response.text()}`);
+      if (!response.ok) alert(`Error: ${await response.text()}`);
     });
   }
 
@@ -94,28 +70,31 @@
     <template v-if="Object.keys(models).length">
       <h3 class="text-center mb-4 text-xl font-semibold">{{ t('modelsTitle') }}</h3>
       <ul class="flex flex-col gap-3">
-        <li v-for="[id, model] in Object.entries(models)" :key="model.displayName">
+        <li v-for="(model, index) in models" :key="model.displayName">
           <div class="bg-zinc-200 dark:bg-zinc-900 px-4 py-3 rounded-lg flex">
             <div class="flex-1">
               <h4
                 class="text-xl text-zinc-900 dark:text-zinc-100 mb-2"
                 title="Click to edit, unfocus to save"
-                @input="({ target }) => (editableNames[id] = (target as any).textContent)"
-                @blur="editModelDisplayName(id)"
+                @input="({ target }) => (model.editableName = (target as any).textContent)"
+                @blur="editModelDisplayName(model)"
                 contenteditable
               >
-                {{ editableNames[id] }}
+                {{ model.editableName ?? model.displayName }}
               </h4>
-              <p class="text-zinc-600 dark:text-zinc-500">
-                {{ formatBytes(model.size) }}
-              </p>
-              <p v-if="model.creationTimestamp" class="text-zinc-600 dark:text-zinc-500">
-                {{ `${t('uploaded')} ${new Date(model.creationTimestamp).toLocaleString()}` }}
-              </p>
+              <div class="flex gap-x-2 text-zinc-600 dark:text-zinc-500">
+                <span>
+                  {{ formatBytes(model.size) }}
+                </span>
+                <span>|</span>
+                <span v-if="model.creationTimestamp">
+                  {{ `${t('uploaded')} ${new Date(model.creationTimestamp).toLocaleString()}` }}
+                </span>
+              </div>
             </div>
             <a
-              :href="`/api/models/${encodeURIComponent(id)}/download`"
-              :download="editableNames[id]"
+              :href="`/api/models/${encodeURIComponent(model.modelId)}/download`"
+              :download="model.editableName ?? model.displayName"
               class="hover:bg-gray-300 dark:hover:bg-zinc-800 rounded-full self-center"
               :title="t('downloadModelTitle')"
             >
@@ -123,7 +102,7 @@
             </a>
             <button
               class="hover:bg-gray-300 dark:hover:bg-zinc-800 rounded-full self-center"
-              @click="deleteModel(id)"
+              @click="deleteModel(model, index)"
               :title="t('deleteModelTitle')"
             >
               <TrashIcon class="fill-cyan-500 m-2" />
@@ -147,7 +126,7 @@
     "confirmDeleteModel": "Are you sure you want to delete {displayName}?",
     "modelsNotFound": "No models found",
     "modelsNotFoundDetails": "Upload a new model to see it in this list.",
-    "modelsTitle": "Stored models",
+    "modelsTitle": "Uploaded models",
     "uploaded": "Uploaded",
     "downloadModelTitle": "Click to download the model file",
     "deleteModelTitle": "Click to delete the model"
@@ -156,7 +135,7 @@
     "confirmDeleteModel": "Jeste li sigurni da želite izbrisati {displayName}?",
     "modelsNotFound": "Modeli nisu pronađeni",
     "modelsNotFoundDetails": "Prenesite novi model kako biste ga vidjeli na ovom popisu.",
-    "modelsTitle": "Spremljeni modeli",
+    "modelsTitle": "Učitani modeli",
     "uploaded": "Dodan",
     "downloadModelTitle": "Preuzmite datoteku modela",
     "deleteModelTitle": "Izbrišite model"
@@ -165,7 +144,7 @@
     "confirmDeleteModel": "Sei sicuro di voler eliminare {displayName}?",
     "modelsNotFound": "Nessun modello trovato",
     "modelsNotFoundDetails": "Carica un nuovo modello per farlo apparire in questo elenco.",
-    "modelsTitle": "Modelli salvati",
+    "modelsTitle": "Modelli caricati",
     "uploaded": "Caricato",
     "downloadModelTitle": "Clicca per scaricare il file del modello",
     "deleteModelTitle": "Clicca per eliminare il modello"

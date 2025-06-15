@@ -22,6 +22,7 @@
     "test:prod": "vitest run"
   },
   "dependencies": {
+    "better-sse": "^0.15.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^5.0.1",

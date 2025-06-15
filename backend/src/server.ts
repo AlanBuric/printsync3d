@@ -7,9 +7,8 @@ import getLoggingPrefix from './util/logging.js';
 import { styleText } from 'util';
 
 EnvConfig.initialize();
-ModelService.initialize();
-
 await connectDatabase();
+ModelService.initialize();
 
 const server = createApplication().listen(EnvConfig.PORT, () => {
   console.info(

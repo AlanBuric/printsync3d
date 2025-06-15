@@ -1,6 +1,5 @@
 <script setup lang="ts">
   import { useModelStore } from '@/stores/models.ts';
-  import RefreshButton from '@/components/RefreshButton.vue';
   import ModelList from '@/components/ModelList.vue';
   import ModelUpload from '@/components/ModelUpload.vue';
 
@@ -8,13 +7,10 @@
 </script>
 
 <template>
-  <main class="w-full px-1 py-8  gap-16 flex justify-center">
+  <main class="w-full px-1 py-8 gap-16 flex justify-center">
     <div class="w-full max-w-screen-md flex flex-col max-lg:flex-col gap-y-8">
       <ModelUpload />
       <ModelList />
-      <div class="flex justify-center">
-        <RefreshButton @click="store.getModels()" :is-loading="store.isLoading" />
-      </div>
     </div>
   </main>
 </template>

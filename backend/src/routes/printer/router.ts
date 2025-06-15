@@ -11,6 +11,7 @@ import type { MinMaxOptions } from 'express-validator/lib/options.js';
 import { getDatabase } from '../../database/database.js';
 import PrinterController from './controller.js';
 import { MODEL_ID_VALIDATOR } from '../model/router.js';
+import { sseChannel } from '../server-side-events.js';
 
 const PRINTER_ID_VALIDATOR = param('printerId')
   .notEmpty()
@@ -25,7 +26,10 @@ const PrinterRouter = Router()
   )
   .post('/refresh', async (_request: Request, response: Response): Promise<any> => {
     await PrinterService.refreshConnections();
-    response.send(PrinterController.getPrinters());
+    const printers = PrinterController.getPrinters();
+
+    response.send(printers);
+    sseChannel.broadcast(printers, 'updatePrinters');
   })
   .get(
     '/:printerId',
@@ -52,17 +56,28 @@ const PrinterRouter = Router()
       const { printerId, displayName } = matchedData(request);
       const printer = getDatabase().data.printers[printerId];
 
-      if (!printer) {
-        return response.sendStatus(StatusCodes.NOT_FOUND);
-      }
+      if (!printer) return response.sendStatus(StatusCodes.NOT_FOUND);
+      if (printer.displayName == displayName) return response.sendStatus(StatusCodes.OK);
 
       printer.displayName = displayName;
+
+      getDatabase()
+        .write()
+        .then(() => {
+          response.sendStatus(StatusCodes.OK);
+
+          sseChannel.broadcast(PrinterController.getPrinter(printerId), 'updatePrinter');
+        });
     },
   )
   .delete('/:printerId', PRINTER_ID_VALIDATOR, (request: Request, response: Response) => {
     const { printerId } = matchedData(request);
-    PrinterService.removePrinter(printerId);
+
+    PrinterService.disconnectPrinter(printerId);
+
     response.sendStatus(StatusCodes.OK);
+
+    sseChannel.broadcast(printerId, 'deletePrinter');
   })
   .get('/control', (_request: Request, response: Response): any =>
     response.send(Object.keys(PRINTER_CONTROLS)),
