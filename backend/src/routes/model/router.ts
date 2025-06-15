@@ -8,17 +8,18 @@ import handleValidationResults from '../../middleware/validation-handler.js';
 import { getDatabase } from '../../database/database.js';
 import getLoggingPrefix from '../../util/logging.js';
 import path from 'path';
-import PrintSync3DConfig from '../../config/config.js';
+import EnvConfig from '../../config/config.js';
 import type { MinMaxOptions } from 'express-validator/lib/options.js';
 
 export const MODEL_ID_VALIDATOR = param('modelId').notEmpty().withMessage('Model ID is required');
+
 const MAX_FILE_UPLOAD_COUNT = 20;
 const MAX_FILE_SIZE = 1.5e9;
 const FILE_NAME_LIMITS: MinMaxOptions = { min: 1, max: 60 };
 
 function createMulterHandler() {
   const storage = multer.diskStorage({
-    destination: ModelService.MODEL_UPLOAD_DIRECTORY,
+    destination: ModelService.MODEL_DIRECTORY,
     filename: (_request, file, callback) => {
       callback(null, ModelService.registerNewFileAndGetName(file));
     },
@@ -62,7 +63,7 @@ function ModelRouter() {
         }
 
         response.download(
-          path.resolve(PrintSync3DConfig.MODEL_UPLOAD_DIRECTORY, `${modelId}.gcode`),
+          path.resolve(ModelService.MODEL_DIRECTORY, `${modelId}.gcode`),
           `${foundModel.displayName}.gcode`,
         );
       },

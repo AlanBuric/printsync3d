@@ -20,6 +20,6 @@ export type ModelInformation = StoredModel & {
    * Creation timestamp, or last modification timestamp if unavailable, of this file.
    */
   creationTimestamp?: number;
-}
+};
 
 export type ModelsResponse = Record<string, ModelInformation>;

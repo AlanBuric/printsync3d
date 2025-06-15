@@ -29,7 +29,7 @@
       return;
     }
 
-    fetch(`http://localhost:3000/api/model/${encodeURIComponent(modelId)}`, {
+    fetch(`/api/models/${encodeURIComponent(modelId)}`, {
       method: 'PATCH',
       body: JSON.stringify({ displayName: newName }),
       headers: { 'Content-Type': 'application/json' },
@@ -52,7 +52,7 @@
       return;
     }
 
-    fetch(`http://localhost:3000/api/model/${encodeURIComponent(modelId)}`, {
+    fetch(`/api/models/${encodeURIComponent(modelId)}`, {
       method: 'DELETE',
     }).then(async (response) => {
       if (response.ok) {
@@ -100,7 +100,7 @@
               <h4
                 class="text-xl text-zinc-900 dark:text-zinc-100 mb-2"
                 title="Click to edit, unfocus to save"
-                @input="({ target }) => (editableNames[id] = (target as any).innerText)"
+                @input="({ target }) => (editableNames[id] = (target as any).textContent)"
                 @blur="editModelDisplayName(id)"
                 contenteditable
               >
@@ -114,7 +114,7 @@
               </p>
             </div>
             <a
-              :href="`http://localhost:3000/api/model/${encodeURIComponent(id)}/download`"
+              :href="`/api/models/${encodeURIComponent(id)}/download`"
               :download="editableNames[id]"
               class="hover:bg-gray-300 dark:hover:bg-zinc-800 rounded-full self-center"
               :title="t('downloadModelTitle')"

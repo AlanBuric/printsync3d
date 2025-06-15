@@ -1,0 +1,87 @@
+- name: Deploy Docker Compose project with local images
+  hosts: webservers
+  become: yes
+  vars:
+    project_dir: "{{ ansible_env.HOME }}/printsync3d"
+
+  tasks:
+    - name: Install required apt packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+        update_cache: yes
+
+    - name: Ensure /etc/apt/keyrings directory exists
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+
+    - name: Download Docker GPG key
+      get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: "0644"
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable"
+        state: present
+        filename: docker
+
+    - name: Install Docker and Docker Compose plugin
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Ensure project directory exists
+      file:
+        path: "{{ project_dir }}"
+        state: directory
+
+    - name: Copy Docker Compose file
+      copy:
+        src: ./compose.yml
+        dest: "{{ project_dir }}/compose.yml"
+
+    - name: Copy frontend image tarball
+      copy:
+        src: ./frontend.tar
+        dest: "{{ project_dir }}/frontend.tar"
+        mode: "0644"
+
+    - name: Copy backend image tarball
+      copy:
+        src: ./backend.tar
+        dest: "{{ project_dir }}/backend.tar"
+        mode: "0644"
+
+    - name: Load frontend image into Docker
+      shell: docker load -i "{{ project_dir }}/frontend.tar"
+      args:
+        chdir: "{{ project_dir }}"
+
+    - name: Load backend image into Docker
+      shell: docker load -i "{{ project_dir }}/backend.tar"
+      args:
+        chdir: "{{ project_dir }}"
+
+    - name: Start services with Docker Compose
+      shell: docker compose -f compose.yml up -d
+      args:
+        chdir: "{{ project_dir }}"

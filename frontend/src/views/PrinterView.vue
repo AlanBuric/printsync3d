@@ -6,7 +6,7 @@
   import { useI18n } from 'vue-i18n';
   import EmptyState from '@/components/EmptyState.vue';
   import { useModelStore } from '@/stores/models.ts';
-  import type { PrinterControlType, TemperatureStatus } from '@shared-types/types.ts';
+  import type { PrinterControlType, TemperatureStatus } from '@/scripts/types.ts';
   import CooldownIcon from '@/components/icons/CooldownIcon.vue';
 
   const { t } = useI18n();
@@ -31,7 +31,7 @@
       return;
     }
 
-    fetch(`http://localhost:3000/api/printer/${encodeURIComponent(printerId)}`, {
+    fetch(`/api/printers/${encodeURIComponent(printerId)}`, {
       method: 'PATCH',
       body: JSON.stringify({ displayName: editableDisplayName.value }),
       headers: { 'Content-Type': 'application/json' },
@@ -61,7 +61,7 @@
   }
 
   function sendControl(controlType: PrinterControlType) {
-    fetch(`http://localhost:3000/api/printer/${encodeURIComponent(printerId)}/control`, {
+    fetch(`/api/printers/${encodeURIComponent(printerId)}/control`, {
       method: 'POST',
       body: JSON.stringify({ controlType }),
       headers: { 'Content-Type': 'application/json' },
@@ -78,10 +78,9 @@
       return;
     }
 
-    fetch(
-      `http://localhost:3000/api/printer/${encodeURIComponent(printerId)}/print/${selectedModel.value}`,
-      { method: 'POST' },
-    ).then(async (response) => {
+    fetch(`/api/printers/${encodeURIComponent(printerId)}/print/${selectedModel.value}`, {
+      method: 'POST',
+    }).then(async (response) => {
       if (response.ok) {
         alert(
           t('alertStartPrinting', {
@@ -104,7 +103,7 @@
             <h1
               class="text-xl text-zinc-900 dark:text-zinc-100"
               contenteditable
-              @input="({ target }) => (editableDisplayName = (target as any).innerText)"
+              @input="({ target }) => (editableDisplayName = (target as any).textContent)"
               @blur="editPrinterDisplayName"
             >
               {{ editableDisplayName }}

@@ -4,7 +4,7 @@ import { ReadlineParser, SerialPort } from 'serialport';
 import { getDatabase } from '../../database/database.js';
 import { StatusCodes } from 'http-status-codes';
 import getLoggingPrefix from '../../util/logging.js';
-import PrintSync3DConfig from '../../config/config.js';
+import EnvConfig from '../../config/config.js';
 import RequestError from '../../util/RequestError.js';
 import { Interface } from 'readline';
 import { parseTemperatureReport } from './reporting.js';
@@ -97,7 +97,7 @@ export default class PrinterService {
     }
 
     const serialPort = new SerialPort({
-      baudRate: PrintSync3DConfig.BAUD_RATE,
+      baudRate: EnvConfig.BAUD_RATE,
       path: portInfo.path,
     });
 

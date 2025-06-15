@@ -29,7 +29,7 @@
 
     body.append('files', file);
 
-    fetch('http://localhost:3000/api/model', { method: 'POST', body }).then(async (response) => {
+    fetch('/api/models', { method: 'POST', body }).then(async (response) => {
       if (response.ok) {
         alert(t('fileUploaded'));
         useModelStore().getModels();

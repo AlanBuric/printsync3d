@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import type { ModelsResponse } from '@shared-types/data-transfer-objects.ts';
+import type { ModelsResponse } from '@/scripts/types.ts';
 
 export const useModelStore = defineStore('models', () => {
   const models = ref<ModelsResponse>({});
@@ -13,7 +13,7 @@ export const useModelStore = defineStore('models', () => {
 
     isLoading.value = true;
 
-    fetch(`http://localhost:3000/api/model`)
+    fetch(`/api/models`)
       .then((response) => response.json())
       .then((foundModels) => (models.value = foundModels))
       .finally(() => (isLoading.value = false));

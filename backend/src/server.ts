@@ -1,24 +1,28 @@
 import createApplication from './application.js';
 import PrinterService from './routes/printer/service.js';
 import { connectDatabase, getDatabase } from './database/database.js';
-import PrintSync3DConfig from './config/config.js';
+import EnvConfig from './config/config.js';
 import ModelService from './routes/model/service.js';
 import getLoggingPrefix from './util/logging.js';
 import { styleText } from 'util';
 
-new PrintSync3DConfig();
-new PrinterService();
-new ModelService();
+EnvConfig.initialize();
+ModelService.initialize();
 
 await connectDatabase();
 
-const server = createApplication().listen(PrintSync3DConfig.PORT, () => {
+const server = createApplication().listen(EnvConfig.PORT, () => {
   console.info(
     styleText(['blueBright', 'bold'], '✔ PrintSync3D service is up and running:'),
     '\n',
     styleText(
       ['blue'],
-      `➥ API routes: ${styleText(['underline'], `http://localhost:${PrintSync3DConfig.PORT}/api`)}`,
+      `➥ API routes: ${styleText(['underline'], `http://localhost:${EnvConfig.PORT}/api`)}`,
+    ),
+    '\n',
+    styleText(
+      ['blue'],
+      `➥ Healthcheck: ${styleText(['underline'], `http://localhost:${EnvConfig.PORT}/health`)}`,
     ),
   );
 

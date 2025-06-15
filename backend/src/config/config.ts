@@ -1,16 +1,18 @@
 import dotenv from 'dotenv';
 
-export default class PrintSync3DConfig {
-  static MODEL_UPLOAD_DIRECTORY: string;
+export default class EnvConfig {
+  static DATA_DIRECTORY: string;
   static BAUD_RATE: number;
   static PORT: number;
 
-  constructor() {
+  private constructor() {}
+
+  static initialize() {
     dotenv.config();
 
-    PrintSync3DConfig.MODEL_UPLOAD_DIRECTORY = PrintSync3DConfig.validateEnvVariable('MODEL_UPLOAD_DIRECTORY');
-    PrintSync3DConfig.BAUD_RATE = PrintSync3DConfig.parseValidInt('BAUD_RATE');
-    PrintSync3DConfig.PORT = PrintSync3DConfig.parseValidInt('PORT');
+    EnvConfig.DATA_DIRECTORY = EnvConfig.validateEnvVariable('DATA_DIRECTORY');
+    EnvConfig.BAUD_RATE = EnvConfig.parseValidInt('BAUD_RATE');
+    EnvConfig.PORT = EnvConfig.parseValidInt('PORT');
   }
 
   static validateEnvVariable(name: string): string {

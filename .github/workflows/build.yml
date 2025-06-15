@@ -1,0 +1,39 @@
+name: 📦 Build and test the frontend and backend services
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  frontend:
+    name: 🛠️ Build the frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - &checkout
+        name: 🗂️ Checkout repository
+        uses: actions/checkout@v4
+      - &setup_node
+        name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npm run build
+
+  backend:
+    name: 🛠️ Build and test the backend service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - *checkout
+      - *setup_node
+      - run: npm ci
+      - run: npm run test:prod
+      - run: npm run build

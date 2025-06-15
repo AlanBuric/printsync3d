@@ -5,6 +5,15 @@
   "description": "Web application for centralized management of 3D printers via a Vue.js website",
   "private": true,
   "type": "module",
+  "license": "MIT",
+  "homepage": "https://github.com/AlanBuric/printsync3d#readme",
+  "bugs": {
+    "url": "https://github.com/AlanBuric/printsync3d/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlanBuric/printsync3d.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",

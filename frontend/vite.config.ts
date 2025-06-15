@@ -1,30 +1,23 @@
 import { fileURLToPath, URL } from 'url';
-import { defineConfig } from 'vite';
+import { CommonServerOptions, defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import tailwindcss from "@tailwindcss/vite";
+import tailwindcss from '@tailwindcss/vite';
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
-import path from 'path';
+
+const proxy: CommonServerOptions['proxy'] = {
+  '/api': {
+    target: 'http://localhost:8000',
+    changeOrigin: true,
+  },
+};
 
 export default defineConfig({
-  plugins: [
-    vue(),
-    tailwindcss(),
-    VueI18nPlugin({
-      strictMessage: false,
-    }),
-  ],
+  plugins: [vue(), tailwindcss(), VueI18nPlugin({ strictMessage: false })],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      '@shared-types': path.resolve(__dirname, '../backend/src/types/*'),
     },
   },
-  preview: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3000',
-        changeOrigin: true,
-      },
-    },
-  },
+  preview: { proxy, port: 3000 },
+  server: { proxy, port: 80 },
 });

@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import fileSystem from 'fs';
 import { createInterface } from 'readline';
-import PrintSync3DConfig from '../../config/config.js';
+import EnvConfig from '../../config/config.js';
 import path from 'path';
 import getLoggingPrefix from '../../util/logging.js';
 import { getDatabase } from '../../database/database.js';
@@ -10,12 +10,14 @@ import RequestError from '../../util/RequestError.js';
 import { StatusCodes } from 'http-status-codes';
 
 export default class ModelService {
-  static MODEL_UPLOAD_DIRECTORY: string;
+  static MODEL_DIRECTORY: string;
 
-  constructor() {
-    ModelService.MODEL_UPLOAD_DIRECTORY = path.resolve(PrintSync3DConfig.MODEL_UPLOAD_DIRECTORY);
+  private constructor() {}
 
-    if (fileSystem.existsSync(ModelService.MODEL_UPLOAD_DIRECTORY)) {
+  static initialize() {
+    ModelService.MODEL_DIRECTORY = path.resolve(EnvConfig.DATA_DIRECTORY, 'models');
+
+    if (fileSystem.existsSync(ModelService.MODEL_DIRECTORY)) {
       ModelService.syncModelsWithFileSystem();
     } else {
       ModelService.createModelDirectory();
@@ -24,13 +26,13 @@ export default class ModelService {
 
   private static async createModelDirectory() {
     console.info(
-      `${getLoggingPrefix()} Model directory doesn't exist. Creating one at ${ModelService.MODEL_UPLOAD_DIRECTORY}.`,
+      `${getLoggingPrefix()} Model directory doesn't exist. Creating one at ${ModelService.MODEL_DIRECTORY}.`,
     );
-    fileSystem.mkdirSync(ModelService.MODEL_UPLOAD_DIRECTORY, { recursive: true });
+    fileSystem.mkdirSync(ModelService.MODEL_DIRECTORY, { recursive: true });
   }
 
   private static async syncModelsWithFileSystem() {
-    fileSystem.promises.readdir(ModelService.MODEL_UPLOAD_DIRECTORY).then((files) => {
+    fileSystem.promises.readdir(ModelService.MODEL_DIRECTORY).then((files) => {
       const allNames = new Set(Object.keys(getDatabase().data.models));
 
       files.forEach((file) => {
@@ -51,7 +53,7 @@ export default class ModelService {
     const modelsResponse: ModelsResponse = structuredClone(models) as any;
 
     try {
-      const files = await fileSystem.promises.readdir(this.MODEL_UPLOAD_DIRECTORY);
+      const files = await fileSystem.promises.readdir(this.MODEL_DIRECTORY);
 
       await Promise.allSettled(
         files.map(async (filename) => {
@@ -61,7 +63,7 @@ export default class ModelService {
 
           if (stats.isFile()) {
             /*
-             * In case new files were added.
+             * In case new files were somehow added manually.
              */
             if (!models[basename]) {
               models[basename] = {
@@ -174,7 +176,7 @@ export default class ModelService {
   }
 
   static getModelPath(filename: string): fileSystem.PathLike {
-    return path.join(this.MODEL_UPLOAD_DIRECTORY, filename);
+    return path.join(this.MODEL_DIRECTORY, filename);
   }
 
   static extractBasename(filename: string) {
