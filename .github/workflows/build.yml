@@ -1,4 +1,4 @@
-name: 📦 Build and test the frontend and backend services
+name: 📦 Build & test the services
 
 on:
   push:
@@ -20,11 +20,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: npm ci
-      - run: npm run build
+      - name: 📥 Clean install
+        run: npm ci
+      - name: ⚒️ Build
+        run: npm run build
 
   backend:
-    name: 🛠️ Build and test the backend service
+    name: 🛠️ Build & test the backend
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -36,6 +38,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: npm ci
-      - run: npm run test:prod
-      - run: npm run build
+      - name: 📥 Clean install
+        run: npm ci
+      - name: 🧪 Run tests
+        run: npm run test:prod
+      - name: ⚒️ Build
+        run: npm run build
