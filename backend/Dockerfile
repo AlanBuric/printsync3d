@@ -15,6 +15,9 @@ FROM node:24-alpine
 COPY package*json ./
 RUN npm ci --omit=dev
 
+# Install udevadm for device management, used by serialport NPM package
+RUN apk add --no-cache udev
+
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 8000

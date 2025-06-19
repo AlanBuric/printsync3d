@@ -29,19 +29,24 @@
 
     - name: Add Docker repository
       apt_repository:
-        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable"
+        repo: "deb [arch={{ ansible_architecture }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian {{ ansible_lsb.codename }} stable"
         state: present
         filename: docker
 
-    - name: Install Docker and Docker Compose plugin
+    - name: Install required apt packages
       apt:
         name:
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
-          - docker-compose-plugin
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
         state: present
         update_cache: yes
+
+    - name: Install Docker using official convenience script
+      shell: curl -fsSL https://get.docker.com | sh
+      args:
+        creates: /usr/bin/docker
 
     - name: Ensure Docker service is running
       service:
@@ -56,18 +61,18 @@
 
     - name: Copy Docker Compose file
       copy:
-        src: ./compose.yml
+        src: ../compose.yml
         dest: "{{ project_dir }}/compose.yml"
 
     - name: Copy frontend image tarball
       copy:
-        src: ./frontend.tar
+        src: ../frontend.tar
         dest: "{{ project_dir }}/frontend.tar"
         mode: "0644"
 
     - name: Copy backend image tarball
       copy:
-        src: ./backend.tar
+        src: ../backend.tar
         dest: "{{ project_dir }}/backend.tar"
         mode: "0644"
 
