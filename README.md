@@ -19,6 +19,7 @@ Web application for centralized management of 3D printers via a Raspberry Pi and
   - cool down temperature
   - pause, resume, cancel
   - move up, down, left, right, forward, backward (XYZ +/-)
+  - print uploaded model
 - **Models:**
   - upload models onto the server
   - rename models

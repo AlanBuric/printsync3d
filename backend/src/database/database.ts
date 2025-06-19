@@ -30,7 +30,7 @@ export async function connectDatabase() {
     throw new Error('Database already connected');
   }
 
-  const databaseFilePath = path.resolve(EnvConfig.DATA_DIRECTORY, '/database/database.json');
+  const databaseFilePath = path.resolve(EnvConfig.DATA_DIRECTORY, 'database', 'database.json');
 
   await fileSystem.promises.access(databaseFilePath).catch(async () => {
     const directory = path.dirname(databaseFilePath);

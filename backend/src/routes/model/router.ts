@@ -100,6 +100,9 @@ function ModelRouter() {
       ModelService.deleteModel(modelId).then(() => {
         response.sendStatus(StatusCodes.OK);
         sseChannel.broadcast(modelId, 'deleteModel');
+      }).catch((error) => {
+        console.error(`${getLoggingPrefix()} Error occurred while trying to delete a file`, error)
+        response.status(StatusCodes.INTERNAL_SERVER_ERROR).send("File is already in use or doesn't exist");
       });
     })
     .post('', createMulterHandler(), async (request: Request, response: Response): Promise<any> => {
