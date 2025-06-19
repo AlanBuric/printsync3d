@@ -28,7 +28,7 @@ const server = createApplication().listen(EnvConfig.PORT, () => {
   PrinterService.refreshConnections();
 });
 
-const handleShutdown = async () => {
+const shutdownGracefully = async () => {
   console.info(
     styleText(['blueBright', 'bold'], `${getLoggingPrefix()} PrintSync3D is shutting down.`),
   );
@@ -36,13 +36,11 @@ const handleShutdown = async () => {
   await getDatabase().write();
 
   server.close((error) => {
-    if (error) {
-      console.error('An error occurred while shutting downthe PrintSync3D server', error);
-    }
+    if (error) console.error('An error occurred while shutting down the PrintSync3D server', error);
 
     process.exit(0);
   });
 };
 
-process.on('SIGTERM', handleShutdown);
-process.on('SIGINT', handleShutdown);
+process.once('SIGTERM', shutdownGracefully);
+process.once('SIGINT', shutdownGracefully);

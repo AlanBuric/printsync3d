@@ -28,7 +28,7 @@ Web application for centralized management of 3D printers via a Raspberry Pi and
 
 ## Hardware
 
-This application is intended for a computer with network access and ability to connect via serial ports to Prusa 3D printers. The applications were developed against the Prusa i3 MK2S models.
+This application is intended for a computer with network access and ability to connect via serial ports to Prusa 3D printers. The applications were developed against the Prusa i3 MK2S printers.
 
 ## Development phase
 

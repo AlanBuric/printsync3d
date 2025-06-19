@@ -9,7 +9,6 @@ import RequestError from '../../util/RequestError.js';
 import { Interface } from 'readline';
 import { parseTemperatureReport } from './reporting.js';
 import { sseChannel } from '../server-side-events.js';
-import type { PrinterResponse } from '../../types/data-transfer-objects.js';
 import PrinterController from './controller.js';
 
 const OK_ATTEMPTS = 3;
