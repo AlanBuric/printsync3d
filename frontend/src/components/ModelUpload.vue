@@ -1,7 +1,6 @@
 <script setup lang="ts">
   import { useI18n } from 'vue-i18n';
   import { ref } from 'vue';
-  import { useModelStore } from '@/stores/models.ts';
   import UploadIcon from '@/components/icons/UploadIcon.vue';
   import CubeIcon from '@/components/icons/CubeIcon.vue';
 

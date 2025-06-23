@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
+type Theme = 'light' | 'dark';
+
 /**
  * Global states available regardless of whether the user is authenticated or not.
  */
 const useGlobalStore = defineStore('global', () => {
-  const theme = ref('light');
+  const theme = ref<Theme>('light');
 
   /**
    * @deprecated Multiple themes are a planned feature for the future
@@ -15,7 +17,7 @@ const useGlobalStore = defineStore('global', () => {
     return theme.value == 'dark';
   }
 
-  function setTheme(newTheme: string, store: boolean = false) {
+  function setTheme(newTheme: Theme, store: boolean = false) {
     theme.value = newTheme;
     document.documentElement.classList.toggle('dark', isDarkTheme());
 
@@ -28,8 +30,12 @@ const useGlobalStore = defineStore('global', () => {
     setTheme(isDarkTheme() ? 'light' : 'dark', true);
   }
 
-  function getSavedTheme() {
-    return localStorage.getItem('theme');
+  function getSavedTheme(): Theme | null {
+    const found = localStorage.getItem('theme')?.toLowerCase();
+
+    if (found != 'dark' && found != 'light') return null;
+
+    return found;
   }
 
   /**

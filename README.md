@@ -38,12 +38,12 @@ In the `backend` directory define your `.env` by making a copy of the `.env.exam
 
 Then, install the NPM packages:
 
-```
+```bash
 cd backend
 npm ci
 ```
 
-```
+```bash
 cd frontend
 npm ci
 ```
@@ -52,12 +52,12 @@ If `npm ci` is causing issues, try using `npm i` instead.
 
 Then, you can run the backend and frontend services in two separate terminals:
 
-```
+```bash
 cd backend
 npm run dev
 ```
 
-```
+```bash
 cd frontend
 npm run dev
 ```
@@ -91,7 +91,7 @@ If you wish to override the pre-defined environment varibles in `compose.yml`, c
 1. Build the Docker images locally in the root directory: `docker compose build`.
 2. Save the Docker images to .tar files:
 
-   ```
+   ```bash
    docker save -o frontend.tar printsync3d-frontend
    docker save -o backend.tar printsync3d-backend
    ```
