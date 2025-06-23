@@ -99,3 +99,9 @@ If you wish to override the pre-defined environment varibles in `compose.yml`, c
 3. Configure Ansible `inventory.yml` with your target computers for deployment, locally adapt `ansible/deployment-example.yml` if needed.
 4. Run `ansible-playbook -i ansible/inventory.yml ansible/deployment-example.yml`.
 5. Once done, both services should be deployed and started. To test, you can access the IP address of the target computer in your browser to see the website.
+6. To manage or view logs for your services, SSH into your Raspberry Pi and run:
+   ```
+   sudo -I su
+   cd ~/printsync3d
+   docker compose logs -f
+   ```
