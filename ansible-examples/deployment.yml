@@ -33,16 +33,6 @@
         state: present
         filename: docker
 
-    - name: Install required apt packages
-      apt:
-        name:
-          - apt-transport-https
-          - ca-certificates
-          - curl
-          - software-properties-common
-        state: present
-        update_cache: yes
-
     - name: Install Docker using official convenience script
       shell: curl -fsSL https://get.docker.com | sh
       args:
@@ -85,6 +75,18 @@
       shell: docker load -i "{{ project_dir }}/backend.tar"
       args:
         chdir: "{{ project_dir }}"
+
+    - name: Ensure udev rule for tty* devices
+      copy:
+        dest: /etc/udev/rules.d/99-tty.rules
+        content: |
+          KERNEL=="tty*", MODE="0666"
+        mode: "0644"
+
+    - name: Reload udev rules
+      shell: |
+        udevadm control --reload-rules
+        udevadm trigger
 
     - name: Start services with Docker Compose
       shell: docker compose -f compose.yml up -d

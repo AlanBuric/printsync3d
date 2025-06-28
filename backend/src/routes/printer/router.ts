@@ -99,7 +99,7 @@ const PrinterRouter = Router()
         controlType: PrinterControlType;
       }>(request);
 
-      PrinterService.sendGCode(PrinterService.getConnectedPrinter(printerId), controlType);
+      PrinterService.sendControl(PrinterService.getConnectedPrinter(printerId), controlType);
 
       response.sendStatus(StatusCodes.OK);
     },

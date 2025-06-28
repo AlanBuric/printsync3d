@@ -11,6 +11,7 @@ services:
 
   backend:
     build: ./backend
+    privileged: true # give full device capabilities
     restart: unless-stopped
     expose:
       - "8000"
@@ -25,6 +26,11 @@ services:
       retries: 5
     volumes:
       - backenddata:/app/data
+      - type: bind
+        source: /dev # bind-mount entire /dev
+        target: /dev
+        bind:
+          propagation: rshared
     networks:
       - app-network
 

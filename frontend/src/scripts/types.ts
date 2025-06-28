@@ -71,6 +71,7 @@ export type PrinterStatus = {
   lastPreheatOption?: PreheatControlType;
   isFilamentLoaded: boolean;
   currentModel?: string;
+  status: 'idle' | 'printing' | 'paused';
 };
 
 export type ErrorResponse = {

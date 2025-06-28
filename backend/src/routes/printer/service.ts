@@ -15,12 +15,13 @@ const OK_ATTEMPTS = 3;
 const REFRESH_LIMIT_MILLISECONDS = 5000;
 
 export default class PrinterService {
-  static connectedPrinters: Record<string, ConnectedPrinter> = {};
+  static connectedPrinters: Map<string, ConnectedPrinter> = new Map();
   static lastRefresh = Date.now();
 
   static async printGCodeModel(printer: ConnectedPrinter, fileStream: Interface, modelId: string) {
     const { serialPort } = printer;
 
+    printer.status.status = 'printing';
     printer.status.currentModel = getDatabase().data.models[modelId]?.displayName ?? modelId;
 
     try {
@@ -54,8 +55,12 @@ export default class PrinterService {
       );
       console.error(error);
     } finally {
+      printer.status.status = 'idle';
       printer.status.currentModel = undefined;
+
       fileStream.close();
+
+      sseChannel.broadcast(PrinterController.getPrinter(printer.portInfo.path), 'updatePrinter');
     }
   }
 
@@ -74,29 +79,36 @@ export default class PrinterService {
 
     console.info(`${getLoggingPrefix()} ${portInfos.length} serial ports have been discovered.`);
 
-    const oldPaths = new Set(Object.keys(this.connectedPrinters));
-    const newPaths = new Set(portInfos.map((portInfo) => portInfo.path));
+    const oldPaths = new Set(this.connectedPrinters.keys());
+    const newPaths = new Set(portInfos.map(({ path }) => path));
 
     oldPaths.difference(newPaths).forEach(this.disconnectPrinter);
 
-    await Promise.allSettled(portInfos.map(this.connectPrinter));
+    await Promise.all(portInfos.map(portInfo => this.connectPrinter(portInfo)));
   }
 
   static disconnectPrinter(path: string) {
-    const existing = this.connectedPrinters[path];
+    const existing = this.connectedPrinters.get(path);
 
     if (existing) {
-      existing.serialPort.close();
-      delete this.connectedPrinters[path];
+      if (existing.serialPort.isOpen)
+        existing.serialPort.close();
+
+      this.connectedPrinters.delete(path);
+      console.info(`${getLoggingPrefix()} Printer ${existing.serialPort.path} has been disconnected.`)
     }
   }
 
   static async connectPrinter(portInfo: PortInfo) {
-    const existing = this.connectedPrinters[portInfo.path];
+    const existingPrinter = this.connectedPrinters.get(portInfo.path);
 
-    if (existing) {
-      existing.portInfo = portInfo;
+    if (existingPrinter) {
+      existingPrinter.portInfo = portInfo;
       return;
+    }
+
+    if (!getDatabase().data.printers[portInfo.path]) {
+      getDatabase().data.printers[portInfo.path] = { displayName: portInfo.path };
     }
 
     const serialPort = new SerialPort({
@@ -115,15 +127,16 @@ export default class PrinterService {
       portInfo,
       parser,
       status: {
-        currentModel: undefined,
         temperatureReport: {
           extruders: [],
         },
         isFilamentLoaded: false,
+        status: 'idle'
       },
       waitingStatusResponses: [],
     };
-    this.connectedPrinters[portInfo.path] = printer;
+
+    this.connectedPrinters.set(portInfo.path, printer);
 
     parser.on('data', (data: string) => {
       console.info(`${getLoggingPrefix()} [${portInfo.path}] ${data}`);
@@ -140,7 +153,7 @@ export default class PrinterService {
 
     serialPort
       .pipe(parser)
-      .on('close', () => delete this.connectedPrinters[portInfo.path])
+      .on('close', () => this.disconnectPrinter(printer.serialPort.path))
       /**
        * Commands the printer to report temperatures, fans and positions every 15 seconds.
        * Source: https://reprap.org/wiki/G-code#M155:_Automatically_send_temperatures.
@@ -148,10 +161,21 @@ export default class PrinterService {
       .write('M155 S15 C7\n');
   }
 
-  static sendGCode(printer: ConnectedPrinter, controlType: PrinterControlType) {
-    printer.serialPort.write(PRINTER_CONTROLS[controlType].join('\n') + '\n');
+  static sendControl(printer: ConnectedPrinter, controlType: PrinterControlType) {
+    printer.serialPort.write(PRINTER_CONTROLS[controlType].map(command => command + '\n').join(''));
 
     switch (controlType) {
+      case 'pause':
+        printer.status.status = 'paused';
+        break;
+      case 'cancel':
+        printer.status.status = 'idle';
+        printer.status.currentModel = undefined;
+        break;
+      case 'resume':
+        if (printer.status.currentModel)
+          printer.status.status = 'printing';
+        break;
       case 'preheatAbs':
       case 'preheatPla':
       case 'preheatPet':
@@ -161,11 +185,10 @@ export default class PrinterService {
   }
 
   static getConnectedPrinter(path: string): ConnectedPrinter {
-    const printer = this.connectedPrinters[path];
+    const printer = this.connectedPrinters.get(path);
 
-    if (!printer) {
+    if (!printer)
       throw new RequestError(StatusCodes.NOT_FOUND, `Printer with path ${path} doesn't exist`);
-    }
 
     return printer;
   }

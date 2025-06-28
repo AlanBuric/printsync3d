@@ -1,0 +1,11 @@
+webservers:
+  hosts:
+    rpi:
+      ansible_host: printsync3d.local
+      ansible_port: 22
+      ansible_user: admin
+      ansible_password: printsync3d
+      ansible_become: yes
+      ansible_become_method: sudo
+      ansible_become_pass: printsync3d
+      ansible_ssh_common_args: "-o StrictHostKeyChecking=no"

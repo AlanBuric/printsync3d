@@ -2,7 +2,7 @@
   import { useRoute } from 'vue-router';
   import { usePrinterStore } from '@/stores/printer';
   import PlayIcon from '@/components/icons/PlayIcon.vue';
-  import { computed, ref } from 'vue';
+  import { computed, nextTick, ref } from 'vue';
   import { useI18n } from 'vue-i18n';
   import EmptyState from '@/components/EmptyState.vue';
   import { useModelStore } from '@/stores/models.ts';
@@ -17,17 +17,39 @@
   }));
   const modelStore = useModelStore();
 
-  const printerId = useRoute().params.id.toString();
-  const printer = usePrinterStore().printers.find((printer) => printer.printerId === printerId);
+  const printerId = decodeURIComponent(useRoute().params.id.toString());
+  const printer = computed(() => usePrinterStore().printers.find((printer) => printer.printerId === printerId));
   const isFilamentReadyToBeLoaded = computed(
-    () => (printer?.temperatureReport.extruder?.actual ?? 0) >= 190,
+    () => (printer.value?.temperatureReport.extruder?.actual ?? 0) >= 190,
   );
-  const editableDisplayName = ref(printer?.displayName);
-  const selectedFilamentType = ref(printer?.lastPreheatOption ?? '');
+  const editableDisplayName = ref(printer.value?.displayName);
+  const selectedFilamentType = ref(printer.value?.lastPreheatOption ?? '');
   const selectedModel = ref('');
+  const isEditingName = ref(false);
+  const nameInputRef = ref<HTMLInputElement | null>(null);
+
+  function startEditingName() {
+    isEditingName.value = true;
+
+    nextTick(() => {
+      nameInputRef.value?.focus();
+      nameInputRef.value?.select();
+    });
+  }
+
+  function finishEditingName() {
+    isEditingName.value = false;
+    editPrinterDisplayName();
+  }
+
+  function onNameInputKeydown(e: KeyboardEvent) {
+    if (e.key === 'Enter') {
+      (e.target as HTMLInputElement).blur();
+    }
+  }
 
   function editPrinterDisplayName() {
-    if (editableDisplayName.value == printer?.displayName) {
+    if (editableDisplayName.value == printer.value?.displayName) {
       return;
     }
 
@@ -37,7 +59,7 @@
       headers: { 'Content-Type': 'application/json' },
     }).then((response) => {
       if (!response.ok) {
-        editableDisplayName.value = printer?.displayName;
+        editableDisplayName.value = printer.value?.displayName;
         response.text().then(alert);
       }
     });
@@ -99,15 +121,31 @@
     <div class="w-full max-w-screen-md justify-center flex max-lg:flex-col gap-y-10">
       <template v-if="printer">
         <section class="gap-y-4 flex flex-col flex-grow">
-          <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-2 rounded-lg w-fit">
-            <h1
-              class="text-xl text-zinc-900 dark:text-zinc-100"
-              contenteditable
-              @input="({ target }) => (editableDisplayName = (target as any).textContent)"
-              @blur="editPrinterDisplayName"
-            >
-              {{ editableDisplayName }}
-            </h1>
+          <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-2 rounded-lg w-fit flex gap-2">
+            <template v-if="!isEditingName">
+              <h1
+                class="text-xl text-zinc-900 dark:text-zinc-100"
+              >
+                {{ printer.displayName }}
+              </h1>
+              <button
+                class="text-xs text-zinc-500 hover:underline ml-2"
+                @click="startEditingName"
+                style="background: none; border: none; cursor: pointer;"
+              >
+                Edit
+              </button>
+            </template>
+            <template v-else>
+              <input
+                ref="nameInputRef"
+                v-model="editableDisplayName"
+                @blur="finishEditingName"
+                @keydown="onNameInputKeydown"
+                class="text-xl text-zinc-900 dark:text-zinc-100 px-0 py-0 bg-transparent border-none outline-none"
+                style="width: auto; min-width: 2em;"
+              />
+            </template>
           </div>
 
           <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-4 rounded-xl">
@@ -115,6 +153,10 @@
               {{ t('printerStatus') }}
             </h2>
             <ul class="space-y-1 text-zinc-800 dark:text-zinc-300 mb-4">
+              <li><span>{{ t('currentStatus') }}</span>
+              <span class="ml-1 text-zinc-700 dark:text-zinc-400">
+                {{ t(`status.${printer.status}`) }}
+              </span></li>
               <li>
                 <span>{{ t('currentModel') }}:</span>
                 <span class="ml-1 text-zinc-700 dark:text-zinc-400">
@@ -421,7 +463,13 @@
     "preheatAbs": "ABS (bed 100 °C, extruder 240 °C)",
     "preheatPet": "PET (bed 90 °C, extruder 230 °C)",
     "printerNotFound": "Printer not found",
-    "printerNotFoundDetails": "The requested printer was not found."
+    "printerNotFoundDetails": "The requested printer was not found.",
+    "currentStatus": "State:",
+    "status": {
+      "idle": "Idle",
+      "printing": "Printing",
+      "paused": "Paused"
+    }
   },
   "hr": {
     "alertModelNotSelected": "Odaberite model za ispis.",
@@ -462,7 +510,13 @@
     "preheatAbs": "ABS (podloga 100 °C, mlaznica 240 °C)",
     "preheatPet": "PET (podloga 90 °C, mlaznica 230 °C)",
     "printerNotFound": "Printer nije pronađen",
-    "printerNotFoundDetails": "Traženi printer nije pronađen."
+    "printerNotFoundDetails": "Traženi printer nije pronađen.",
+    "currentStatus": "Stanje:",
+    "status": {
+      "idle": "Mirovanje",
+      "printing": "Ispisuje",
+      "paused": "Pauziran"
+    }
   },
   "it": {
     "alertModelNotSelected": "Seleziona un modello da stampare.",
@@ -503,7 +557,13 @@
     "preheatAbs": "ABS (piano 100 °C, estrusore 240 °C)",
     "preheatPet": "PET (piano 90 °C, estrusore 230 °C)",
     "printerNotFound": "Stampante non trovata",
-    "printerNotFoundDetails": "La stampante richiesta non è stata trovata."
+    "printerNotFoundDetails": "La stampante richiesta non è stata trovata.",
+    "currentStatus": "Stato:",
+    "status": {
+      "idle": "Inattivo",
+      "printing": "Stampa in corso",
+      "paused": "In pausa"
+    }
   }
 }
 </i18n>

@@ -1,6 +1,4 @@
 import type { PrinterResponse } from '../../types/data-transfer-objects.js';
-import RequestError from '../../util/RequestError.js';
-import { StatusCodes } from 'http-status-codes';
 import PrinterService from './service.js';
 import type { ConnectedPrinter } from '../../types/types.js';
 import { getDatabase } from '../../database/database.js';
@@ -17,19 +15,10 @@ export default class PrinterController {
   }
 
   static getPrinter(printerId: string): PrinterResponse {
-    const printer = PrinterService.connectedPrinters[printerId];
-
-    if (!printer) {
-      throw new RequestError(
-        StatusCodes.NOT_FOUND,
-        `Printer with printer ID ${printerId} not found`,
-      );
-    }
-
-    return this.mapPrinterToPrinterResponse(printer);
+    return this.mapPrinterToPrinterResponse(PrinterService.getConnectedPrinter(printerId));
   }
 
   static getPrinters(): PrinterResponse[] {
-    return Object.values(PrinterService.connectedPrinters).map(this.mapPrinterToPrinterResponse);
+    return PrinterService.connectedPrinters.values().map(this.mapPrinterToPrinterResponse).toArray();
   }
 }
