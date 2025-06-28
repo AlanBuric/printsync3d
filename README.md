@@ -35,6 +35,7 @@ This application is intended for a computer with network access and ability to c
 **Prerequisites:** Node.js, NPM
 
 In the `backend` directory define your `.env` by making a copy of the `.env.example` file.
+Change the `DATA_DIRECTORY=./app/data` to `DATA_DIRECTORY=/app/data` if you'll be running the backend locally.
 
 Then, install the NPM packages:
 
