@@ -19,7 +19,7 @@ export default class PrinterService {
   static lastRefresh = Date.now();
 
   static async printGCodeModel(printer: ConnectedPrinter, fileStream: Interface, modelId: string) {
-    const connection = printer.serialPort;
+    const { serialPort } = printer;
 
     printer.status.currentModel = getDatabase().data.models[modelId]?.displayName ?? modelId;
 
@@ -34,8 +34,8 @@ export default class PrinterService {
         // Skip blank lines.
         if (!line) continue;
 
-        console.info(`${getLoggingPrefix()} [${printer.portInfo.path}] Write '${line}'`);
-        connection.write(line);
+        console.info(`${getLoggingPrefix()} [${serialPort.path}] Write '${line}'`);
+        serialPort.write(line);
 
         for (let i = 0; i < OK_ATTEMPTS; i++) {
           const response: string = await new Promise((resolve) => {
@@ -43,7 +43,7 @@ export default class PrinterService {
           });
 
           if (response.startsWith('ok')) {
-            console.info(response);
+            console.info(`${getLoggingPrefix()} [${serialPort.path}] response`);
             break;
           }
         }
@@ -126,7 +126,7 @@ export default class PrinterService {
     this.connectedPrinters[portInfo.path] = printer;
 
     parser.on('data', (data: string) => {
-      console.info(`${getLoggingPrefix()} Received ${data}`);
+      console.info(`${getLoggingPrefix()} [${portInfo.path}] ${data}`);
 
       if (data.includes('T')) {
         printer.status.temperatureReport = parseTemperatureReport(data);
