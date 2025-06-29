@@ -1,6 +1,8 @@
 services:
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+    image: printsync3d-frontend:latest
     platform: linux/arm64
     restart: unless-stopped
     ports:
@@ -16,7 +18,9 @@ services:
         max-file: "3"
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+    image: printsync3d-backend:latest
     platform: linux/arm64
     privileged: true # give full device capabilities
     restart: unless-stopped

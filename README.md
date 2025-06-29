@@ -115,7 +115,7 @@ If you wish to override the pre-defined environment varibles in `compose.yml`, c
    docker save -o backend.tar printsync3d-backend
    ```
 
-4. Configure Ansible `inventory.yml` with your target computers for deployment, locally adapt `ansible/deployment-example.yml` if needed.
+4. Configure Ansible `ansible-examples/inventory.yml` with your target computers for deployment, locally adapt `ansible-examples/deployment.yml` if needed.
 5. Run the Ansible deployment script, e.g.:
 
    ```bash
