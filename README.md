@@ -63,7 +63,7 @@ cd frontend
 npm run dev
 ```
 
-That's it, the website should be available at http://localhost:3000 by default, and the changes you make to the backend and frontend cause the services to restart upon save.
+That's it, the website should be available at http://localhost by default, and the changes you make to the backend and frontend cause the services to restart upon save.
 
 ## Build phase
 
