@@ -5,7 +5,7 @@ import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
 import { availableLocales, chooseAvailableLocale } from '@/scripts/translation.ts';
-import { mapModelResponse, useModelStore } from './stores/models';
+import { useModelStore } from './stores/models';
 import { usePrinterStore } from './stores/printer';
 import type { ModelResponse, PrinterResponse } from './scripts/types';
 
@@ -19,17 +19,20 @@ const i18n = createI18n({
   availableLocales: availableLocales.map((locale) => locale[0]),
   messages: {
     en: {
+      editAction: 'Edit',
       refresh: 'Refresh',
       printerNotFound: 'Printer not found',
       printerNotFoundDetails:
         "It seems the printer you're looking for doesn't exist or isn't connected.",
     },
     hr: {
+      editAction: 'Uredi',
       refresh: 'Osvježi',
       printerNotFound: 'Printer nije pronađen',
       printerNotFoundDetails: 'Izgleda da printer koji tražite ne postoji ili nije povezan.',
     },
     it: {
+      editAction: 'Modifica',
       refresh: 'Aggiorna',
       printerNotFound: 'Stampante non trovata',
       printerNotFoundDetails:
@@ -64,7 +67,7 @@ sseSource.addEventListener('updatePrinter', ({ data }) => {
 
 sseSource.addEventListener('updateModels', ({ data }) => {
   const models: ModelResponse[] = JSON.parse(data);
-  useModelStore().models = models.map(mapModelResponse);
+  useModelStore().models = models;
 });
 
 sseSource.addEventListener('updateModel', ({ data }) => {

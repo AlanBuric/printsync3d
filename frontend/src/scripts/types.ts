@@ -66,29 +66,21 @@ export type PrinterControlType =
 
 export type PreheatControlType = 'preheatPla' | 'preheatAbs' | 'preheatPet';
 
-export type PrinterStatus = {
+export interface PrinterResponse {
   temperatureReport: TemperatureReport;
   lastPreheatOption?: PreheatControlType;
   isFilamentLoaded: boolean;
   currentModel?: string;
   status: 'idle' | 'printing' | 'paused';
-};
-
-export type ErrorResponse = {
-  error: string;
-};
-
-export type PrinterResponse = PrinterStatus & {
   /**
    * Display name of the model as originally uploaded by the user or custom set afterward.
    */
   displayName: string;
   printerId: string;
-};
+}
 
 export interface ModelResponse {
   modelId: string;
-  editableName?: string | null;
   /**
    * Display name of the model as originally uploaded by the user or custom set afterward.
    */
@@ -101,8 +93,4 @@ export interface ModelResponse {
    * Creation timestamp, or last modification timestamp if unavailable, of this file.
    */
   creationTimestamp?: number;
-}
-
-export interface Model extends ModelResponse {
-  editableName: string;
 }

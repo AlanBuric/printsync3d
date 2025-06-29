@@ -8,6 +8,7 @@
   import { useModelStore } from '@/stores/models.ts';
   import type { PrinterControlType, TemperatureStatus } from '@/scripts/types.ts';
   import CoolDownIcon from '@/components/icons/CoolDownIcon.vue';
+  import { useUIEdit } from '@/composables/useInputEdit';
 
   const { t } = useI18n();
   const FILAMENTS = computed(() => ({
@@ -18,52 +19,29 @@
   const modelStore = useModelStore();
 
   const printerId = decodeURIComponent(useRoute().params.id.toString());
-  const printer = computed(() => usePrinterStore().printers.find((printer) => printer.printerId === printerId));
+  const printer = computed(() =>
+    usePrinterStore().printers.find((printer) => printer.printerId === printerId),
+  );
   const isFilamentReadyToBeLoaded = computed(
     () => (printer.value?.temperatureReport.extruder?.actual ?? 0) >= 190,
   );
-  const editableDisplayName = ref(printer.value?.displayName);
   const selectedFilamentType = ref(printer.value?.lastPreheatOption ?? '');
   const selectedModel = ref('');
-  const isEditingName = ref(false);
-  const nameInputRef = ref<HTMLInputElement | null>(null);
 
-  function startEditingName() {
-    isEditingName.value = true;
-
-    nextTick(() => {
-      nameInputRef.value?.focus();
-      nameInputRef.value?.select();
-    });
-  }
-
-  function finishEditingName() {
-    isEditingName.value = false;
-    editPrinterDisplayName();
-  }
-
-  function onNameInputKeydown(e: KeyboardEvent) {
-    if (e.key === 'Enter') {
-      (e.target as HTMLInputElement).blur();
-    }
-  }
-
-  function editPrinterDisplayName() {
-    if (editableDisplayName.value == printer.value?.displayName) {
-      return;
-    }
-
+  function submitNewDisplayName(newName: string) {
     fetch(`/api/printers/${encodeURIComponent(printerId)}`, {
       method: 'PATCH',
-      body: JSON.stringify({ displayName: editableDisplayName.value }),
+      body: JSON.stringify({ displayName: newName }),
       headers: { 'Content-Type': 'application/json' },
     }).then((response) => {
-      if (!response.ok) {
-        editableDisplayName.value = printer.value?.displayName;
-        response.text().then(alert);
-      }
+      if (!response.ok) response.text().then(alert);
     });
   }
+
+  const { isEditing, inputRef, startEditing, onInputKeydown, onSubmit, value } = useUIEdit(
+    () => printer.value?.displayName,
+    submitNewDisplayName,
+  );
 
   /**
    * Formats a TemperatureStatus object.
@@ -75,9 +53,7 @@
 
     let result = `${status.actual} °C`;
 
-    if (status.target != null) {
-      result += ` / ${status.target} °C`;
-    }
+    if (status.target) result += ` / ${status.target} °C`;
 
     return result;
   }
@@ -122,29 +98,25 @@
       <template v-if="printer">
         <section class="gap-y-4 flex flex-col flex-grow">
           <div class="bg-zinc-200 dark:bg-zinc-900 px-5 py-2 rounded-lg w-fit flex gap-2">
-            <template v-if="!isEditingName">
-              <h1
-                class="text-xl text-zinc-900 dark:text-zinc-100"
-              >
+            <input
+              v-if="isEditing"
+              ref="inputRef"
+              v-model.trim="value"
+              @blur="onSubmit"
+              @keydown="onInputKeydown"
+              class="min-w-10 text-xl text-zinc-900 dark:text-zinc-100 px-0 py-0 bg-transparent border-none outline-none"
+            />
+            <template v-else>
+              <h1 class="text-xl text-zinc-900 dark:text-zinc-100">
                 {{ printer.displayName }}
               </h1>
               <button
                 class="text-xs text-zinc-500 hover:underline ml-2"
-                @click="startEditingName"
-                style="background: none; border: none; cursor: pointer;"
+                @click="startEditing"
+                style="background: none; border: none; cursor: pointer"
               >
-                Edit
+                {{ t('editAction') }}
               </button>
-            </template>
-            <template v-else>
-              <input
-                ref="nameInputRef"
-                v-model="editableDisplayName"
-                @blur="finishEditingName"
-                @keydown="onNameInputKeydown"
-                class="text-xl text-zinc-900 dark:text-zinc-100 px-0 py-0 bg-transparent border-none outline-none"
-                style="width: auto; min-width: 2em;"
-              />
             </template>
           </div>
 
@@ -153,10 +125,12 @@
               {{ t('printerStatus') }}
             </h2>
             <ul class="space-y-1 text-zinc-800 dark:text-zinc-300 mb-4">
-              <li><span>{{ t('currentStatus') }}</span>
-              <span class="ml-1 text-zinc-700 dark:text-zinc-400">
-                {{ t(`status.${printer.status}`) }}
-              </span></li>
+              <li>
+                <span>{{ t('currentStatus') }}</span>
+                <span class="ml-1 text-zinc-700 dark:text-zinc-400">
+                  {{ t(`status.${printer.status}`) }}
+                </span>
+              </li>
               <li>
                 <span>{{ t('currentModel') }}:</span>
                 <span class="ml-1 text-zinc-700 dark:text-zinc-400">
