@@ -89,24 +89,42 @@ If you wish to override the pre-defined environment varibles in `compose.yml`, c
 
 ### Build and deployment steps
 
-1. Build the Docker images locally in the root directory: `docker compose build`.
-2. Save the Docker images to .tar files:
+1. If you're on Windows, enable the experimental Docker build for the target platform option:
+
+   ```bash
+   docker buildx create --use
+   ```
+
+   Otherwise, you may get issues like these when deployed:
+
+   ```
+   backend-1   | exec /usr/local/bin/docker-entrypoint.sh: exec format error
+   frontend-1  | exec /docker-entrypoint.sh: exec format error
+   ```
+
+2. Build the Docker images for Raspberry Pi (ARM64) locally:
+
+   ```bash
+   docker compose build
+   ```
+
+3. Save the Docker images to .tar files:
 
    ```bash
    docker save -o frontend.tar printsync3d-frontend
    docker save -o backend.tar printsync3d-backend
    ```
 
-3. Configure Ansible `inventory.yml` with your target computers for deployment, locally adapt `ansible/deployment-example.yml` if needed.
-4. Run the Ansible deployment script, e.g.:
+4. Configure Ansible `inventory.yml` with your target computers for deployment, locally adapt `ansible/deployment-example.yml` if needed.
+5. Run the Ansible deployment script, e.g.:
 
    ```bash
    cd ansible-examples
-   ansible-playbook -i inventory.yml deployment-example.yml
+   ansible-playbook -i inventory.yml deployment.yml
    ```
 
-5. Once done, both services should be deployed and started. To test, you can access the IP address of the target computer in your browser to see the website.
-6. To manage or view logs for your services, SSH into your Raspberry Pi and run:
+6. Once done, both services should be deployed and started. To test, you can access the IP address of the target computer in your browser to see the website.
+7. To manage or view logs for your services, SSH into your Raspberry Pi and run:
 
    ```bash
    sudo -i su

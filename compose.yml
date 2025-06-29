@@ -1,6 +1,7 @@
 services:
   frontend:
     build: ./frontend
+    platform: linux/arm64
     restart: unless-stopped
     ports:
       - "80:80"
@@ -16,6 +17,7 @@ services:
 
   backend:
     build: ./backend
+    platform: linux/arm64
     privileged: true # give full device capabilities
     restart: unless-stopped
     expose:

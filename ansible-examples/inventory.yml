@@ -1,6 +1,7 @@
 webservers:
   hosts:
     rpi:
+      # Or use the IP address, e.g. 192.168.25.1, if this doesn't work
       ansible_host: printsync3d.local
       ansible_port: 22
       ansible_user: admin
