@@ -8,6 +8,11 @@ services:
       - backend
     networks:
       - app-network
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   backend:
     build: ./backend
@@ -33,6 +38,13 @@ services:
           propagation: rshared
     networks:
       - app-network
+    # Limit the amount of log files for small IoT
+    # devices with limited amount of disk memory
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "3"
 
 volumes:
   backenddata:
