@@ -84,18 +84,19 @@ export default class PrinterService {
 
     oldPaths.difference(newPaths).forEach(this.disconnectPrinter);
 
-    await Promise.all(portInfos.map(portInfo => this.connectPrinter(portInfo)));
+    await Promise.all(portInfos.map((portInfo) => this.connectPrinter(portInfo)));
   }
 
   static disconnectPrinter(path: string) {
     const existing = this.connectedPrinters.get(path);
 
     if (existing) {
-      if (existing.serialPort.isOpen)
-        existing.serialPort.close();
+      if (existing.serialPort.isOpen) existing.serialPort.close();
 
       this.connectedPrinters.delete(path);
-      console.info(`${getLoggingPrefix()} Printer ${existing.serialPort.path} has been disconnected.`)
+      console.info(
+        `${getLoggingPrefix()} Printer ${existing.serialPort.path} has been disconnected.`,
+      );
     }
   }
 
@@ -131,7 +132,7 @@ export default class PrinterService {
           extruders: [],
         },
         isFilamentLoaded: false,
-        status: 'idle'
+        status: 'idle',
       },
       waitingStatusResponses: [],
     };
@@ -162,7 +163,9 @@ export default class PrinterService {
   }
 
   static sendControl(printer: ConnectedPrinter, controlType: PrinterControlType) {
-    printer.serialPort.write(PRINTER_CONTROLS[controlType].map(command => command + '\n').join(''));
+    printer.serialPort.write(
+      PRINTER_CONTROLS[controlType].map((command) => command + '\n').join(''),
+    );
 
     switch (controlType) {
       case 'pause':
@@ -173,15 +176,20 @@ export default class PrinterService {
         printer.status.currentModel = undefined;
         break;
       case 'resume':
-        if (printer.status.currentModel)
+        if (printer.status.currentModel) {
           printer.status.status = 'printing';
-        break;
+          break;
+        }
+
+        return;
       case 'preheatAbs':
       case 'preheatPla':
       case 'preheatPet':
         printer.status.lastPreheatOption = controlType;
         break;
     }
+
+    sseChannel.broadcast(printer, 'updatePrinter');
   }
 
   static getConnectedPrinter(path: string): ConnectedPrinter {
