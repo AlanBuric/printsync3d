@@ -116,11 +116,18 @@ If you wish to override the pre-defined environment varibles in `compose.yml`, c
    ```
 
 4. Configure Ansible `ansible-examples/inventory.yml` with your target computers for deployment, locally adapt `ansible-examples/deployment.yml` if needed.
-5. Run the Ansible deployment script, e.g.:
+5. If this is the first time deploying the web application onto the target devices, run the Ansible deployment script with the following options, e.g.:
 
    ```bash
    cd ansible-examples
-   ansible-playbook -i inventory.yml deployment.yml
+   ansible-playbook -i inventory.yml deployment.yml --tags setup
+   ```
+
+   Otherwise, if you're just updating the web application, and won't need Internet access:
+
+   ```bash
+   cd ansible-examples
+   ansible-playbook -i inventory.yml deployment.yml --skip-tags setup
    ```
 
 6. Once done, both services should be deployed and started. To test, you can access the IP address of the target computer in your browser to see the website.

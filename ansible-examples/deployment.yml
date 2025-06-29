@@ -14,29 +14,34 @@
           - software-properties-common
         state: present
         update_cache: yes
+      tags: setup
 
     - name: Ensure /etc/apt/keyrings directory exists
       file:
         path: /etc/apt/keyrings
         state: directory
         mode: "0755"
+      tags: setup
 
     - name: Download Docker GPG key
       get_url:
         url: https://download.docker.com/linux/ubuntu/gpg
         dest: /etc/apt/keyrings/docker.asc
         mode: "0644"
+      tags: setup
 
     - name: Add Docker repository
       apt_repository:
         repo: "deb [arch={{ ansible_architecture }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian {{ ansible_lsb.codename }} stable"
         state: present
         filename: docker
+      tags: setup
 
     - name: Install Docker using official convenience script
       shell: curl -fsSL https://get.docker.com | sh
       args:
         creates: /usr/bin/docker
+      tags: setup
 
     - name: Ensure Docker service is running
       service:
