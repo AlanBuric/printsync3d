@@ -13,7 +13,7 @@ const PRINTER_CONTROLS = {
   coolDown: ['M140 S0', 'M104 S0'],
   loadFilament: ['M701'],
   unloadFilament: ['M702'],
-  autoHome: ['G28'],
+  autoHome: ['G28 W'],
   meshBedLeveling: ['G80', 'G29'],
   resetXyz: ['M502'],
   resume: ['M24'],
