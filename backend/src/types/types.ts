@@ -54,12 +54,14 @@ export type TemperatureReport = {
   ambient?: number;
 };
 
+type PrinterStatusType = 'idle' | 'paused' | 'printing';
+
 export type PrinterStatus = {
   temperatureReport: TemperatureReport;
   lastPreheatOption?: PreheatControlType;
   isFilamentLoaded: boolean;
   currentModel?: string;
-  status: 'idle' | 'printing' | 'paused';
+  status: PrinterStatusType;
 };
 
 export type PrinterControlType = keyof typeof PRINTER_CONTROLS;

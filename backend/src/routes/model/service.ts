@@ -5,7 +5,7 @@ import EnvConfig from '../../config/config.js';
 import path from 'path';
 import getLoggingPrefix from '../../util/logging.js';
 import { getDatabase } from '../../database/database.js';
-import type { Model } from '../../types/data-transfer-objects.js';
+import type { ModelResponse } from '../../types/data-transfer-objects.js';
 import RequestError from '../../util/RequestError.js';
 import { StatusCodes } from 'http-status-codes';
 
@@ -52,17 +52,17 @@ export default class ModelService {
    * Retrieves all models from the database and merges them their file information.
    * @returns A promise that resolves to an object containing all models and their information.
    */
-  static async getAllModels(): Promise<Model[]> {
+  static async getAllModels(): Promise<ModelResponse[]> {
     const models = getDatabase().data.models;
-    const fullModels: Model[] = [];
+    const fullModels: ModelResponse[] = [];
 
     try {
-      const files = await fileSystem.promises.readdir(this.MODEL_DIRECTORY);
+      const files = await fileSystem.promises.readdir(ModelService.MODEL_DIRECTORY);
 
       await Promise.allSettled(
         files.map(async (filename) => {
-          const filePath = this.getModelPath(filename);
-          const modelId = this.extractBasename(filename);
+          const filePath = ModelService.getModelPath(filename);
+          const modelId = ModelService.extractBasename(filename);
           const stats = await fileSystem.promises.stat(filePath);
 
           if (stats.isFile()) {
@@ -76,7 +76,11 @@ export default class ModelService {
             }
 
             fullModels.push(
-              this.mapFileStatsToModel(stats, models[modelId].displayName ?? modelId, modelId),
+              ModelService.mapFileStatsToModel(
+                stats,
+                models[modelId].displayName ?? modelId,
+                modelId,
+              ),
             );
           }
         }),
@@ -92,14 +96,14 @@ export default class ModelService {
    * Retrieves a model from the database and merges it with its file information.
    * @returns A promise that resolves to an object containing the model.
    */
-  static async getModel(modelId: string): Promise<Model> {
+  static async getModel(modelId: string): Promise<ModelResponse> {
     const model = getDatabase().data.models[modelId];
 
     try {
       if (!model) {
         return await fileSystem.promises
-          .stat(this.getModelPathFromModelId(modelId))
-          .then((stats) => this.mapFileStatsToModel(stats, modelId, modelId))
+          .stat(ModelService.getModelPathFromModelId(modelId))
+          .then((stats) => ModelService.mapFileStatsToModel(stats, modelId, modelId))
           .then((modelInformation) => {
             getDatabase().update(({ models }) => (models[modelId] = { displayName: modelId }));
 
@@ -108,8 +112,8 @@ export default class ModelService {
       }
 
       return await fileSystem.promises
-        .stat(this.getModelPathFromModelId(modelId))
-        .then((stats) => this.mapFileStatsToModel(stats, model.displayName, modelId));
+        .stat(ModelService.getModelPathFromModelId(modelId))
+        .then((stats) => ModelService.mapFileStatsToModel(stats, model.displayName, modelId));
     } catch {
       throw new RequestError(StatusCodes.NOT_FOUND, `Model with ID ${modelId} was not found.`);
     }
@@ -119,7 +123,7 @@ export default class ModelService {
     stats: fileSystem.Stats,
     displayName: string,
     modelId: string,
-  ): Model {
+  ): ModelResponse {
     return {
       modelId,
       displayName: displayName,
@@ -129,9 +133,9 @@ export default class ModelService {
   }
 
   static registerNewFileAndGetName(file: Express.Multer.File): string {
-    const filename = this.createFileName();
+    const filename = ModelService.createFileName();
 
-    getDatabase().data.models[this.extractBasename(filename)] = {
+    getDatabase().data.models[ModelService.extractBasename(filename)] = {
       displayName: file.originalname.split('.')[0] ?? file.originalname,
     };
 
@@ -148,7 +152,7 @@ export default class ModelService {
 
     try {
       await fileSystem.promises.access(
-        this.getModelPathFromModelId(modelId),
+        ModelService.getModelPathFromModelId(modelId),
         fileSystem.constants.R_OK,
       );
 
@@ -162,7 +166,7 @@ export default class ModelService {
 
   static async deleteModel(modelId: string) {
     await Promise.all([
-      fileSystem.promises.rm(this.getModelPathFromModelId(modelId)),
+      fileSystem.promises.rm(ModelService.getModelPathFromModelId(modelId)),
       getDatabase().update(({ models }) => delete models[modelId]),
     ]);
 
@@ -171,7 +175,7 @@ export default class ModelService {
 
   static getModelFileStream(modelId: string) {
     return createInterface({
-      input: fileSystem.createReadStream(this.getModelPath(modelId)),
+      input: fileSystem.createReadStream(ModelService.getModelPath(modelId)),
       crlfDelay: Infinity,
     });
   }
@@ -181,11 +185,11 @@ export default class ModelService {
   }
 
   static getModelPathFromModelId(modelId: string) {
-    return this.getModelPath(this.createFileName(modelId));
+    return ModelService.getModelPath(ModelService.createFileName(modelId));
   }
 
   static getModelPath(filename: string): fileSystem.PathLike {
-    return path.join(this.MODEL_DIRECTORY, filename);
+    return path.join(ModelService.MODEL_DIRECTORY, filename);
   }
 
   static extractBasename(filename: string) {

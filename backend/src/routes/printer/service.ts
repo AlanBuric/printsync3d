@@ -12,7 +12,7 @@ import { sseChannel } from '../server-side-events.js';
 import PrinterController from './controller.js';
 import EventEmitter from 'events';
 
-const OK_ATTEMPTS = 3;
+const OK_ATTEMPTS = 5;
 const REFRESH_LIMIT_MILLISECONDS = 5000;
 const RESUME_EVENT = 'resume';
 
@@ -25,12 +25,12 @@ export default class PrinterService {
     return new Promise<void>((resolve) => {
       const handleContinue = (receivedPath: string) => {
         if (receivedPath == path) {
-          this.internalEventEmitter.off(RESUME_EVENT, handleContinue);
+          PrinterService.internalEventEmitter.off(RESUME_EVENT, handleContinue);
           resolve();
         }
       };
 
-      this.internalEventEmitter.on(RESUME_EVENT, handleContinue);
+      PrinterService.internalEventEmitter.on(RESUME_EVENT, handleContinue);
     });
   }
 
@@ -51,7 +51,7 @@ export default class PrinterService {
           return;
           // @ts-ignore
         } else if (printer.status.status == 'paused') {
-          await this.waitForPrinterToBeResumed(printer.portInfo.path);
+          await PrinterService.waitForPrinterToBeResumed(printer.portInfo.path);
         }
 
         // Ignore comments.
@@ -88,7 +88,7 @@ export default class PrinterService {
 
       fileStream.close();
 
-      sseChannel.broadcast(PrinterController.getPrinter(printer.portInfo.path), 'updatePrinter');
+      PrinterController.broadcastPrinterUpdate(printer.portInfo.path);
     }
   }
 
@@ -99,33 +99,33 @@ export default class PrinterService {
   static async refreshConnections() {
     const currentTime = Date.now();
 
-    if (currentTime - this.lastRefresh < REFRESH_LIMIT_MILLISECONDS) {
+    if (currentTime - PrinterService.lastRefresh < REFRESH_LIMIT_MILLISECONDS) {
       return false;
     }
 
-    this.lastRefresh = currentTime;
+    PrinterService.lastRefresh = currentTime;
     const portInfos = await SerialPort.list();
 
     console.info(`${getLoggingPrefix()} ${portInfos.length} serial ports have been discovered.`);
 
-    const oldPaths = new Set(this.connectedPrinters.keys());
+    const oldPaths = new Set(PrinterService.connectedPrinters.keys());
     const newPaths = new Set(portInfos.map(({ path }) => path));
     const difference = oldPaths.difference(newPaths);
 
-    difference.forEach(this.disconnectPrinter);
+    difference.forEach(PrinterService.disconnectPrinter);
 
-    await Promise.all(portInfos.map((portInfo) => this.connectPrinter(portInfo)));
+    await Promise.all(portInfos.map((portInfo) => PrinterService.connectPrinter(portInfo)));
 
     return difference.size != 0;
   }
 
   static disconnectPrinter(path: string) {
-    const existing = this.connectedPrinters.get(path);
+    const existing = PrinterService.connectedPrinters.get(path);
 
     if (existing) {
       if (existing.serialPort.isOpen) existing.serialPort.close();
 
-      this.connectedPrinters.delete(path);
+      PrinterService.connectedPrinters.delete(path);
       console.info(
         `${getLoggingPrefix()} Printer ${existing.serialPort.path} has been disconnected.`,
       );
@@ -133,7 +133,7 @@ export default class PrinterService {
   }
 
   static async connectPrinter(portInfo: PortInfo) {
-    const existingPrinter = this.connectedPrinters.get(portInfo.path);
+    const existingPrinter = PrinterService.connectedPrinters.get(portInfo.path);
 
     if (existingPrinter) {
       existingPrinter.portInfo = portInfo;
@@ -169,7 +169,7 @@ export default class PrinterService {
       waitingStatusResponses: [],
     };
 
-    this.connectedPrinters.set(portInfo.path, printer);
+    PrinterService.connectedPrinters.set(portInfo.path, printer);
 
     parser.on('data', (data: string) => {
       console.info(`${getLoggingPrefix()} [${portInfo.path}] ${data}`);
@@ -177,16 +177,13 @@ export default class PrinterService {
       if (data.includes('T')) {
         printer.status.temperatureReport = parseTemperatureReport(data);
 
-        sseChannel.broadcast(
-          PrinterController.mapPrinterToPrinterResponse(printer),
-          'updatePrinter',
-        );
+        PrinterController.broadcastPrinterUpdate(printer.portInfo.path);
       }
     });
 
     serialPort
       .pipe(parser)
-      .on('close', () => this.disconnectPrinter(printer.serialPort.path))
+      .on('close', () => PrinterService.disconnectPrinter(printer.serialPort.path))
       /**
        * Commands the printer to report temperatures, fans and positions every 15 seconds.
        * Source: https://reprap.org/wiki/G-code#M155:_Automatically_send_temperatures.
@@ -210,7 +207,7 @@ export default class PrinterService {
       case 'resume':
         if (printer.status.currentModel) {
           printer.status.status = 'printing';
-          this.internalEventEmitter.emit(RESUME_EVENT, printer.portInfo.path);
+          PrinterService.internalEventEmitter.emit(RESUME_EVENT, printer.portInfo.path);
           break;
         }
 
@@ -225,8 +222,8 @@ export default class PrinterService {
     sseChannel.broadcast(printer, 'updatePrinter');
   }
 
-  static getConnectedPrinter(path: string): ConnectedPrinter {
-    const printer = this.connectedPrinters.get(path);
+  static getConnectedPrinter(path: string): ConnectedPrinter | never {
+    const printer = PrinterService.connectedPrinters.get(path);
 
     if (!printer)
       throw new RequestError(StatusCodes.NOT_FOUND, `Printer with path ${path} doesn't exist`);

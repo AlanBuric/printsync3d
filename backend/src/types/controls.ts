@@ -1,3 +1,5 @@
+import type { PrinterControlType } from './types.js';
+
 export type PreheatControlType = 'preheatPla' | 'preheatAbs' | 'preheatPet';
 
 const PRINTER_CONTROLS = {
@@ -22,4 +24,4 @@ const PRINTER_CONTROLS = {
 } as const;
 
 export default PRINTER_CONTROLS;
-export const PRINTER_CONTROL_TYPES = Object.keys(PRINTER_CONTROLS);
+export const PRINTER_CONTROL_TYPES = Object.keys(PRINTER_CONTROLS) as PrinterControlType[];

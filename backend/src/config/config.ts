@@ -26,7 +26,7 @@ export default class EnvConfig {
   }
 
   static parseValidInt(name: string): number {
-    const text = this.validateEnvVariable(name);
+    const text = EnvConfig.validateEnvVariable(name);
     const value = parseInt(text);
 
     if (!Number.isInteger(value)) {
