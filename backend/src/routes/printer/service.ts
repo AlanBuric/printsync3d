@@ -10,13 +10,29 @@ import { Interface } from 'readline';
 import { parseTemperatureReport } from './reporting.js';
 import { sseChannel } from '../server-side-events.js';
 import PrinterController from './controller.js';
+import EventEmitter from 'events';
 
 const OK_ATTEMPTS = 3;
 const REFRESH_LIMIT_MILLISECONDS = 5000;
+const RESUME_EVENT = 'resume';
 
 export default class PrinterService {
+  private static internalEventEmitter = new EventEmitter();
   static connectedPrinters: Map<string, ConnectedPrinter> = new Map();
   static lastRefresh = Date.now();
+
+  private static async waitForPrinterToBeResumed(path: string) {
+    return new Promise<void>((resolve) => {
+      const handleContinue = (receivedPath: string) => {
+        if (receivedPath == path) {
+          this.internalEventEmitter.off(RESUME_EVENT, handleContinue);
+          resolve();
+        }
+      };
+
+      this.internalEventEmitter.on(RESUME_EVENT, handleContinue);
+    });
+  }
 
   static async printGCodeModel(printer: ConnectedPrinter, fileStream: Interface, modelId: string) {
     const { serialPort } = printer;
@@ -26,6 +42,18 @@ export default class PrinterService {
 
     try {
       for await (let line of fileStream) {
+        // @ts-ignore
+        if (printer.status.status == 'idle') {
+          console.info(
+            `${getLoggingPrefix()} [${printer.portInfo.path}] Model printing stopped by user.`,
+          );
+
+          return;
+          // @ts-ignore
+        } else if (printer.status.status == 'paused') {
+          await this.waitForPrinterToBeResumed(printer.portInfo.path);
+        }
+
         // Ignore comments.
         if (line.startsWith(';')) continue;
 
@@ -66,12 +94,13 @@ export default class PrinterService {
 
   /**
    * Lists currently connected serial ports, removes those that are gone and adds new printer connections if they're missing.
+   * @returns True if the printers were changed
    */
   static async refreshConnections() {
     const currentTime = Date.now();
 
     if (currentTime - this.lastRefresh < REFRESH_LIMIT_MILLISECONDS) {
-      return;
+      return false;
     }
 
     this.lastRefresh = currentTime;
@@ -81,10 +110,13 @@ export default class PrinterService {
 
     const oldPaths = new Set(this.connectedPrinters.keys());
     const newPaths = new Set(portInfos.map(({ path }) => path));
+    const difference = oldPaths.difference(newPaths);
 
-    oldPaths.difference(newPaths).forEach(this.disconnectPrinter);
+    difference.forEach(this.disconnectPrinter);
 
     await Promise.all(portInfos.map((portInfo) => this.connectPrinter(portInfo)));
+
+    return difference.size != 0;
   }
 
   static disconnectPrinter(path: string) {
@@ -178,6 +210,7 @@ export default class PrinterService {
       case 'resume':
         if (printer.status.currentModel) {
           printer.status.status = 'printing';
+          this.internalEventEmitter.emit(RESUME_EVENT, printer.portInfo.path);
           break;
         }
 
