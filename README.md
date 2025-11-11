@@ -85,7 +85,7 @@ Install Python3, pipx and finally Ansible. [Here](https://docs.ansible.com/ansib
 
 Docker containerizes and isolates the application's services.
 You'll need it to build the images, while the control node will need Docker engine to run them.
-If you wish to override the pre-defined environment varibles in `compose.yml`, create an `.env` file next to it.
+If you wish to override the pre-defined environment variables in `compose.yml`, create an `.env` file next to it.
 
 ### Build and deployment steps
 
